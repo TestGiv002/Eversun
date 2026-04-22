@@ -31,21 +31,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseClasses =
-<<<<<<< HEAD
-      'inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group';
-
-    const variants = {
-      primary:
-        'bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 hover:from-teal-600 hover:via-teal-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] hover:-translate-y-0.5',
-      secondary:
-        'bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600 shadow-md hover:shadow-lg transform hover:scale-[1.02]',
-      outline:
-        'bg-white dark:bg-transparent text-teal-600 dark:text-teal-400 border-2 border-teal-600 dark:border-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 shadow-md hover:shadow-lg transform hover:scale-[1.02]',
-      ghost:
-        'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:shadow-md',
-      danger:
-        'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] hover:-translate-y-0.5',
-=======
       'inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group active:scale-95';
 
     const variants = {
@@ -68,16 +53,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       // Modern rose danger
       danger:
         'bg-gradient-to-r from-error-500 to-error-600 hover:from-error-600 hover:to-error-700 text-white shadow-md hover:shadow-lg hover:shadow-error/30 transform hover:scale-[1.02]',
->>>>>>> from-master
     };
 
     const sizes = {
       sm: 'px-4 py-2 text-sm',
-<<<<<<< HEAD
-      md: 'px-6 py-2.5 text-sm',
-=======
       md: 'px-6 py-2 text-sm',
->>>>>>> from-master
       lg: 'px-8 py-3 text-base',
     };
 

@@ -7,10 +7,7 @@ export type Section =
   | 'dp-en-cours'
   | 'dp-accordes'
   | 'dp-refuses'
-<<<<<<< HEAD
-=======
   | 'daact'
->>>>>>> from-master
   | 'consuel-en-cours'
   | 'consuel-finalise'
   | 'raccordement'

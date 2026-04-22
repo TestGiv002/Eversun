@@ -207,23 +207,12 @@ Le projet utilise un design system personnalisé défini dans `globals.css` avec
 
 ### Haute Priorité ✅
 
-<<<<<<< HEAD
 - **Hashage mots de passe**: Implémentation de bcrypt pour sécuriser les mots de passe
 - **Pagination serveur**: API endpoints supportent maintenant la pagination
 - **React Query**: Mise en place du caching et gestion d'état des données
 - **Validation client-side**: react-hook-form + Zod pour validation robuste
 - **Nettoyage console.log**: Suppression de tous les logs de debug
-=======
-- **Refonte formulaire client**: Design moderne et professionnel avec sections organisées en cartes
-- **Refonte fiche client**: Modal de détails avec design moderne et cohérent
-- **Navigation améliorée**: Sidebar réductible/étendable avec raccourcis clavier (Alt + 1-7)
-- **Animations fluides**: Transitions optimisées entre sections et composants
-- **Scroll corrigé**: Modales avec scroll interne et position fixe
-- **Mot de passe**: Retrait du hachage pour les mots de passe de portails (stockage en clair)
-- **Pagination serveur**: API endpoints supportent maintenant la pagination
-- **React Query**: Mise en place du caching et gestion d'état des données
-- **Validation client-side**: react-hook-form + Zod pour validation robuste
->>>>>>> from-master
+
 
 ### Moyenne Priorité ✅
 
@@ -231,12 +220,7 @@ Le projet utilise un design system personnalisé défini dans `globals.css` avec
 - **Configuration Prettier**: Formatting automatique
 - **.gitignore amélioré**: Exclusion des fichiers générés et sensibles
 - **Template .env.example**: Guide pour configuration
-<<<<<<< HEAD
-=======
-- **Indicateurs de chargement**: Skeleton loaders améliorés avec animations progressives
-- **Accessibilité**: Raccourcis clavier et ARIA labels
-- **Layout adaptatif**: Contenu s'adapte dynamiquement à l'état de la sidebar
->>>>>>> from-master
+
 
 ### En Cours ⏳
 
@@ -249,12 +233,9 @@ Le projet utilise un design system personnalisé défini dans `globals.css` avec
 - **NextAuth.js**: Implémentation de l'authentification
 - **Tests E2E**: Configuration Playwright
 - **State management global**: Zustand pour état partagé
-<<<<<<< HEAD
 - **Accessibilité**: Audit et améliorations WCAG
 - **Framer Motion**: Animations fluides
-=======
-- **Framer Motion**: Animations avancées
->>>>>>> from-master
+
 
 ## 🚀 Déploiement
 

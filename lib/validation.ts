@@ -8,10 +8,7 @@ export const clientSchema = z.object({
     'dp-en-cours',
     'dp-accordes',
     'dp-refuses',
-<<<<<<< HEAD
-=======
     'daact',
->>>>>>> from-master
     'consuel-en-cours',
     'consuel-finalise',
     'raccordement',

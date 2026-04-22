@@ -1,14 +1,10 @@
 {
   "compilerOptions": {
-<<<<<<< HEAD
-    "lib": ["dom", "dom.iterable", "es6"],
-=======
     "lib": [
       "dom",
       "dom.iterable",
       "es6"
     ],
->>>>>>> from-master
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -18,11 +14,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-<<<<<<< HEAD
-    "jsx": "preserve",
-=======
     "jsx": "react-jsx",
->>>>>>> from-master
     "incremental": true,
     "plugins": [
       {
@@ -31,13 +23,6 @@
     ],
     "baseUrl": ".",
     "paths": {
-<<<<<<< HEAD
-      "@/*": ["./*"]
-    }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
-=======
       "@/*": [
         "./*"
       ]
@@ -54,5 +39,4 @@
   "exclude": [
     "node_modules"
   ]
->>>>>>> from-master
 }

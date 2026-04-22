@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-<<<<<<< HEAD
-=======
 import { List, CaretUp } from '@phosphor-icons/react';
->>>>>>> from-master
 import Sidebar from '@/components/Sidebar';
 import ClientSection from '@/components/ClientSection';
 import DashboardOverview from '@/components/DashboardOverview';
+import ClientAggregationView from '@/components/ClientAggregationView';
 import PageTransition from '@/components/PageTransition';
 import SectionTransition from '@/components/SectionTransition';
 import { Section } from '@/types/client';
@@ -21,11 +19,9 @@ interface DashboardProps {
 export default function Dashboard({ initialSection = 'dp-en-cours' }: DashboardProps) {
   const { activeSection, setActiveSection, sectionCounts } = useAppStore();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-<<<<<<< HEAD
-=======
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
->>>>>>> from-master
+  const [isSectionLoading, setIsSectionLoading] = useState(false);
 
   useEffect(() => {
     if (initialSection) {
@@ -33,10 +29,6 @@ export default function Dashboard({ initialSection = 'dp-en-cours' }: DashboardP
     }
   }, [initialSection, setActiveSection]);
 
-<<<<<<< HEAD
-  return (
-    <div className="h-screen">
-=======
   useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 300);
@@ -46,24 +38,29 @@ export default function Dashboard({ initialSection = 'dp-en-cours' }: DashboardP
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleSectionLoading = (event: any) => {
+      const { section, loading } = event.detail;
+      if (section === activeSection) {
+        setIsSectionLoading(loading);
+      }
+    };
+
+    window.addEventListener('sectionLoading', handleSectionLoading);
+    return () => window.removeEventListener('sectionLoading', handleSectionLoading);
+  }, [activeSection]);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="flex h-screen">
->>>>>>> from-master
       <Sidebar
         activeSection={activeSection}
         setActiveSection={setActiveSection}
         sectionCounts={sectionCounts}
         onCollapsedChange={setIsSidebarCollapsed}
-<<<<<<< HEAD
-      />
-      <main className={`flex-1 overflow-auto transition-all duration-300 ${
-        isSidebarCollapsed ? 'pl-16' : 'pl-56'
-      }`}>
-=======
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
       />
@@ -78,19 +75,15 @@ export default function Dashboard({ initialSection = 'dp-en-cours' }: DashboardP
         >
           <List className="h-6 w-6 text-gray-600 dark:text-gray-400" weight="bold" />
         </button>
-
->>>>>>> from-master
         <PageTransition>
-          <SectionTransition sectionKey={activeSection}>
+          <SectionTransition sectionKey={activeSection} isLoading={isSectionLoading}>
             {activeSection === 'clients' ? (
-              <DashboardOverview />
+              <ClientAggregationView />
             ) : (
               <ClientSection section={activeSection} />
             )}
           </SectionTransition>
         </PageTransition>
-<<<<<<< HEAD
-=======
 
         {/* Back to Top Button */}
         {showBackToTop && (
@@ -99,10 +92,9 @@ export default function Dashboard({ initialSection = 'dp-en-cours' }: DashboardP
             className="fixed bottom-6 right-6 z-50 p-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg shadow-md hover:shadow hover:scale-[1.01] transition-all duration-200"
             aria-label="Retour en haut"
           >
-            <CaretUp className="h-5 w-5" weight="bold" />
+            <CaretUp className="h-6 w-6" weight="bold" />
           </button>
         )}
->>>>>>> from-master
       </main>
     </div>
   );

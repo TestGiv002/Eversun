@@ -11,10 +11,7 @@ export const ClientSchema = new mongoose.Schema({
       'dp-en-cours',
       'dp-accordes',
       'dp-refuses',
-<<<<<<< HEAD
-=======
       'daact',
->>>>>>> from-master
       'consuel-en-cours',
       'consuel-finalise',
       'raccordement',
@@ -42,6 +39,10 @@ export const ClientSchema = new mongoose.Schema({
   raccordement: String,
   numeroContrat: String,
   dateMiseEnService: String,
+  stages: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
+  },
 });
 
 export interface IClient extends mongoose.Document {

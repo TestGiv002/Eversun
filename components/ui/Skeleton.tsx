@@ -8,12 +8,6 @@ export function Skeleton({ className }: SkeletonProps) {
   return (
     <div
       className={cn(
-<<<<<<< HEAD
-        'animate-pulse rounded-md bg-gray-200 dark:bg-gray-700',
-        className
-      )}
-    />
-=======
         'relative overflow-hidden rounded-md bg-gray-200 dark:bg-gray-700',
         className
       )}
@@ -22,17 +16,12 @@ export function Skeleton({ className }: SkeletonProps) {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent opacity-50" />
       </div>
     </div>
->>>>>>> from-master
   );
 }
 
 export function CardSkeleton() {
   return (
-<<<<<<< HEAD
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-=======
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
->>>>>>> from-master
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <Skeleton className="h-4 w-24 mb-2" />

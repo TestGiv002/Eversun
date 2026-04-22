@@ -1,13 +1,10 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongo';
 import mongoose from 'mongoose';
 import { ClientSchema } from '@/lib/clientModel';
 import { clientSchema } from '@/lib/validation';
 import { hashPassword } from '@/lib/password';
-<<<<<<< HEAD
-=======
-import logger from '@/lib/logger';
->>>>>>> from-master
+
 
 /**
  * Fonction de mappage pour transformer les champs français en anglais
@@ -36,11 +33,8 @@ function mapImportedFields(doc: any): any {
     'Date dernière démarche': 'dateDerniereDemarche',
     Commentaires: 'commentaires',
     'Date Estimatives': 'dateEstimative',
-<<<<<<< HEAD
     'Raccordement': 'raccordement',
-=======
-    Raccordement: 'raccordement',
->>>>>>> from-master
+
     'Numéro de contrat': 'numeroContrat',
     'Date de Mise en service raccordement': 'dateMiseEnService',
   };
@@ -89,27 +83,14 @@ function mapImportedFields(doc: any): any {
     }
   }
 
-<<<<<<< HEAD
-=======
-  // Supprimer tous les anciens champs français qui pourraient encore exister
-  const frenchFields = Object.keys(fieldMapping);
-  for (const frenchField of frenchFields) {
-    if (mapped[frenchField] !== undefined) {
-      delete mapped[frenchField];
-    }
-  }
 
->>>>>>> from-master
   return mapped;
 }
 
 export async function GET(request: Request) {
   try {
     if (!process.env.MONGODB_URI) {
-<<<<<<< HEAD
-=======
-      logger.error('MONGODB_URI not configured');
->>>>>>> from-master
+
       return NextResponse.json(
         { error: 'MONGODB_URI not configured' },
         { status: 500 }
@@ -119,7 +100,6 @@ export async function GET(request: Request) {
 
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
-<<<<<<< HEAD
     const limit = parseInt(url.searchParams.get('limit') || '10000');
     const section = url.searchParams.get('section');
     const skip = (page - 1) * limit;
@@ -129,6 +109,7 @@ export async function GET(request: Request) {
       { section: 'dp-en-cours', name: 'dp_in_progress' },
       { section: 'dp-accordes', name: 'dp_received' },
       { section: 'dp-refuses', name: 'dp_ko' },
+      { section: 'daact', name: 'daact' },
       { section: 'consuel-en-cours', name: 'consuel_in_progress' },
       { section: 'consuel-finalise', name: 'consuel_finalised' },
       { section: 'raccordement', name: 'raccordement' },
@@ -173,63 +154,7 @@ export async function GET(request: Request) {
       }
     }
 
-=======
-    const limit = parseInt(url.searchParams.get('limit') || '50');
-    const section = url.searchParams.get('section');
-    const skip = (page - 1) * limit;
 
-    logger.info({ page, limit, section }, 'Fetching clients from API');
-
-    // Use single unified collection
-    const collectionName = 'clients';
-    const Model =
-      mongoose.models[collectionName] ||
-      mongoose.model(collectionName, ClientSchema, collectionName);
-
-    // Build query filter
-    const filter: any = {};
-    if (section) {
-      filter.section = section;
-    }
-
-    // Count total documents
-    const totalCount = await Model.countDocuments(filter);
-
-    // Retrieve documents with pagination
-    const docs = await Model.find(filter).skip(skip).limit(limit).lean();
-
-    const allClients = docs.map((doc) => {
-      const mapped = mapImportedFields(doc);
-      // S'assurer que les vieux champs français ne sont pas dans la réponse
-      delete mapped['Client'];
-      delete mapped['Nom'];
-      delete mapped['nom'];
-      delete mapped['Date d\'envoi DP'];
-      delete mapped['Attente DP'];
-      delete mapped['Presta'];
-      delete mapped['Status'];
-      delete mapped['Numéro DP'];
-      delete mapped['Ville'];
-      delete mapped['Site DP'];
-      delete mapped['Email utilisé'];
-      delete mapped['Mot de passe'];
-      delete mapped['PV Chantier'];
-      delete mapped['Cause de non présence Consuel'];
-      delete mapped['Prestataire'];
-      delete mapped['Etat Actuel'];
-      delete mapped['Type de consuel demandé'];
-      delete mapped['Date dernière démarche'];
-      delete mapped['Commentaires'];
-      delete mapped['Date Estimatives'];
-      delete mapped['Raccordement'];
-      delete mapped['Numéro de contrat'];
-      delete mapped['Date de Mise en service raccordement'];
-      return mapped;
-    });
-
-    logger.info({ count: allClients.length, total: totalCount }, 'Clients fetched successfully');
-
->>>>>>> from-master
     return NextResponse.json({
       data: allClients,
       pagination: {
@@ -240,10 +165,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error: any) {
-<<<<<<< HEAD
-=======
-    logger.error({ error: error?.message, stack: error?.stack }, 'Error fetching clients');
->>>>>>> from-master
+
     return NextResponse.json(
       { error: error?.message || 'Erreur serveur', stack: error?.stack },
       { status: 500 }
@@ -254,10 +176,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     if (!process.env.MONGODB_URI) {
-<<<<<<< HEAD
-=======
-      logger.error('MONGODB_URI not configured');
->>>>>>> from-master
+
       return NextResponse.json(
         { error: 'MONGODB_URI not configured' },
         { status: 500 }
@@ -265,31 +184,25 @@ export async function POST(request: Request) {
     }
     await connectToDatabase();
     const data = await request.json();
-
-<<<<<<< HEAD
-    // Validation Zod
-    const parseResult = clientSchema.safeParse(data);
-    if (!parseResult.success) {
-=======
-    logger.info({ section: data.section }, 'Creating new client');
+    console.log('POST request received with data:', data);
 
     // Validation Zod
     const parseResult = clientSchema.safeParse(data);
     if (!parseResult.success) {
-      logger.warn({ errors: parseResult.error.issues }, 'Client validation failed');
->>>>>>> from-master
+      console.error('Validation failed:', parseResult.error.issues);
+
       return NextResponse.json(
         { error: 'Validation échouée', details: parseResult.error.issues },
         { status: 400 }
       );
     }
 
-<<<<<<< HEAD
     const sectionToCollection = {
       clients: 'clients',
       'dp-en-cours': 'dp_in_progress',
       'dp-accordes': 'dp_received',
       'dp-refuses': 'dp_ko',
+      daact: 'daact',
       'consuel-en-cours': 'consuel_in_progress',
       'consuel-finalise': 'consuel_finalised',
       raccordement: 'raccordement',
@@ -302,77 +215,32 @@ export async function POST(request: Request) {
     }
 
     try {
-      const Model =
-        mongoose.models[collection] ||
-        mongoose.model(collection, ClientSchema, collection);
-      const client = await Model.create(data);
-      return NextResponse.json(client);
-    } catch (err: any) {
-=======
-    // Validate section
-    const validSections = [
-      'clients',
-      'dp-en-cours',
-      'dp-accordes',
-      'dp-refuses',
-      'daact',
-      'consuel-en-cours',
-      'consuel-finalise',
-      'raccordement',
-      'raccordement-mes',
-    ];
-
-    if (!data.section || !validSections.includes(data.section)) {
-      logger.warn({ section: data.section }, 'Invalid section provided');
-      return NextResponse.json({ error: 'Section invalide' }, { status: 400 });
-    }
-
-    // Supprimer les anciens champs français pour éviter les conflits
-    const frenchFieldsToRemove = [
-      'Client',
-      'Nom',
-      'nom',
-      'Date d\'envoi DP',
-      'Attente DP',
-      'Presta',
-      'Status',
-      'Numéro DP',
-      'Ville',
-      'Site DP',
-      'Email utilisé',
-      'Mot de passe',
-      'PV Chantier',
-      'Cause de non présence Consuel',
-      'Prestataire',
-      'Etat Actuel',
-      'Type de consuel demandé',
-      'Date dernière démarche',
-      'Commentaires',
-      'Date Estimatives',
-      'Raccordement',
-      'Numéro de contrat',
-      'Date de Mise en service raccordement',
-    ];
-
-    const cleanData = { ...data };
-    for (const field of frenchFieldsToRemove) {
-      if (cleanData[field] !== undefined) {
-        delete cleanData[field];
+      // Delete cached model to force schema reload
+      const models = mongoose.models as any;
+      if (models[collection]) {
+        delete models[collection];
+        delete (mongoose.connection.models as any)[collection];
       }
-    }
+      const Model = mongoose.model(collection, ClientSchema, collection);
+      console.log('Creating client in collection:', collection, 'with data:', data);
+      const client = await Model.create(data);
+      console.log('Client created successfully:', client);
 
-    try {
-      // Use single unified collection
-      const collectionName = 'clients';
-      const Model =
-        mongoose.models[collectionName] ||
-        mongoose.model(collectionName, ClientSchema, collectionName);
-      const client = await Model.create(cleanData);
-      logger.info({ clientId: client._id, section: data.section }, 'Client created successfully');
+      // Sync to clients aggregation collection
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/clients/sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+      } catch (syncError) {
+        console.error('Failed to sync to clients aggregation:', syncError);
+      }
+
       return NextResponse.json(client);
     } catch (err: any) {
-      logger.error({ error: err?.message, section: data.section }, 'Error creating client in MongoDB');
->>>>>>> from-master
+      console.error('Erreur MongoDB lors de la création:', err);
+
       return NextResponse.json(
         {
           error: `Erreur MongoDB lors de la création`,
@@ -382,10 +250,7 @@ export async function POST(request: Request) {
       );
     }
   } catch (error: any) {
-<<<<<<< HEAD
-=======
-    logger.error({ error: error?.message, stack: error?.stack }, 'Error in POST endpoint');
->>>>>>> from-master
+
     return NextResponse.json(
       { error: error?.message || 'Erreur serveur', stack: error?.stack },
       { status: 500 }
@@ -393,7 +258,6 @@ export async function POST(request: Request) {
   }
 }
 
-<<<<<<< HEAD
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
@@ -415,6 +279,7 @@ export async function PATCH(
       'dp-en-cours': 'dp_in_progress',
       'dp-accordes': 'dp_received',
       'dp-refuses': 'dp_ko',
+      daact: 'daact',
       'consuel-en-cours': 'consuel_in_progress',
       'consuel-finalise': 'consuel_finalised',
       raccordement: 'raccordement',
@@ -449,5 +314,5 @@ export async function PATCH(
     );
   }
 }
-=======
->>>>>>> from-master
+
+

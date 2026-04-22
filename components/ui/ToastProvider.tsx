@@ -1,20 +1,13 @@
 'use client';
 
-<<<<<<< HEAD
-import { useToastStore } from '@/store/useToastStore';
-import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react';
-=======
 import { useState, useEffect } from 'react';
 import { useToastStore } from '@/store/useToastStore';
-import { CheckCircle, XCircle, Warning, Info, X, ArrowCounterClockwise, ArrowClockwise } from '@phosphor-icons/react';
->>>>>>> from-master
+import { CheckCircle, XCircle, Warning, Info, X, ArrowClockwise } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ToastProvider() {
   const toasts = useToastStore((state) => state.toasts);
   const removeToast = useToastStore((state) => state.removeToast);
-<<<<<<< HEAD
-=======
   const [progress, setProgress] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -39,22 +32,10 @@ export default function ToastProvider() {
       }
     });
   }, [toasts, progress, removeToast]);
->>>>>>> from-master
 
   const getIcon = (type: string) => {
     switch (type) {
       case 'success':
-<<<<<<< HEAD
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
-      case 'error':
-        return <XCircle className="w-5 h-5 text-red-500" />;
-      case 'warning':
-        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
-      case 'info':
-        return <Info className="w-5 h-5 text-teal-500" />;
-      default:
-        return <Info className="w-5 h-5 text-teal-500" />;
-=======
         return <CheckCircle className="w-5 h-5 text-green-500" weight="bold" />;
       case 'error':
         return <XCircle className="w-5 h-5 text-red-500" weight="bold" />;
@@ -64,7 +45,6 @@ export default function ToastProvider() {
         return <Info className="w-5 h-5 text-teal-500" weight="bold" />;
       default:
         return <Info className="w-5 h-5 text-teal-500" weight="bold" />;
->>>>>>> from-master
     }
   };
 
@@ -93,21 +73,6 @@ export default function ToastProvider() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 100, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-<<<<<<< HEAD
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border ${getBgColor(toast.type)} min-w-[300px]`}
-          >
-            {getIcon(toast.type)}
-            <span className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100">
-              {toast.message}
-            </span>
-            <button
-              onClick={() => removeToast(toast.id)}
-              className="p-1 rounded hover:bg-white/50 dark:hover:bg-gray-700 transition-colors"
-              aria-label="Fermer"
-            >
-              <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-            </button>
-=======
             className={`relative overflow-hidden rounded-lg shadow-md border ${getBgColor(toast.type)} min-w-[350px]`}
           >
             {/* Progress Bar */}
@@ -130,30 +95,6 @@ export default function ToastProvider() {
 
               {/* Action Buttons */}
               <div className="flex items-center gap-1">
-                {toast.onUndo && (
-                  <button
-                    onClick={() => {
-                      toast.onUndo?.();
-                      removeToast(toast.id);
-                    }}
-                    className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-110"
-                    aria-label="Annuler"
-                  >
-                    <ArrowCounterClockwise className="w-4 h-4 text-gray-600 dark:text-gray-400" weight="bold" />
-                  </button>
-                )}
-                {toast.onRetry && (
-                  <button
-                    onClick={() => {
-                      toast.onRetry?.();
-                      removeToast(toast.id);
-                    }}
-                    className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-110"
-                    aria-label="Réessayer"
-                  >
-                    <ArrowClockwise className="w-4 h-4 text-gray-600 dark:text-gray-400" weight="bold" />
-                  </button>
-                )}
                 <button
                   onClick={() => removeToast(toast.id)}
                   className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-110"
@@ -163,7 +104,6 @@ export default function ToastProvider() {
                 </button>
               </div>
             </div>
->>>>>>> from-master
           </motion.div>
         ))}
       </AnimatePresence>

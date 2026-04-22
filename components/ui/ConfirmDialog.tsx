@@ -3,11 +3,7 @@
 import { useState } from 'react';
 import Modal from './Modal';
 import Button from './Button';
-<<<<<<< HEAD
-import { AlertTriangle } from 'lucide-react';
-=======
 import { Warning, Info, CheckCircle, XCircle } from '@phosphor-icons/react';
->>>>>>> from-master
 import type { Variant } from '@/types/common';
 
 interface ConfirmDialogProps {
@@ -55,29 +51,6 @@ export default function ConfirmDialog({
     switch (variant) {
       case 'danger':
         return {
-<<<<<<< HEAD
-          iconBg: 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/40 dark:to-red-800/40',
-          iconColor: 'text-red-600 dark:text-red-400',
-          buttonBg: 'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700',
-        };
-      case 'warning':
-        return {
-          iconBg: 'bg-gradient-to-br from-yellow-100 to-amber-200 dark:from-yellow-900/40 dark:to-amber-800/40',
-          iconColor: 'text-yellow-600 dark:text-yellow-400',
-          buttonBg: 'bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700',
-        };
-      case 'info':
-        return {
-          iconBg: 'bg-gradient-to-br from-teal-100 to-cyan-200 dark:from-teal-900/40 dark:to-cyan-800/40',
-          iconColor: 'text-teal-600 dark:text-teal-400',
-          buttonBg: 'bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700',
-        };
-      default:
-        return {
-          iconBg: 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700',
-          iconColor: 'text-gray-600 dark:text-gray-400',
-          buttonBg: 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800',
-=======
           iconBg: 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900 dark:to-red-800',
           iconColor: 'text-red-600 dark:text-red-400',
           iconBorder: 'border-red-200 dark:border-red-700',
@@ -107,7 +80,6 @@ export default function ConfirmDialog({
           iconBorder: 'border-gray-200 dark:border-gray-600',
           buttonBg: 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 shadow-lg',
           icon: <CheckCircle className="h-8 w-8" weight="fill" />,
->>>>>>> from-master
         };
     }
   };
@@ -116,22 +88,6 @@ export default function ConfirmDialog({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="sm">
-<<<<<<< HEAD
-      <div className="text-center">
-        <div
-          className={`mx-auto flex items-center justify-center h-16 w-16 rounded-2xl shadow-lg ${styles.iconBg} mb-4`}
-        >
-          <AlertTriangle className={`h-8 w-8 ${styles.iconColor}`} />
-        </div>
-        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          {title}
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-          {message}
-        </p>
-        <div className="flex gap-3 justify-center">
-          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-=======
       <div className="text-center px-2">
         {/* Icon with elegant design */}
         <div
@@ -160,17 +116,12 @@ export default function ConfirmDialog({
             disabled={isSubmitting}
             className="px-6 py-2.5 font-medium"
           >
->>>>>>> from-master
             {cancelText}
           </Button>
           <Button
             onClick={handleConfirm}
             loading={isSubmitting}
-<<<<<<< HEAD
-            className={styles.buttonBg}
-=======
             className={`${styles.buttonBg} px-6 py-2.5 font-medium text-white`}
->>>>>>> from-master
           >
             {confirmText}
           </Button>

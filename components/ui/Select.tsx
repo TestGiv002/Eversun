@@ -2,11 +2,7 @@
 
 import React, { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
-<<<<<<< HEAD
-import { ChevronDown } from 'lucide-react';
-=======
 import { CaretDown } from '@phosphor-icons/react';
->>>>>>> from-master
 import type { WithLabelError, WithIcon, SelectOption } from '@/types/common';
 
 interface SelectProps
@@ -41,39 +37,24 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-<<<<<<< HEAD
-            className="text-sm font-medium text-gray-700"
-=======
             className="text-sm font-semibold text-gray-700 dark:text-gray-300"
->>>>>>> from-master
           >
             {label}
           </label>
         )}
         <div className="relative group">
           {icon && (
-<<<<<<< HEAD
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400 group-focus-within:text-teal-500 transition-colors duration-150">
-=======
             <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400 group-focus-within:text-amber-500 transition-colors duration-200">
->>>>>>> from-master
               {icon}
             </div>
           )}
           <select
             id={selectId}
             className={cn(
-<<<<<<< HEAD
-              'flex h-10 w-full rounded-md border border-border bg-white dark:bg-gray-900 dark:border-gray-600 px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:border-teal-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-150 hover:border-border-dark dark:hover:border-gray-500 appearance-none',
-              icon && 'pl-12',
-              error &&
-                'border-error focus-visible:ring-error focus-visible:border-error',
-=======
               'flex h-12 w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-3 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 focus-visible:border-amber-500 dark:focus-visible:border-amber-500 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500 shadow hover:shadow-md appearance-none',
               icon && 'pl-12',
               error &&
                 'border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500',
->>>>>>> from-master
               'text-base sm:text-sm',
               className
             )}
@@ -99,36 +80,22 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
               </option>
             ))}
           </select>
-<<<<<<< HEAD
-          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400 group-focus-within:text-teal-500 transition-colors duration-150" />
-=======
           <CaretDown className="absolute right-4 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400 group-focus-within:text-amber-500 transition-colors duration-200" weight="bold" />
->>>>>>> from-master
         </div>
         {error && (
           <p
             id={`${selectId}-error`}
-<<<<<<< HEAD
-            className="text-sm text-red-600 font-medium"
-            role="alert"
-          >
-=======
             className="text-sm text-red-600 dark:text-red-400 font-medium flex items-center gap-1"
             role="alert"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
->>>>>>> from-master
             {error}
           </p>
         )}
         {helperText && !error && (
-<<<<<<< HEAD
-          <p id={`${selectId}-helper`} className="text-sm text-gray-500">
-=======
           <p id={`${selectId}-helper`} className="text-sm text-gray-500 dark:text-gray-400">
->>>>>>> from-master
             {helperText}
           </p>
         )}

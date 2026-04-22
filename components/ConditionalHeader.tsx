@@ -1,69 +1,14 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-<<<<<<< HEAD
-import ThemeToggle from './ThemeToggle';
-import UserMenu from './UserMenu';
-
-export default function ConditionalHeader() {
-  const pathname = usePathname();
-  console.log('ConditionalHeader - pathname:', pathname);
-  const isAuthPage = pathname?.startsWith('/login') || pathname?.startsWith('/reset-password');
-  console.log('ConditionalHeader - isAuthPage:', isAuthPage);
-
-  if (isAuthPage) {
-    console.log('ConditionalHeader - hiding header');
-    return null;
-  }
-
-  console.log('ConditionalHeader - showing header');
-  return (
-    <header
-      className="sticky top-0 z-50 w-full h-16 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 flex items-center px-6 shadow-lg"
-      role="banner"
-    >
-      <div className="flex-1 flex items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 via-teal-600 to-cyan-500 shadow-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">E</span>
-          </div>
-          <span className="text-2xl font-bold bg-gradient-to-r from-teal-600 via-teal-700 to-cyan-600 bg-clip-text text-transparent tracking-tight">
-            Eversun
-          </span>
-        </div>
-      </div>
-      <div className="flex items-center gap-3">
-        <ThemeToggle />
-        <div className="flex items-center gap-3 pl-4 border-l border-gray-200/50 dark:border-gray-700/50">
-          <UserMenu />
-        </div>
-      </div>
-    </header>
-=======
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { House, Sun, Moon, CaretRight } from '@phosphor-icons/react';
 import { useAppStore } from '@/store/useAppStore';
 import UserMenu from './UserMenu';
-
-const sectionLabels: Record<string, string> = {
-  'clients': 'Tableau de bord',
-  'dp-en-cours': 'DP En cours',
-  'dp-accordes': 'DP Accordés',
-  'dp-refuses': 'DP Refus',
-  'daact': 'DAACT',
-  'consuel-en-cours': 'Consuel En cours',
-  'consuel-finalise': 'Consuel Finalisé',
-  'raccordement': 'Raccordement',
-  'raccordement-mes': 'Raccordement MES',
-};
 
 export default function ConditionalHeader() {
   const pathname = usePathname();
   const [time, setTime] = useState('');
-  const theme = useAppStore((state) => state.theme);
-  const setTheme = useAppStore((state) => state.setTheme);
   const activeSection = useAppStore((state) => state.activeSection);
 
   useEffect(() => {
@@ -139,6 +84,5 @@ export default function ConditionalHeader() {
       </motion.header>
       <div id="logout-dialog-portal" />
     </>
->>>>>>> from-master
   );
 }

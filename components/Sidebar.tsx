@@ -1,23 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-<<<<<<< HEAD
-=======
 import { motion, AnimatePresence } from 'framer-motion';
->>>>>>> from-master
 import {
   FileText,
   CheckCircle,
   XCircle,
   Circle,
-<<<<<<< HEAD
-  Zap,
-  Flag,
-  ChevronLeft,
-  ChevronRight,
-  Keyboard,
-} from 'lucide-react';
-=======
   Lightning,
   Flag,
   CaretLeft,
@@ -26,8 +15,8 @@ import {
   MagnifyingGlass,
   X,
   List,
+  Users,
 } from '@phosphor-icons/react';
->>>>>>> from-master
 import { Section } from '@/types/client';
 
 interface SidebarProps {
@@ -39,16 +28,23 @@ interface SidebarProps {
   sectionCounts?: Record<string, number>;
   /** Callback appelé quand la sidebar est réduite/étendue */
   onCollapsedChange?: (collapsed: boolean) => void;
-<<<<<<< HEAD
-=======
   /** État mobile de la sidebar */
   isMobileOpen?: boolean;
   /** Callback pour fermer la sidebar mobile */
   onMobileClose?: () => void;
->>>>>>> from-master
 }
 
 const sectionGroups = [
+  {
+    title: 'Vue Globale',
+    sections: [
+      {
+        id: 'clients' as const,
+        label: 'Clients',
+        icon: Users,
+      },
+    ],
+  },
   {
     title: 'Déclarations Préalables',
     sections: [
@@ -67,14 +63,11 @@ const sectionGroups = [
         label: 'DP Refus',
         icon: XCircle,
       },
-<<<<<<< HEAD
-=======
       {
         id: 'daact' as const,
         label: 'DAACT',
         icon: CheckSquare,
       },
->>>>>>> from-master
     ],
   },
   {
@@ -98,11 +91,7 @@ const sectionGroups = [
       {
         id: 'raccordement' as const,
         label: 'Raccordement',
-<<<<<<< HEAD
-        icon: Zap,
-=======
         icon: Lightning,
->>>>>>> from-master
       },
       {
         id: 'raccordement-mes' as const,
@@ -118,10 +107,6 @@ export default function Sidebar({
   setActiveSection,
   sectionCounts,
   onCollapsedChange,
-<<<<<<< HEAD
-}: SidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-=======
   isMobileOpen = false,
   onMobileClose,
 }: SidebarProps) {
@@ -138,7 +123,6 @@ export default function Sidebar({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
->>>>>>> from-master
 
   useEffect(() => {
     if (onCollapsedChange) {
@@ -146,58 +130,6 @@ export default function Sidebar({
     }
   }, [isCollapsed, onCollapsedChange]);
 
-<<<<<<< HEAD
-  // Raccourcis clavier pour la navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.altKey) {
-        const sections: Section[] = [
-          'dp-en-cours',
-          'dp-accordes',
-          'dp-refuses',
-          'consuel-en-cours',
-          'consuel-finalise',
-          'raccordement',
-          'raccordement-mes',
-        ];
-        
-        const keyIndex = parseInt(e.key);
-        if (keyIndex >= 1 && keyIndex <= sections.length) {
-          setActiveSection(sections[keyIndex - 1]);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setActiveSection]);
-
-  return (
-    <aside
-      className={`bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border-r border-gray-200/50 dark:border-gray-700/50 h-[calc(100vh-3.5rem)] fixed top-14 left-0 z-40 flex flex-col shadow-lg transition-all duration-300 ${
-        isCollapsed ? 'w-16' : 'w-56'
-      }`}
-      role="navigation"
-      aria-label="Navigation principale"
-    >
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-4 z-50 p-1.5 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-110 transition-transform duration-200"
-        aria-label={isCollapsed ? 'Étendre la sidebar' : 'Réduire la sidebar'}
-      >
-        {isCollapsed ? (
-          <ChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-        ) : (
-          <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-        )}
-      </button>
-      <nav className="py-4 flex-1 overflow-y-auto">
-        {sectionGroups.map((group, groupIndex) => (
-          <div key={group.title} className="mb-6">
-            {!isCollapsed && (
-              <div className="px-4 mb-3">
-                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-=======
   // Load saved state
   useEffect(() => {
     const savedCollapsed = localStorage.getItem('sidebar-collapsed');
@@ -289,7 +221,6 @@ export default function Sidebar({
             {!isCollapsed && (
               <div className="px-4 mb-3">
                 <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
->>>>>>> from-master
                   {group.title}
                 </span>
               </div>
@@ -301,19 +232,11 @@ export default function Sidebar({
                   <li key={section.id} role="listitem">
                     <button
                       onClick={() => setActiveSection(section.id)}
-<<<<<<< HEAD
-                      className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-3 group relative overflow-hidden
-                        ${
-                          activeSection === section.id
-                            ? 'bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 text-white shadow-xl ring-2 ring-teal-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 transform scale-[1.02]'
-                            : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 dark:hover:from-gray-800 dark:hover:to-gray-700 hover:shadow-lg hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900'
-=======
                       className={`w-full text-left px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-3 group relative overflow-hidden
                         ${
                           activeSection === section.id
                             ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md ring-2 ring-amber-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 transform scale-[1.01]'
                             : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:shadow hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900'
->>>>>>> from-master
                         }`}
                       tabIndex={0}
                       aria-current={activeSection === section.id ? 'page' : undefined}
@@ -324,14 +247,9 @@ export default function Sidebar({
                       )}
                       {section.icon && (
                         <section.icon
-<<<<<<< HEAD
-                          className={`h-5 w-5 flex-shrink-0 transition-all duration-300 ${
-                            activeSection === section.id ? 'text-white scale-110' : 'text-gray-400 dark:text-gray-500 group-hover:text-teal-600 dark:group-hover:text-teal-400 group-hover:scale-110'
-=======
                           weight="regular"
                           className={`h-5 w-5 flex-shrink-0 transition-all duration-200 ${
                             activeSection === section.id ? 'text-white scale-110' : 'text-gray-400 dark:text-gray-500 group-hover:text-amber-500 dark:group-hover:text-amber-400 group-hover:scale-110'
->>>>>>> from-master
                           }`}
                           aria-hidden="true"
                         />
@@ -341,17 +259,10 @@ export default function Sidebar({
                           <span className="flex-1 relative z-10">{section.label}</span>
                           {sectionCounts && sectionCounts[section.id] !== undefined && (
                             <span
-<<<<<<< HEAD
-                              className={`text-xs font-bold px-2.5 py-1 rounded-full transition-all duration-300 relative z-10 ${
-                                activeSection === section.id
-                                  ? 'bg-white text-teal-600 shadow-md'
-                                  : 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 group-hover:bg-teal-200 dark:group-hover:bg-teal-800/50'
-=======
                               className={`text-xs font-bold px-2 py-1 rounded-full transition-all duration-200 relative z-10 ${
                                 activeSection === section.id
                                   ? 'bg-white text-amber-600 shadow'
                                   : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 group-hover:bg-amber-200 dark:group-hover:bg-amber-800/50'
->>>>>>> from-master
                               }`}
                             >
                               {sectionCounts[section.id]}
@@ -360,17 +271,10 @@ export default function Sidebar({
                         </>
                       )}
                       {isCollapsed && sectionCounts && sectionCounts[section.id] !== undefined && (
-<<<<<<< HEAD
-                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full relative z-10 ${
-                          activeSection === section.id
-                            ? 'bg-white text-teal-600'
-                            : 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
-=======
                         <span className={`text-xs font-bold px-2 py-1 rounded-full relative z-10 ${
                           activeSection === section.id
                             ? 'bg-white text-amber-600'
                             : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
->>>>>>> from-master
                         }`}>
                           {sectionCounts[section.id]}
                         </span>
@@ -383,19 +287,6 @@ export default function Sidebar({
           </div>
         ))}
       </nav>
-<<<<<<< HEAD
-      
-      {/* Keyboard shortcuts hint */}
-      {!isCollapsed && (
-        <div className="px-4 py-3 border-t border-gray-200/50 dark:border-gray-700/50">
-          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            <Keyboard className="h-3 w-3" />
-            <span>Alt + 1-7</span>
-          </div>
-        </div>
-      )}
-    </aside>
-=======
 
       {/* Collapse Toggle - Desktop only */}
       {!isMobile && (
@@ -418,6 +309,5 @@ export default function Sidebar({
       )}
     </aside>
     </>
->>>>>>> from-master
   );
 }

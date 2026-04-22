@@ -6,10 +6,7 @@ import ToastProvider from '@/components/ui/ToastProvider';
 import ThemeProvider from '@/components/ThemeProvider';
 import ConditionalHeader from '@/components/ConditionalHeader';
 import MainWrapper from '@/components/MainWrapper';
-<<<<<<< HEAD
-=======
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
->>>>>>> from-master
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -39,13 +36,9 @@ export default function RootLayout({
           <ThemeProvider>
             <ToastProvider />
             <ConditionalHeader />
-<<<<<<< HEAD
-            <MainWrapper>{children}</MainWrapper>
-=======
             <ErrorBoundary>
               <MainWrapper>{children}</MainWrapper>
             </ErrorBoundary>
->>>>>>> from-master
           </ThemeProvider>
         </QueryProvider>
       </body>

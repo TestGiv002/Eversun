@@ -9,84 +9,6 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-<<<<<<< HEAD
-        // Transporeon-style professional palette with dark mode variants
-        primary: {
-          DEFAULT: '#1a1a1a',
-          light: '#333333',
-          dark: '#000000',
-        },
-        secondary: {
-          DEFAULT: '#f5f5f5',
-          light: '#fafafa',
-          dark: '#e0e0e0',
-        },
-        accent: {
-          DEFAULT: '#0052cc',
-          light: '#0066ff',
-          dark: '#003d99',
-        },
-        text: {
-          primary: '#333333',
-          secondary: '#666666',
-          muted: '#999999',
-        },
-        border: {
-          DEFAULT: '#e0e0e0',
-          light: '#f0f0f0',
-          dark: '#cccccc',
-        },
-        success: {
-          DEFAULT: '#00a651',
-          light: '#00c853',
-          dark: '#008542',
-        },
-        warning: {
-          DEFAULT: '#f39c12',
-          light: '#f1c40f',
-          dark: '#d68910',
-        },
-        error: {
-          DEFAULT: '#e74c3c',
-          light: '#ec7063',
-          dark: '#c0392b',
-        },
-      },
-      darkMode: 'class',
-      // Add dark mode overrides
-      dark: {
-        primary: {
-          DEFAULT: '#f5f5f5',
-          light: '#e0e0e0',
-          dark: '#ffffff',
-        },
-        secondary: {
-          DEFAULT: '#2a2a2a',
-          light: '#333333',
-          dark: '#1a1a1a',
-        },
-        accent: {
-          DEFAULT: '#4a90ff',
-          light: '#5aa5ff',
-          dark: '#3a80e0',
-        },
-        text: {
-          primary: '#f5f5f5',
-          secondary: '#cccccc',
-          muted: '#999999',
-        },
-        border: {
-          DEFAULT: '#333333',
-          light: '#444444',
-          dark: '#222222',
-        },
-      },
-      darkMode: 'class',
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-=======
         // Modern Cyan/Blue Primary (Replacing Amber/Orange)
         primary: {
           50: '#f0f9ff',
@@ -269,7 +191,6 @@ module.exports = {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
->>>>>>> from-master
       },
     },
   },
