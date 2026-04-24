@@ -363,7 +363,7 @@ export default function ClientForm({
         : isDaact
           ? daactStatuts.map((s) => ({ value: s, label: s }))
           : [];
-  const financementOptions = ['Sunlib', 'Otovo'].map((f) => ({
+  const financementOptions = ['Sunlib', 'Otovo', 'Upfront'].map((f) => ({
     value: f,
     label: f,
   }));
