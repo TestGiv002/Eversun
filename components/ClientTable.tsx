@@ -163,7 +163,10 @@ export default function ClientTable({
     columns.push(
       { key: 'client', label: 'Client' },
       { key: 'statut', label: 'Statut' },
+      { key: 'financement', label: 'Financement' },
       { key: 'pvChantier', label: 'PV Chantier' },
+      { key: 'commentaires', label: 'Commentaires' },
+      { key: 'dateEstimative', label: 'Date de pose' },
       { key: 'datePV', label: 'Date PV' }
     );
   } else if (isConsuelEnCours) {
@@ -496,10 +499,13 @@ export default function ClientTable({
                           </button>
                         ) : col.key === 'dateEnvoi' ||
                         col.key === 'dateEstimative' ||
-                        col.key === 'pvChantier' ||
                         col.key === 'dateDerniereDemarche' ||
                         col.key === 'dateMiseEnService' ||
                         col.key === 'datePV' ? (
+                          formatDateFR(item[col.key] as string)
+                        ) : col.key === 'pvChantier' && isInstallation && item.pvChantier ? (
+                          <span className="font-medium text-primary">{item.pvChantier}</span>
+                        ) : col.key === 'pvChantier' && item.pvChantier ? (
                           formatDateFR(item[col.key] as string)
                         ) : col.key === 'portail' &&
                           isDp &&
