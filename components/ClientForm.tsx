@@ -60,7 +60,6 @@ const raccordementStatuts = ['Demande transmise', 'Demande à effectuer'];
 const daactStatuts = ['En attente', 'Validé', 'Refusé'];
 const installationStatuts = ['En attente date de pose', 'Date prévue'];
 const consuelTypes = ['Violet', 'Bleu'];
-const prestataires = ['Eversun', 'Projet Solaire'];
 
 export default function ClientForm({
   section,
@@ -257,7 +256,7 @@ export default function ClientForm({
         }
       }
 
-      if (section === 'installation' && key === 'statut' && value === 'En attente date de pose' && prev.dateEstimative) {
+      if (section === 'installation' && key === 'statut' && value === 'En attente date de pose') {
         next.pvChantier = 'En attente';
       }
 
@@ -280,8 +279,8 @@ export default function ClientForm({
       newErrors.client = 'Le nom du client est requis';
     }
 
-    if (!section.startsWith('dp') && !isDaact && !form.prestataire?.trim()) {
-      newErrors.prestataire = 'Le prestataire est requis';
+    if (!section.startsWith('dp') && !isDaact && !form.financement?.trim()) {
+      newErrors.financement = 'Le financement est requis';
     }
 
     if (section.startsWith('dp') && !form.statut?.trim()) {
@@ -338,7 +337,7 @@ export default function ClientForm({
         section: finalSection,
         dateEnvoi: formatDateInput(form.dateEnvoi ?? ''),
         dateEstimative: formatDateInput(form.dateEstimative ?? ''),
-        pvChantier: formatDateInput(form.pvChantier ?? ''),
+        pvChantier: section === 'installation' ? form.pvChantier ?? '' : formatDateInput(form.pvChantier ?? ''),
         datePV: formatDateInput(form.datePV ?? ''),
         dateDerniereDemarche: formatDateInput(form.dateDerniereDemarche ?? ''),
         dateMiseEnService: formatDateInput(form.dateMiseEnService ?? ''),
@@ -366,7 +365,6 @@ export default function ClientForm({
   const isRaccordementMes = section === 'raccordement-mes';
   const isDaact = section === 'daact';
 
-  const prestataireOptions = prestataires.map((p) => ({ value: p, label: p }));
   const statutOptions = isDp
     ? dpStatuts.map((s) => ({ value: s, label: s }))
     : isInstallation
@@ -468,16 +466,24 @@ export default function ClientForm({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {!isDp && (
                     <Select
-                      label="Prestataire *"
-                      value={form.prestataire}
-                      onChange={(e) => handleChange('prestataire', e.target.value)}
-                      options={prestataireOptions}
-                      placeholder="Sélectionner un prestataire"
+                      label="Financement *"
+                      value={form.financement}
+                      onChange={(e) => handleChange('financement', e.target.value)}
+                      options={financementOptions}
+                      placeholder="Sélectionner un financement"
                       required
-                      error={errors.prestataire}
+                      error={errors.financement}
                       icon={<Buildings className="h-4 w-4" weight="bold" />}
                     />
                   )}
+
+                  <Input
+                    label="Commentaires"
+                    value={form.commentaires}
+                    onChange={(e) => handleChange('commentaires', e.target.value)}
+                    placeholder="Ajouter des commentaires..."
+                    name="commentaires"
+                  />
 
 
                   <Input
@@ -622,7 +628,7 @@ export default function ClientForm({
                     placeholder="Sélectionner un statut PV"
                   />
                   <DatePicker
-                    label="Date prévue"
+                    label="Date de pose"
                     value={form.dateEstimative}
                     onChange={(value) => handleChange('dateEstimative', value)}
                     icon={<Calendar className="h-4 w-4" />}
