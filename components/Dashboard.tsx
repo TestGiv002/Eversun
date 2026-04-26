@@ -1,15 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { List, CaretUp } from '@phosphor-icons/react';
 import Sidebar from '@/components/Sidebar';
-import ClientSection from '@/components/ClientSection';
-import DashboardOverview from '@/components/DashboardOverview';
-import ClientAggregationView from '@/components/ClientAggregationView';
 import PageTransition from '@/components/PageTransition';
 import SectionTransition from '@/components/SectionTransition';
 import { Section } from '@/types/client';
 import { useAppStore } from '@/store/useAppStore';
+import useDebounceCallback from '@/hooks/useDebounceCallback';
+
+// Code splitting pour les composants lourds
+const ClientSection = dynamic(() => import('@/components/ClientSection'), {
+  loading: () => <div className="p-8 text-center">Chargement...</div>,
+  ssr: false,
+});
+
+const DashboardOverview = dynamic(() => import('@/components/DashboardOverview'), {
+  loading: () => <div className="p-8 text-center">Chargement...</div>,
+  ssr: false,
+});
+
+const ClientAggregationView = dynamic(() => import('@/components/ClientAggregationView'), {
+  loading: () => <div className="p-8 text-center">Chargement...</div>,
+  ssr: false,
+});
 
 interface DashboardProps {
   /** Section initiale (optionnel, défaut: 'dp-en-cours') */
@@ -23,6 +38,12 @@ export default function Dashboard({ initialSection = 'dp-en-cours' }: DashboardP
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isSectionLoading, setIsSectionLoading] = useState(false);
 
+  const handleScroll = useCallback(() => {
+    setShowBackToTop(window.scrollY > 300);
+  }, []);
+
+  const debouncedHandleScroll = useDebounceCallback(handleScroll, 100);
+
   useEffect(() => {
     if (initialSection) {
       setActiveSection(initialSection);
@@ -30,17 +51,14 @@ export default function Dashboard({ initialSection = 'dp-en-cours' }: DashboardP
   }, [initialSection, setActiveSection]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 300);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    window.addEventListener('scroll', debouncedHandleScroll);
+    return () => window.removeEventListener('scroll', debouncedHandleScroll);
+  }, [debouncedHandleScroll]);
 
   useEffect(() => {
-    const handleSectionLoading = (event: any) => {
-      const { section, loading } = event.detail;
+    const handleSectionLoading = (event: Event) => {
+      const customEvent = event as CustomEvent<{ section: string; loading: boolean }>;
+      const { section, loading } = customEvent.detail;
       if (section === activeSection) {
         setIsSectionLoading(loading);
       }

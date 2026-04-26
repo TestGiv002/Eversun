@@ -359,49 +359,71 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="bg-primary border border-primary rounded-lg p-4 shadow-md">
+      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30">
+              <SquaresFour className="h-6 w-6" weight="bold" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                Vue Grille
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{items.length} dossiers</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCardView(cardView === 'compact' ? 'detailed' : 'compact')}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 shadow-sm hover:shadow-md"
+              title="Changer la vue"
+            >
+              {cardView === 'compact' ? <List className="h-5 w-5 text-gray-700 dark:text-gray-300" /> : <SquaresFour className="h-5 w-5 text-gray-700 dark:text-gray-300" />}
+              <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300">{cardView === 'compact' ? 'Détaillée' : 'Compacte'}</span>
+            </button>
+          </div>
+        </div>
+
         <div className="flex flex-wrap gap-4 items-center">
-          {/* Sort */}
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-secondary">Trier par:</span>
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Trier par:</label>
             <select
               value={sortField}
               onChange={(e) => setSortField(e.target.value as SortField)}
-              className="select-enhanced px-3 py-2"
+              className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm"
             >
               <option value="client">Client</option>
-              <option value="statut">{section.startsWith('consuel') ? 'Statut' : 'Statut'}</option>
+              <option value="statut">Statut</option>
               <option value="dateEnvoi">Date d'envoi</option>
               <option value="dateEstimative">Date estimative</option>
+              <option value="ville">Ville</option>
               <option value="prestataire">Prestataire</option>
-              {section.startsWith('consuel') && <option value="typeConsuel">Type Consuel</option>}
+              <option value="typeConsuel">Type Consuel</option>
             </select>
-            <button
-              onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-              className="p-2 bg-secondary border border-primary rounded-lg hover:bg-secondary transition-colors"
-              title={sortDirection === 'asc' ? 'Croissant' : 'Décroissant'}
-            >
-              {sortDirection === 'asc' ? (
-                <SortAscending className="h-4 w-4 text-tertiary" />
-              ) : (
-                <SortDescending className="h-4 w-4 text-tertiary" />
-              )}
-            </button>
           </div>
-
-
-          {/* Group By */}
+          <button
+            onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            {sortDirection === 'asc' ? (
+              <SortAscending className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            ) : (
+              <SortDescending className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            )}
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{sortDirection === 'asc' ? 'Croissant' : 'Décroissant'}</span>
+          </button>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-secondary">Grouper par:</span>
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Grouper par:</label>
             <select
               value={groupBy}
               onChange={(e) => setGroupBy(e.target.value as GroupBy)}
-              className="select-enhanced px-3 py-2"
+              className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm"
             >
               <option value="none">Aucun</option>
               <option value="statut">Statut</option>
+              <option value="ville">Ville</option>
               <option value="prestataire">Prestataire</option>
-              {section.startsWith('consuel') && <option value="typeConsuel">Type Consuel</option>}
+              <option value="typeConsuel">Type Consuel</option>
             </select>
           </div>
         </div>

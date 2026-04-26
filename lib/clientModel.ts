@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import { Section } from '@/types/client';
+import { encrypt, decrypt } from './encryption';
+import logger from '@/lib/logger';
 
 export const ClientSchema = new mongoose.Schema({
   id: { type: mongoose.Schema.Types.Mixed, required: false },
@@ -29,7 +31,7 @@ export const ClientSchema = new mongoose.Schema({
   ville: String,
   portail: String,
   identifiant: String,
-  motDePasse: String,
+  motDePasse: { type: String, select: false }, // Masqué par défaut dans les requêtes
   type: String,
   pvChantier: String,
   pvChantierDate: String,
@@ -45,6 +47,43 @@ export const ClientSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     default: {},
   },
+});
+
+// Hook pre-save pour chiffrer le motDePasse avant sauvegarde
+ClientSchema.pre('save', async function (next) {
+  if (this.motDePasse && this.isModified('motDePasse')) {
+    try {
+      this.motDePasse = encrypt(this.motDePasse);
+    } catch (error) {
+      return next(error as Error);
+    }
+  }
+  next();
+});
+
+// Hook post-find pour déchiffrer le motDePasse après récupération
+ClientSchema.post('find', function (docs: any[]) {
+  if (Array.isArray(docs)) {
+    docs.forEach((doc) => {
+      if (doc.motDePasse) {
+        try {
+          doc.motDePasse = decrypt(doc.motDePasse);
+        } catch (error) {
+          logger.error({ error }, 'Erreur lors du déchiffrement du mot de passe');
+        }
+      }
+    });
+  }
+});
+
+ClientSchema.post('findOne', function (doc: any) {
+  if (doc && doc.motDePasse) {
+    try {
+      doc.motDePasse = decrypt(doc.motDePasse);
+    } catch (error) {
+      logger.error({ error }, 'Erreur lors du déchiffrement du mot de passe');
+    }
+  }
 });
 
 export interface IClient extends mongoose.Document {

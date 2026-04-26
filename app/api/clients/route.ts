@@ -1,16 +1,53 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongo';
 import mongoose from 'mongoose';
 import { ClientSchema } from '@/lib/clientModel';
 import { clientSchema } from '@/lib/validation';
 import { clientCollectionName } from '@/lib/sectionConfig';
+import { rateLimit } from '@/lib/rateLimit';
 
+// Rate limiting: 100 requêtes par minute pour les endpoints clients
+const clientsRateLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 100,
+});
+
+/**
+ * Interface pour les données de client mappées
+ */
+interface MappedClient {
+  [key: string]: unknown;
+  client?: string;
+  section?: string;
+  prestataire?: string;
+  statut?: string;
+  dateEnvoi?: string;
+  dateEstimative?: string;
+  financement?: string;
+  noDp?: string;
+  ville?: string;
+  portail?: string;
+  identifiant?: string;
+  motDePasse?: string;
+  type?: string;
+  pvChantier?: string;
+  pvChantierDate?: string;
+  datePV?: string;
+  causeNonPresence?: string;
+  etatActuel?: string;
+  typeConsuel?: string;
+  dateDerniereDemarche?: string;
+  commentaires?: string;
+  raccordement?: string;
+  numeroContrat?: string;
+  dateMiseEnService?: string;
+}
 
 /**
  * Fonction de mappage pour transformer les champs français en anglais
  * Utilisée pour les données importées depuis un fichier Excel/CSV
  */
-function mapImportedFields(doc: any): any {
+function mapImportedFields(doc: MappedClient): MappedClient {
   const fieldMapping: Record<string, string> = {
     Client: 'client',
     Nom: 'client',
@@ -39,7 +76,7 @@ function mapImportedFields(doc: any): any {
     'Date de Mise en service raccordement': 'dateMiseEnService',
   };
 
-  const mapped: any = { ...doc };
+  const mapped: MappedClient = { ...doc };
 
   // Mapper les champs français vers anglais
   for (const [frenchKey, englishKey] of Object.entries(fieldMapping)) {
@@ -64,12 +101,12 @@ function mapImportedFields(doc: any): any {
     return dateStr;
   };
 
-  mapped.dateEnvoi = convertFrenchDateToISO(mapped.dateEnvoi);
-  mapped.dateEstimative = convertFrenchDateToISO(mapped.dateEstimative);
-  mapped.pvChantierDate = convertFrenchDateToISO(mapped.pvChantierDate);
-  mapped.datePV = convertFrenchDateToISO(mapped.datePV);
-  mapped.dateDerniereDemarche = convertFrenchDateToISO(mapped.dateDerniereDemarche);
-  mapped.dateMiseEnService = convertFrenchDateToISO(mapped.dateMiseEnService);
+  mapped.dateEnvoi = convertFrenchDateToISO(mapped.dateEnvoi as string | undefined);
+  mapped.dateEstimative = convertFrenchDateToISO(mapped.dateEstimative as string | undefined);
+  mapped.pvChantierDate = convertFrenchDateToISO(mapped.pvChantierDate as string | undefined);
+  mapped.datePV = convertFrenchDateToISO(mapped.datePV as string | undefined);
+  mapped.dateDerniereDemarche = convertFrenchDateToISO(mapped.dateDerniereDemarche as string | undefined);
+  mapped.dateMiseEnService = convertFrenchDateToISO(mapped.dateMiseEnService as string | undefined);
 
   // Si pas de section, déterminer selon le statut
   if (!mapped.section) {
@@ -84,14 +121,18 @@ function mapImportedFields(doc: any): any {
     }
   }
 
-
   return mapped;
 }
 
 export async function GET(request: Request) {
+  // Appliquer le rate limiting
+  const rateLimitResult = await clientsRateLimit(request as any);
+  if (rateLimitResult) {
+    return rateLimitResult;
+  }
+
   try {
     if (!process.env.MONGODB_URI) {
-
       return NextResponse.json(
         { error: 'MONGODB_URI not configured' },
         { status: 500 }
@@ -104,7 +145,7 @@ export async function GET(request: Request) {
     const limit = parseInt(url.searchParams.get('limit') || '50');
     const section = url.searchParams.get('section');
     const skip = (page - 1) * limit;
-    const query: any = {};
+    const query: Record<string, unknown> = {};
 
     if (section) {
       query.section = section;
@@ -116,9 +157,18 @@ export async function GET(request: Request) {
         mongoose.model(clientCollectionName, ClientSchema, clientCollectionName);
 
       const totalCount = await Model.countDocuments(query);
-      const docs = await Model.find(query).skip(skip).limit(limit).lean();
+      
+      // Inclure le mot de passe pour les sections DP sauf DP Accordés et DP Refus
+      let queryBuilder = Model.find(query).skip(skip).limit(limit);
+      if (section && section.startsWith('dp') && 
+          section !== 'dp-accordes' && 
+          section !== 'dp-refuses') {
+        queryBuilder = queryBuilder.select('+motDePasse');
+      }
+      
+      const docs = await queryBuilder.lean();
 
-      const allClients = docs.map((doc) => mapImportedFields(doc));
+      const allClients = docs.map((doc) => mapImportedFields(doc as MappedClient));
 
       return NextResponse.json({
         data: allClients,
@@ -129,25 +179,32 @@ export async function GET(request: Request) {
           totalPages: Math.ceil(totalCount / limit),
         },
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
       return NextResponse.json(
         {
           error: `Erreur MongoDB lors de la récupération des clients`,
-          details: err?.message || err,
+          details: errorMessage,
         },
         { status: 500 }
       );
     }
-  } catch (error: any) {
-
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur serveur';
     return NextResponse.json(
-      { error: error?.message || 'Erreur serveur', stack: error?.stack },
+      { error: errorMessage },
       { status: 500 }
     );
   }
 }
 
 export async function POST(request: Request) {
+  // Appliquer le rate limiting
+  const rateLimitResult = await clientsRateLimit(request as any);
+  if (rateLimitResult) {
+    return rateLimitResult;
+  }
+
   try {
     if (!process.env.MONGODB_URI) {
       return NextResponse.json(
@@ -196,23 +253,49 @@ export async function POST(request: Request) {
 
       const client = await Model.create(createPayload);
 
+      // Si le client est dans dp-accordes avec statut Accord tacite ou Accord favorable,
+      // créer une copie dans installation
+      if (
+        data.section === 'dp-accordes' &&
+        (data.statut === 'Accord tacite' || data.statut === 'Accord favorable')
+      ) {
+        try {
+          const installationPayload = {
+            ...data,
+            section: 'installation',
+            dateEstimative: '', // Vider la date de pose lors du passage en Installation
+            stages: {
+              ...createPayload.stages,
+              installation: {
+                statut: 'En cours',
+                date: new Date().toISOString(),
+                updatedAt: new Date(),
+              },
+            },
+          };
+          await Model.create(installationPayload);
+        } catch (installError: unknown) {
+          // Ne pas bloquer la création principale si la copie échoue
+          console.error('Erreur lors de la copie vers installation:', installError);
+        }
+      }
+
       return NextResponse.json(client);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
       return NextResponse.json(
         {
           error: `Erreur MongoDB lors de la création`,
-          details: err?.message || err,
+          details: errorMessage,
         },
         { status: 500 }
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur serveur';
     return NextResponse.json(
-      { error: error?.message || 'Erreur serveur', stack: error?.stack },
+      { error: errorMessage },
       { status: 500 }
     );
   }
 }
-
-
-

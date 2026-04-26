@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import logger from '@/lib/logger';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -11,7 +12,7 @@ if (!cached.mongoose) {
 
 export async function connectToDatabase() {
   if (!MONGODB_URI) {
-    console.warn('MONGODB_URI is not set. Skipping database connection.');
+    logger.warn('MONGODB_URI is not set. Skipping database connection.');
     return cached.mongoose!;
   }
 

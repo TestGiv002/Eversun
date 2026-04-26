@@ -813,6 +813,37 @@ body {
   }
 }
 
+/* Shimmer Animation for Loading Skeletons */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    90deg,
+    rgba(200, 200, 200, 0.3) 0%,
+    rgba(220, 220, 220, 0.5) 50%,
+    rgba(200, 200, 200, 0.3) 100%
+  );
+  background-size: 200% 100%;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(60, 60, 60, 0.3) 0%,
+    rgba(80, 80, 80, 0.5) 50%,
+    rgba(60, 60, 60, 0.3) 100%
+  );
+  background-size: 200% 100%;
+}
+
 
 /* Smooth Page Transitions */
 .page-enter {

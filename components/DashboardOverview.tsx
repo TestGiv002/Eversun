@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { ClientRecord } from '@/types/client';
 import {
   FileText,
@@ -98,7 +98,7 @@ function SectionProgress({ title, count, total, color }: SectionProgressProps) {
   );
 }
 
-export default function DashboardOverview() {
+function DashboardOverview() {
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<'week' | 'month' | 'quarter' | 'all'>('all');
@@ -598,3 +598,5 @@ export default function DashboardOverview() {
     </div>
   );
 }
+
+export default memo(DashboardOverview);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText,
@@ -20,6 +20,7 @@ import {
 } from '@phosphor-icons/react';
 import { Section } from '@/types/client';
 import Input from '@/components/ui/Input';
+import useDebounceCallback from '@/hooks/useDebounceCallback';
 
 interface SidebarProps {
   /** Section actuellement active */
@@ -104,7 +105,7 @@ const sectionGroups = [
   },
 ];
 
-export default function Sidebar({
+function Sidebar({
   activeSection,
   setActiveSection,
   sectionCounts,
@@ -117,15 +118,18 @@ export default function Sidebar({
   const [isMobile, setIsMobile] = useState(false);
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(sectionGroups.map((group) => group.title)));
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+  // Debounce le handler de resize
+  const checkMobile = useCallback(() => {
+    setIsMobile(window.innerWidth < 768);
   }, []);
+
+  const debouncedCheckMobile = useDebounceCallback(checkMobile, 250);
+
+  useEffect(() => {
+    checkMobile();
+    window.addEventListener('resize', debouncedCheckMobile);
+    return () => window.removeEventListener('resize', debouncedCheckMobile);
+  }, [debouncedCheckMobile, checkMobile]);
 
   useEffect(() => {
     if (onCollapsedChange) {
@@ -186,9 +190,9 @@ export default function Sidebar({
         className={`bg-primary border-r border-primary h-[calc(100vh-3.5rem)] z-40 flex flex-col shadow-md transition-all duration-200 flex-shrink-0 ${
           isMobile
             ? isMobileOpen
-              ? 'translate-x-0 w-64 fixed left-0'
-              : '-translate-x-full w-64 fixed left-0'
-            : 'fixed left-0 top-14 ' + (isCollapsed ? 'w-16' : 'w-56')
+              ? 'translate-x-0 w-56 fixed left-0'
+              : '-translate-x-full w-56 fixed left-0'
+            : 'fixed left-0 top-14 ' + (isCollapsed ? 'w-14' : 'w-48')
         }`}
         role="navigation"
         aria-label="Navigation principale"
@@ -207,50 +211,50 @@ export default function Sidebar({
 
       {/* Search Bar */}
       {!isCollapsed && (
-        <div className="px-4 py-3">
+        <div className="px-3 py-2">
           <div className="relative">
-            <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+            <MagnifyingGlass className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
             <Input
               type="text"
               placeholder="Rechercher..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 py-2 pl-10 pr-10 text-sm shadow-none hover:shadow-none"
+              className="h-8 py-1.5 pl-8 pr-8 text-xs shadow-none hover:shadow-none"
               aria-label="Rechercher une section"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 aria-label="Effacer la recherche"
               >
-                <X className="h-4 w-4" weight="bold" />
+                <X className="h-3 w-3" weight="bold" />
               </button>
             )}
           </div>
         </div>
       )}
 
-      <nav className="py-4 flex-1 overflow-y-auto">
+      <nav className="py-2 flex-1 overflow-y-auto">
         {filteredSectionGroups.map((group, groupIndex) => {
           const isGroupOpen = isCollapsed || openGroups.has(group.title) || searchQuery.trim() !== '';
           return (
-            <div key={group.title} className="mb-6">
+            <div key={group.title} className="mb-4">
               {!isCollapsed && (
                 <button
                   type="button"
                   onClick={() => toggleGroup(group.title)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 rounded-lg hover:bg-secondary/50 transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 rounded-md hover:bg-secondary/50 transition-colors"
                 >
                   <span>{group.title}</span>
                   <CaretDown
                     weight="bold"
-                    className={`h-4 w-4 transition-transform ${isGroupOpen ? 'rotate-180' : ''}`}
+                    className={`h-3 w-3 transition-transform ${isGroupOpen ? 'rotate-180' : ''}`}
                   />
                 </button>
               )}
               {isGroupOpen && (
-                <ul className="space-y-2 px-2 mt-3" role="list">
+                <ul className="space-y-1.5 px-2 mt-2" role="list">
                   {group.sections.map((section, sectionIndex) => {
                     const globalIndex = sectionGroups
                       .slice(0, groupIndex)
@@ -259,9 +263,9 @@ export default function Sidebar({
                       <li key={section.id} role="listitem">
                         <button
                           onClick={() => setActiveSection(section.id)}
-                          className={`w-full text-left rounded-lg text-sm font-semibold transition-all duration-200 flex items-center group relative overflow-hidden
+                          className={`w-full text-left rounded-md text-xs font-semibold transition-all duration-200 flex items-center group relative overflow-hidden
                             ${
-                              isCollapsed ? 'justify-center px-3 py-3' : 'px-4 py-3 gap-3'
+                              isCollapsed ? 'justify-center px-2 py-2' : 'px-3 py-2 gap-2'
                             }
                             ${
                               activeSection === section.id
@@ -278,7 +282,7 @@ export default function Sidebar({
                           {section.icon && (
                             <section.icon
                               weight="regular"
-                              className={`h-5 w-5 flex-shrink-0 transition-all duration-200 ${
+                              className={`h-4 w-4 flex-shrink-0 transition-all duration-200 ${
                                 activeSection === section.id ? 'text-white scale-110' : 'text-gray-400 dark:text-gray-500 group-hover:text-primary-500 dark:group-hover:text-primary-400 group-hover:scale-110'
                               }`}
                               aria-hidden="true"
@@ -289,7 +293,7 @@ export default function Sidebar({
                               <span className="flex-1 relative z-10">{section.label}</span>
                               {sectionCounts && sectionCounts[section.id] !== undefined && (
                                 <span
-                                  className={`text-xs font-bold px-2 py-1 rounded-full transition-all duration-200 relative z-10 ${
+                                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full transition-all duration-200 relative z-10 ${
                                     activeSection === section.id
                                       ? 'bg-white dark:bg-gray-800 text-primary-600 shadow'
                                       : 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 group-hover:bg-primary-200 dark:group-hover:bg-primary-800/50'
@@ -313,18 +317,18 @@ export default function Sidebar({
 
       {/* Collapse Toggle - Desktop only */}
       {!isMobile && (
-        <div className="px-2 py-3 border-t border-primary">
+        <div className="px-2 py-2 border-t border-primary">
           <button
             onClick={handleCollapse}
-            className="w-full flex items-center justify-center gap-2 p-2 bg-secondary rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200"
+            className="w-full flex items-center justify-center gap-2 p-1.5 bg-secondary rounded-md hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200"
             aria-label={isCollapsed ? 'Étendre la sidebar' : 'Réduire la sidebar'}
           >
             {isCollapsed ? (
-              <CaretRight className="h-4 w-4 text-secondary" />
+              <CaretRight className="h-3 w-3 text-secondary" />
             ) : (
               <>
-                <CaretLeft className="h-4 w-4 text-secondary" />
-                <span className="text-sm font-medium text-secondary">Réduire</span>
+                <CaretLeft className="h-3 w-3 text-secondary" />
+                <span className="text-xs font-medium text-secondary">Réduire</span>
               </>
             )}
           </button>
@@ -334,3 +338,5 @@ export default function Sidebar({
     </>
   );
 }
+
+export default Sidebar;

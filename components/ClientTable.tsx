@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo, lazy, Suspense } from 'react';
 import Badge from '@/components/ui/Badge';
 import {
   MagnifyingGlass,
@@ -28,6 +28,7 @@ import {
   House,
   Funnel,
   CaretDown,
+  List,
 } from '@phosphor-icons/react';
 import { ClientRecord } from '@/types/client';
 import {
@@ -40,11 +41,13 @@ import {
   getPrestataireBadgeColor,
   getCauseNonPresenceBadgeColor,
 } from '@/lib/clientTableUtils';
-import ClientModal from '@/components/ClientModal';
 import PaginationControls from '@/components/PaginationControls';
 import { useClientTableFilters, useClientTablePagination } from '@/hooks/useClientTable';
 import DatePicker from '@/components/ui/DatePicker';
 import FilterChips from '@/components/ui/FilterChips';
+
+// Code splitting pour le modal lourd
+const ClientModal = lazy(() => import('@/components/ClientModal'));
 
 /**
  * Props pour le composant ClientTable
@@ -64,7 +67,7 @@ interface ClientTableProps {
   onRefresh?: () => void;
 }
 
-export default function ClientTable({
+function ClientTable({
   section,
   items,
   onEdit,
@@ -208,7 +211,6 @@ export default function ClientTable({
       { key: 'client', label: 'Client' },
       { key: 'prestataire', label: 'Prestataire' },
       { key: 'typeConsuel', label: 'Type de consuel demandé' },
-      { key: 'raccordement', label: 'Raccordement' },
       { key: 'dateDerniereDemarche', label: 'Date dernière démarche' },
       { key: 'numeroContrat', label: 'Numéro de contrat' },
       { key: 'dateMiseEnService', label: 'Date de Mise en service raccordement' }
@@ -355,12 +357,17 @@ export default function ClientTable({
             onResetAll={resetFilters}
           />
           
-          <div className="flex items-center justify-between gap-3">
-            <label className="text-secondary font-medium text-sm">Lignes par page</label>
+          <div className="flex items-center justify-between gap-3 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md">
+                <List className="h-4 w-4" weight="bold" />
+              </div>
+              <label className="text-gray-900 dark:text-white font-semibold text-sm">Lignes par page</label>
+            </div>
             <select
               value={rowsPerPage}
               onChange={(e) => setRowsPerPage(Number(e.target.value))}
-              className="select-enhanced h-10 px-3 py-2"
+              className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm hover:shadow-md font-medium"
             >
               {[5, 10, 20, 50].map((n) => (
                 <option key={n} value={n}>
@@ -373,7 +380,7 @@ export default function ClientTable({
 
         {/* Tableau moderne - Responsive Design */}
         <div
-          className={`rounded-lg shadow-sm bg-primary border border-primary overflow-hidden transition-all duration-300 ${
+          className={`rounded-xl shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-xl ${
             isPageTransitioning
               ? transitionDirection === 'right'
                 ? 'opacity-0 transform translateX(-20px)'
@@ -383,29 +390,32 @@ export default function ClientTable({
         >
           {/* Desktop/Tablette Table - Horizontal scroll for all columns */}
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-primary">
+            <table className="min-w-full text-xs text-gray-900 dark:text-gray-100">
               <caption className="sr-only">
                 Tableau des dossiers clients, {filteredItems.length} resultats
               </caption>
               <thead>
-                <tr className="bg-secondary border-b border-primary">
+                <tr className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b-2 border-gray-200 dark:border-gray-600">
                   {columns.map((col, idx) => (
                     <th
                       key={col.key as string}
                       aria-sort={
                         sortKey === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'
                       }
-                      className={`px-4 py-3 font-semibold text-left cursor-pointer select-none hover:bg-secondary-dark transition-colors duration-200 whitespace-nowrap text-xs uppercase tracking-wider text-tertiary ${
-                        idx === 0 ? 'sticky left-0 bg-secondary z-10 shadow-r' : ''
+                      className={`px-3 py-2 font-bold text-left cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 whitespace-nowrap text-[10px] uppercase tracking-wider text-gray-700 dark:text-gray-200 group ${
+                        idx === 0 ? 'sticky left-0 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 shadow-r' : ''
                       }`}
                       onClick={() => setSortKey(col.key as string)}
                     >
-                      <div className="flex items-center gap-2">
-                        {col.label}
+                      <div className="flex items-center gap-1.5">
+                        <span className="group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">{col.label}</span>
                         {sortKey === col.key && (
-                          <span className="text-accent">
+                          <span className="text-amber-600 dark:text-amber-400 font-bold">
                             {sortDir === 'asc' ? '↑' : '↓'}
                           </span>
+                        )}
+                        {sortKey !== col.key && (
+                          <CaretDown className="w-2.5 h-2.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" weight="bold" />
                         )}
                       </div>
                     </th>
@@ -417,81 +427,33 @@ export default function ClientTable({
                   <tr>
                     <td
                       colSpan={columns.length}
-                      className="text-center py-16"
+                      className="px-3 py-8 text-center text-gray-500 dark:text-gray-400 text-xs"
                     >
-                      <div className="flex flex-col items-center justify-center gap-4">
-                        <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center">
-                          <svg
-                            className="w-10 h-10 text-amber-500 dark:text-amber-400"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <circle cx="12" cy="12" r="10" />
-                            <line x1="12" y1="8" x2="12" y2="12" />
-                            <line x1="12" y1="16" x2="12.01" y2="16" />
-                          </svg>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            {search ? 'Aucun résultat trouvé' : 'Aucune donnée disponible'}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                            {search ? 'Essayez de modifier votre recherche' : 'Commencez par ajouter votre premier dossier'}
-                          </p>
-                          {!search && !['dp-accordes', 'dp-refuses', 'consuel-finalise', 'raccordement-mes'].includes(section) && (
-                            <button
-                              onClick={() => onEdit({} as ClientRecord)}
-                              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow transition-all duration-200 hover:scale-[1.01]"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                              </svg>
-                              Créer un dossier
-                            </button>
-                          )}
-                        </div>
-                      </div>
+                      Aucun résultat trouvé
                     </td>
                   </tr>
                 )}
-                {paginated.map((item, idx) => (
+                {paginated.map((item, index) => (
                   <tr
-                    key={item._id || item.id || idx}
-                    className={`group hover:bg-secondary dark:hover:bg-gray-800 transition-colors duration-200 border-b border-border dark:border-gray-700 last:border-b-0 ${
-                      isPageTransitioning
-                        ? 'opacity-0 transform translateX(10px)'
-                        : 'opacity-100 transform translateX(0)'
+                    key={item._id || item.id || index}
+                    className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/10 dark:hover:to-indigo-900/10 transition-all duration-200 group cursor-pointer ${
+                      index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-800/50'
                     }`}
-                    style={{
-                      animation: isPageTransitioning
-                        ? 'none'
-                        : `slideIn 0.4s ease-out ${idx * 30}ms forwards`,
-                    }}
+                    onClick={() => onEdit(item)}
                   >
-                    {columns.map((col, cellIdx) => (
+                    {columns.map((col) => (
                       <td
                         key={col.key as string}
-                        className={`px-4 py-4 whitespace-nowrap ${
-                          cellIdx === 0 ? 'sticky left-0 bg-primary z-10' : ''
+                        className={`px-3 py-2 whitespace-nowrap text-xs ${
+                          col.key === 'client' ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'
                         }`}
                       >
-                        {cellIdx === 0 ? (
+                        {col.key === 'client' ? (
                           <button
-                            type="button"
-                            onClick={() => handleClientClick(item)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleClientClick(item);
+                            }}
                             className="text-left w-full font-semibold text-primary hover:text-amber-600 dark:hover:text-amber-400 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
                             aria-label={`Voir le détail du dossier ${item.client || 'client'}`}
                           >
@@ -503,11 +465,17 @@ export default function ClientTable({
                         col.key === 'dateMiseEnService' ||
                         col.key === 'datePV' ||
                         col.key === 'pvChantierDate' ? (
-                          formatDateFR(item[col.key] as string)
+                          <span className="inline-flex items-center gap-1 text-gray-700 dark:text-gray-300 font-medium">
+                            <Calendar className="w-3 h-3 text-amber-500" weight="fill" />
+                            {formatDateFR(item[col.key] as string)}
+                          </span>
                         ) : col.key === 'pvChantier' && isInstallation && item.pvChantier ? (
-                          <span className="font-medium text-primary">{item.pvChantier}</span>
+                          <span className="font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-md text-xs">{item.pvChantier}</span>
                         ) : col.key === 'pvChantier' && item.pvChantier ? (
-                          formatDateFR(item[col.key] as string)
+                          <span className="inline-flex items-center gap-1 text-gray-700 dark:text-gray-300 font-medium">
+                            <Calendar className="w-3 h-3 text-amber-500" weight="fill" />
+                            {formatDateFR(item[col.key] as string)}
+                          </span>
                         ) : col.key === 'portail' &&
                           isDp &&
                           item.portail &&
@@ -516,57 +484,66 @@ export default function ClientTable({
                             href={item.portail}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-success-500 text-white dark:text-white font-medium hover:bg-success-600 dark:hover:bg-success-600 transition-colors duration-200 text-xs"
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold hover:from-green-600 hover:to-emerald-600 transition-all duration-200 text-xs shadow-md hover:shadow-lg transform hover:scale-105"
                             onClick={(e) => e.stopPropagation()}
                           >
+                            <Globe className="w-3 h-3" weight="bold" />
                             Connexion
                             <ArrowSquareOut className="w-3 h-3" weight="bold" />
                           </a>
                         ) : col.key === 'identifiant' && item.identifiant ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium text-xs border border-primary-200 dark:border-primary-800">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-semibold text-xs border border-blue-200 dark:border-blue-800 shadow-sm">
                             <Key className="w-3 h-3" weight="bold" />
                             {item.identifiant}
                           </span>
                         ) : col.key === 'motDePasse' && item.motDePasse ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-error-50 dark:bg-error-900/20 text-error-700 dark:text-error-300 font-medium text-xs border border-error-200 dark:border-error-800">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 font-semibold text-xs border border-red-200 dark:border-red-800 shadow-sm">
                               <Key className="w-3 h-3" weight="bold" />
                               {item.motDePasse}
-                            </span>
-                          ) : col.key === 'statut' && item.statut ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded font-medium text-xs border ${getStatutBadgeColor(item.statut)}`}>
+                          </span>
+                        ) : col.key === 'statut' && item.statut ? (
+                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getStatutBadgeColor(item.statut)}`}>
                               {item.statut}
                             </span>
                           ) : col.key === 'financement' && item.financement ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded font-medium text-xs border ${getFinancementBadgeColor(item.financement)}`}>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getFinancementBadgeColor(item.financement)}`}>
                               {item.financement}
                             </span>
                           ) : col.key === 'raccordement' && item.raccordement ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded font-medium text-xs border ${getRaccordementBadgeColor(item.raccordement)}`}>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getRaccordementBadgeColor(item.raccordement)}`}>
                               {item.raccordement}
                             </span>
                           ) : col.key === 'etatActuel' && item.etatActuel ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded font-medium text-xs border ${getEtatActuelBadgeColor(item.etatActuel)}`}>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getEtatActuelBadgeColor(item.etatActuel)}`}>
                               {item.etatActuel}
                             </span>
                           ) : col.key === 'typeConsuel' && item.typeConsuel ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded font-medium text-xs border ${getTypeConsuelBadgeColor(item.typeConsuel)}`}>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getTypeConsuelBadgeColor(item.typeConsuel)}`}>
                               {item.typeConsuel}
                             </span>
                           ) : col.key === 'prestataire' && item.prestataire ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded font-medium text-xs border ${getPrestataireBadgeColor(item.prestataire)}`}>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getPrestataireBadgeColor(item.prestataire)}`}>
+                              <Buildings className="w-3 h-3 mr-1" weight="bold" />
                               {item.prestataire}
                             </span>
                           ) : col.key === 'causeNonPresence' && item.causeNonPresence ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded font-medium text-xs border ${getCauseNonPresenceBadgeColor(item.causeNonPresence)}`}>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getCauseNonPresenceBadgeColor(item.causeNonPresence)}`}>
                               {item.causeNonPresence}
                             </span>
+                          ) : col.key === 'commentaires' && item.commentaires ? (
+                            <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                              <ChatCircle className="w-3 h-3 text-amber-500" weight="fill" />
+                              <span className="max-w-xs truncate" title={item.commentaires}>
+                                {item.commentaires}
+                              </span>
+                            </div>
                           ) : (
                             <span className="font-medium text-primary">
                               {(item[col.key] as string) || '-'}
                             </span>
                           )}
-                        </td>
-                      ))}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -586,16 +563,20 @@ export default function ClientTable({
       </div>
 
       {/* Modal Client Details */}
-      <ClientModal
-        selectedClient={selectedClient}
-        onClose={() => setSelectedClient(null)}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        section={section}
-        showPassword={showPassword}
-        setShowPassword={setShowPassword}
-      />
+      <Suspense fallback={<div className="p-8 text-center">Chargement...</div>}>
+        <ClientModal
+          selectedClient={selectedClient}
+          onClose={() => setSelectedClient(null)}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          section={section}
+          showPassword={showPassword}
+          setShowPassword={setShowPassword}
+        />
+      </Suspense>
     </>
   );
 }
+
+export default memo(ClientTable);
 

@@ -37,6 +37,15 @@ export function CardSkeleton() {
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="space-y-3">
+      {/* Header */}
+      <div className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-4 w-28" />
+      </div>
+      
+      {/* Rows */}
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="flex items-center gap-4 p-4 bg-primary rounded-lg border border-primary">
           <Skeleton className="h-10 w-10 rounded-full" />
