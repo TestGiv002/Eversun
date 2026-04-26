@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, memo, lazy, Suspense } from 'react';
+import { useState, useMemo, memo, lazy, Suspense, useCallback, useRef, useEffect } from 'react';
 import Badge from '@/components/ui/Badge';
 import {
   MagnifyingGlass,
@@ -228,14 +228,69 @@ function ClientTable({
     page * rowsPerPage
   );
 
-  const handleClientClick = (client: ClientRecord) => {
+  const handleClientClick = useCallback((client: ClientRecord) => {
     setSelectedClient(client);
-  };
+  }, []);
 
-  const closeClientDetails = () => {
+  const closeClientDetails = useCallback(() => {
     setSelectedClient(null);
     setShowPassword(false);
-  };
+  }, []);
+
+  const handleRowClick = useCallback((item: ClientRecord) => {
+    onEdit(item);
+  }, [onEdit]);
+
+  const handleSortClick = useCallback((key: string) => {
+    setSortKey(key);
+  }, []);
+
+  // Debounced filter handlers
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedSetFilterStatus = useCallback((value: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      setFilterStatus(value);
+    }, 100);
+  }, []);
+
+  const debouncedSetFilterVille = useCallback((value: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      setFilterVille(value);
+    }, 100);
+  }, []);
+
+  const debouncedSetFilterPrestataire = useCallback((value: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      setFilterPrestataire(value);
+    }, 100);
+  }, []);
+
+  const debouncedSetFilterFinancement = useCallback((value: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      setFilterFinancement(value);
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   // Build active filters list for FilterChips
   const activeFilters = [
@@ -303,7 +358,7 @@ function ClientTable({
                     type="text"
                     placeholder="Filtrer par statut"
                     value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
+                    onChange={(e) => debouncedSetFilterStatus(e.target.value)}
                     aria-label="Filtrer par statut"
                     className="w-full px-3 py-2 rounded-lg border border-primary bg-primary text-sm text-primary focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
@@ -316,7 +371,7 @@ function ClientTable({
                     type="text"
                     placeholder="Filtrer par ville"
                     value={filterVille}
-                    onChange={(e) => setFilterVille(e.target.value)}
+                    onChange={(e) => debouncedSetFilterVille(e.target.value)}
                     aria-label="Filtrer par ville"
                     className="w-full px-3 py-2 rounded-lg border border-primary bg-primary text-sm text-primary focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
@@ -329,7 +384,7 @@ function ClientTable({
                     type="text"
                     placeholder="Filtrer par prestataire"
                     value={filterPrestataire}
-                    onChange={(e) => setFilterPrestataire(e.target.value)}
+                    onChange={(e) => debouncedSetFilterPrestataire(e.target.value)}
                     aria-label="Filtrer par prestataire"
                     className="w-full px-3 py-2 rounded-lg border border-primary bg-primary text-sm text-primary focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
@@ -342,7 +397,7 @@ function ClientTable({
                     type="text"
                     placeholder="Filtrer par financement"
                     value={filterFinancement}
-                    onChange={(e) => setFilterFinancement(e.target.value)}
+                    onChange={(e) => debouncedSetFilterFinancement(e.target.value)}
                     aria-label="Filtrer par financement"
                     className="w-full px-3 py-2 rounded-lg border border-primary bg-primary text-sm text-primary focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
@@ -498,7 +553,7 @@ function ClientTable({
                         ? 'bg-white dark:bg-gray-800'
                         : 'bg-gray-50 dark:bg-gray-800/50'
                     }`}
-                    onClick={() => onEdit(item)}
+                    onClick={() => handleRowClick(item)}
                   >
                     {columns.map((col) => (
                       <td
