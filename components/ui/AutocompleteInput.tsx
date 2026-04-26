@@ -6,7 +6,8 @@ import { CaretDown, X } from '@phosphor-icons/react';
 import type { WithLabelError, WithIcon } from '@/types/common';
 
 interface AutocompleteInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onSelect'>,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onSelect'>,
     WithLabelError,
     WithIcon {
   /** Options disponibles pour l'autocomplétion */
@@ -19,7 +20,10 @@ interface AutocompleteInputProps
   readOnlyAfterSelect?: boolean;
 }
 
-const AutocompleteInput = React.forwardRef<HTMLInputElement, AutocompleteInputProps>(
+const AutocompleteInput = React.forwardRef<
+  HTMLInputElement,
+  AutocompleteInputProps
+>(
   (
     {
       className,
@@ -56,10 +60,10 @@ const AutocompleteInput = React.forwardRef<HTMLInputElement, AutocompleteInputPr
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (isReadOnly) return;
-      
+
       const inputValue = e.target.value;
       onChange?.(e);
-      
+
       if (inputValue.length > 0) {
         const filtered = options.filter((option) =>
           option.toLowerCase().includes(inputValue.toLowerCase())
@@ -74,7 +78,9 @@ const AutocompleteInput = React.forwardRef<HTMLInputElement, AutocompleteInputPr
     };
 
     const handleSelectOption = (option: string) => {
-      onChange?.({ target: { value: option } } as React.ChangeEvent<HTMLInputElement>);
+      onChange?.({
+        target: { value: option },
+      } as React.ChangeEvent<HTMLInputElement>);
       setIsOpen(false);
       setFilteredOptions([]);
       onSelect?.(option);
@@ -84,7 +90,9 @@ const AutocompleteInput = React.forwardRef<HTMLInputElement, AutocompleteInputPr
     };
 
     const handleClear = () => {
-      onChange?.({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>);
+      onChange?.({
+        target: { value: '' },
+      } as React.ChangeEvent<HTMLInputElement>);
       setIsReadOnly(false);
       setFilteredOptions([]);
       setIsOpen(false);
@@ -97,7 +105,7 @@ const AutocompleteInput = React.forwardRef<HTMLInputElement, AutocompleteInputPr
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setIsOpen(true);
-        setHighlightedIndex((prev) => 
+        setHighlightedIndex((prev) =>
           prev < filteredOptions.length - 1 ? prev + 1 : prev
         );
       } else if (e.key === 'ArrowUp') {
@@ -127,7 +135,8 @@ const AutocompleteInput = React.forwardRef<HTMLInputElement, AutocompleteInputPr
 
     useEffect(() => {
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     return (
@@ -153,13 +162,15 @@ const AutocompleteInput = React.forwardRef<HTMLInputElement, AutocompleteInputPr
               if (typeof ref === 'function') {
                 ref(el);
               } else if (ref && 'current' in ref) {
-                (ref as React.MutableRefObject<HTMLInputElement | null>).current = el;
+                (
+                  ref as React.MutableRefObject<HTMLInputElement | null>
+                ).current = el;
               }
             }}
             className={cn(
               'flex h-12 w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm text-gray-900 dark:text-white ring-offset-gray-100 dark:ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:border-primary-500 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 shadow hover:shadow-md appearance-none',
               icon && 'pl-12',
-              (value && readOnlyAfterSelect) && 'pr-12',
+              value && readOnlyAfterSelect && 'pr-12',
               error &&
                 'border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500',
               'text-base sm:text-sm',
@@ -195,9 +206,12 @@ const AutocompleteInput = React.forwardRef<HTMLInputElement, AutocompleteInputPr
             </button>
           )}
           {!isReadOnly && !value && (
-            <CaretDown className="absolute right-4 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400 dark:text-gray-500 group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400 transition-colors duration-200" weight="bold" />
+            <CaretDown
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400 dark:text-gray-500 group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400 transition-colors duration-200"
+              weight="bold"
+            />
           )}
-          
+
           {isOpen && filteredOptions.length > 0 && (
             <ul
               id={`${inputId}-listbox`}
@@ -230,13 +244,20 @@ const AutocompleteInput = React.forwardRef<HTMLInputElement, AutocompleteInputPr
             role="alert"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={`${inputId}-helper`} className="text-sm text-gray-500 dark:text-gray-400">
+          <p
+            id={`${inputId}-helper`}
+            className="text-sm text-gray-500 dark:text-gray-400"
+          >
             {helperText}
           </p>
         )}

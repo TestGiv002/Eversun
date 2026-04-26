@@ -1,12 +1,12 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { 
-  FileText, 
-  MagnifyingGlass, 
-  Warning, 
+import {
+  FileText,
+  MagnifyingGlass,
+  Warning,
   Plus,
-  ArrowClockwise
+  ArrowClockwise,
 } from '@phosphor-icons/react';
 
 interface EmptyStateProps {
@@ -37,24 +37,29 @@ const emptyStateConfig = {
     defaultTitle: 'Aucun résultat',
     defaultDescription: 'Essayez de modifier vos critères de recherche',
   },
-  'error': {
+  error: {
     icon: <Warning className="h-16 w-16 text-tertiary" weight="thin" />,
     defaultTitle: 'Une erreur est survenue',
-    defaultDescription: 'Une erreur inattendue s\'est produite',
+    defaultDescription: "Une erreur inattendue s'est produite",
   },
-  'loading': {
-    icon: <ArrowClockwise className="h-16 w-16 text-amber-500 animate-spin" weight="bold" />,
+  loading: {
+    icon: (
+      <ArrowClockwise
+        className="h-16 w-16 text-amber-500 animate-spin"
+        weight="bold"
+      />
+    ),
     defaultTitle: 'Chargement...',
     defaultDescription: 'Veuillez patienter pendant le chargement des données',
   },
 };
 
-export default function EmptyState({ 
-  type, 
-  title, 
-  description, 
+export default function EmptyState({
+  type,
+  title,
+  description,
   action,
-  customIcon 
+  customIcon,
 }: EmptyStateProps) {
   const config = emptyStateConfig[type];
   const icon = customIcon || config.icon;
@@ -63,15 +68,11 @@ export default function EmptyState({
 
   return (
     <div className="flex flex-col items-center justify-center p-12 text-center">
-      <div className="mb-6">
-        {icon}
-      </div>
+      <div className="mb-6">{icon}</div>
       <h3 className="text-xl font-semibold text-primary mb-2">
         {displayTitle}
       </h3>
-      <p className="text-tertiary mb-6 max-w-md">
-        {displayDescription}
-      </p>
+      <p className="text-tertiary mb-6 max-w-md">{displayDescription}</p>
       {action && (
         <button
           onClick={action.onClick}

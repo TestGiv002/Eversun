@@ -26,7 +26,10 @@ interface ExistingDocument {
   toObject?: () => Record<string, unknown>;
 }
 
-function buildStageUpdate(data: Record<string, unknown>, existing: ExistingDocument) {
+function buildStageUpdate(
+  data: Record<string, unknown>,
+  existing: ExistingDocument
+) {
   const section = (data.section as string) || existing.section;
   const stageDate =
     (data.dateEnvoi as string) ||
@@ -115,17 +118,18 @@ export async function PUT(
         }
       } catch (installError: unknown) {
         // Ne pas bloquer la mise à jour principale si la copie échoue
-        console.error('Erreur lors de la copie vers installation:', installError);
+        console.error(
+          'Erreur lors de la copie vers installation:',
+          installError
+        );
       }
     }
 
     return NextResponse.json(updated);
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur serveur';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erreur serveur';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -198,17 +202,18 @@ export async function PATCH(
         }
       } catch (installError: unknown) {
         // Ne pas bloquer la mise à jour principale si la copie échoue
-        console.error('Erreur lors de la copie vers installation:', installError);
+        console.error(
+          'Erreur lors de la copie vers installation:',
+          installError
+        );
       }
     }
 
     return NextResponse.json(updated);
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur serveur';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erreur serveur';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -225,11 +230,11 @@ export async function DELETE(
   try {
     await connectToDatabase();
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur de connexion à la base de données';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Erreur de connexion à la base de données';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 
   const { id } = await params;
@@ -237,7 +242,7 @@ export async function DELETE(
   const Model =
     mongoose.models[clientCollectionName] ||
     mongoose.model(clientCollectionName, ClientSchema, clientCollectionName);
-  
+
   try {
     const deleted = await Model.findByIdAndDelete(id);
     if (!deleted) {
@@ -245,10 +250,8 @@ export async function DELETE(
     }
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la suppression';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erreur lors de la suppression';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

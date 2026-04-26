@@ -17,9 +17,15 @@ export default function ThemeToggle() {
     >
       <div className="relative">
         {theme === 'light' ? (
-          <Moon className="w-5 h-5 text-secondary group-hover:text-teal-500 transition-colors" weight="bold" />
+          <Moon
+            className="w-5 h-5 text-secondary group-hover:text-teal-500 transition-colors"
+            weight="bold"
+          />
         ) : (
-          <Sun className="w-5 h-5 text-secondary group-hover:text-teal-500 transition-colors" weight="bold" />
+          <Sun
+            className="w-5 h-5 text-secondary group-hover:text-teal-500 transition-colors"
+            weight="bold"
+          />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 opacity-0 group-hover:opacity-10 rounded-full blur-md transition-opacity duration-200" />
       </div>

@@ -52,7 +52,7 @@ function mapImportedFields(doc: MappedClient): MappedClient {
     Client: 'client',
     Nom: 'client',
     nom: 'client',
-    'Date d\'envoi DP': 'dateEnvoi',
+    "Date d'envoi DP": 'dateEnvoi',
     'Attente DP': 'dateEstimative',
     Presta: 'prestataire',
     Financement: 'financement',
@@ -87,7 +87,9 @@ function mapImportedFields(doc: MappedClient): MappedClient {
   }
 
   // Convertir les dates du format français (DD/MM/YYYY) au format ISO
-  const convertFrenchDateToISO = (dateStr: string | undefined): string | undefined => {
+  const convertFrenchDateToISO = (
+    dateStr: string | undefined
+  ): string | undefined => {
     if (!dateStr) return undefined;
     // Si déjà au format ISO ou contient des tirets, retourner tel quel
     if (dateStr.includes('-') || dateStr.includes('T')) return dateStr;
@@ -101,12 +103,22 @@ function mapImportedFields(doc: MappedClient): MappedClient {
     return dateStr;
   };
 
-  mapped.dateEnvoi = convertFrenchDateToISO(mapped.dateEnvoi as string | undefined);
-  mapped.dateEstimative = convertFrenchDateToISO(mapped.dateEstimative as string | undefined);
-  mapped.pvChantierDate = convertFrenchDateToISO(mapped.pvChantierDate as string | undefined);
+  mapped.dateEnvoi = convertFrenchDateToISO(
+    mapped.dateEnvoi as string | undefined
+  );
+  mapped.dateEstimative = convertFrenchDateToISO(
+    mapped.dateEstimative as string | undefined
+  );
+  mapped.pvChantierDate = convertFrenchDateToISO(
+    mapped.pvChantierDate as string | undefined
+  );
   mapped.datePV = convertFrenchDateToISO(mapped.datePV as string | undefined);
-  mapped.dateDerniereDemarche = convertFrenchDateToISO(mapped.dateDerniereDemarche as string | undefined);
-  mapped.dateMiseEnService = convertFrenchDateToISO(mapped.dateMiseEnService as string | undefined);
+  mapped.dateDerniereDemarche = convertFrenchDateToISO(
+    mapped.dateDerniereDemarche as string | undefined
+  );
+  mapped.dateMiseEnService = convertFrenchDateToISO(
+    mapped.dateMiseEnService as string | undefined
+  );
 
   // Si pas de section, déterminer selon le statut
   if (!mapped.section) {
@@ -154,21 +166,30 @@ export async function GET(request: Request) {
     try {
       const Model =
         mongoose.models[clientCollectionName] ||
-        mongoose.model(clientCollectionName, ClientSchema, clientCollectionName);
+        mongoose.model(
+          clientCollectionName,
+          ClientSchema,
+          clientCollectionName
+        );
 
       const totalCount = await Model.countDocuments(query);
-      
+
       // Inclure le mot de passe pour les sections DP sauf DP Accordés et DP Refus
       let queryBuilder = Model.find(query).skip(skip).limit(limit);
-      if (section && section.startsWith('dp') && 
-          section !== 'dp-accordes' && 
-          section !== 'dp-refuses') {
+      if (
+        section &&
+        section.startsWith('dp') &&
+        section !== 'dp-accordes' &&
+        section !== 'dp-refuses'
+      ) {
         queryBuilder = queryBuilder.select('+motDePasse');
       }
-      
+
       const docs = await queryBuilder.lean();
 
-      const allClients = docs.map((doc) => mapImportedFields(doc as MappedClient));
+      const allClients = docs.map((doc) =>
+        mapImportedFields(doc as MappedClient)
+      );
 
       return NextResponse.json({
         data: allClients,
@@ -180,7 +201,8 @@ export async function GET(request: Request) {
         },
       });
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erreur inconnue';
       return NextResponse.json(
         {
           error: `Erreur MongoDB lors de la récupération des clients`,
@@ -190,11 +212,9 @@ export async function GET(request: Request) {
       );
     }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur serveur';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erreur serveur';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -230,7 +250,11 @@ export async function POST(request: Request) {
     try {
       const Model =
         mongoose.models[clientCollectionName] ||
-        mongoose.model(clientCollectionName, ClientSchema, clientCollectionName);
+        mongoose.model(
+          clientCollectionName,
+          ClientSchema,
+          clientCollectionName
+        );
 
       const stageDate =
         data.dateEnvoi ||
@@ -276,13 +300,17 @@ export async function POST(request: Request) {
           await Model.create(installationPayload);
         } catch (installError: unknown) {
           // Ne pas bloquer la création principale si la copie échoue
-          console.error('Erreur lors de la copie vers installation:', installError);
+          console.error(
+            'Erreur lors de la copie vers installation:',
+            installError
+          );
         }
       }
 
       return NextResponse.json(client);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erreur inconnue';
       return NextResponse.json(
         {
           error: `Erreur MongoDB lors de la création`,
@@ -292,10 +320,8 @@ export async function POST(request: Request) {
       );
     }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur serveur';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erreur serveur';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

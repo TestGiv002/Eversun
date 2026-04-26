@@ -2,7 +2,11 @@
 
 import { usePathname } from 'next/navigation';
 
-export default function MainWrapper({ children }: { children: React.ReactNode }) {
+export default function MainWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const isAuthPage = pathname === '/login' || pathname === '/reset-password';
 

@@ -28,12 +28,25 @@ interface ClientGridProps {
   onMove?: (client: ClientRecord, newSection: Section) => void;
 }
 
-type SortField = 'client' | 'statut' | 'dateEnvoi' | 'dateEstimative' | 'ville' | 'prestataire' | 'typeConsuel';
+type SortField =
+  | 'client'
+  | 'statut'
+  | 'dateEnvoi'
+  | 'dateEstimative'
+  | 'ville'
+  | 'prestataire'
+  | 'typeConsuel';
 type SortDirection = 'asc' | 'desc';
 type CardView = 'compact' | 'detailed';
 type GroupBy = 'none' | 'statut' | 'ville' | 'prestataire' | 'typeConsuel';
 
-export default function ClientGrid({ section, items, onEdit, onDelete, onMove }: ClientGridProps) {
+export default function ClientGrid({
+  section,
+  items,
+  onEdit,
+  onDelete,
+  onMove,
+}: ClientGridProps) {
   const [sortField, setSortField] = useState<SortField>('client');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [cardView, setCardView] = useState<CardView>('detailed');
@@ -53,21 +66,27 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
   const sortedItems = useMemo(() => {
     const sorted = [...items].sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortField) {
         case 'client':
           comparison = (a.client || '').localeCompare(b.client || '');
           break;
         case 'statut':
-          comparison = (section.startsWith('consuel') ? (a.etatActuel || '') : (a.statut || '')).localeCompare(
-            section.startsWith('consuel') ? (b.etatActuel || '') : (b.statut || '')
+          comparison = (
+            section.startsWith('consuel') ? a.etatActuel || '' : a.statut || ''
+          ).localeCompare(
+            section.startsWith('consuel') ? b.etatActuel || '' : b.statut || ''
           );
           break;
         case 'dateEnvoi':
-          comparison = new Date(a.dateEnvoi || 0).getTime() - new Date(b.dateEnvoi || 0).getTime();
+          comparison =
+            new Date(a.dateEnvoi || 0).getTime() -
+            new Date(b.dateEnvoi || 0).getTime();
           break;
         case 'dateEstimative':
-          comparison = new Date(a.dateEstimative || 0).getTime() - new Date(b.dateEstimative || 0).getTime();
+          comparison =
+            new Date(a.dateEstimative || 0).getTime() -
+            new Date(b.dateEstimative || 0).getTime();
           break;
         case 'ville':
           comparison = (a.ville || '').localeCompare(b.ville || '');
@@ -79,7 +98,7 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
           comparison = (a.typeConsuel || '').localeCompare(b.typeConsuel || '');
           break;
       }
-      
+
       return sortDirection === 'asc' ? comparison : -comparison;
     });
     return sorted;
@@ -91,13 +110,15 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
     }
 
     const groups: Record<string, ClientRecord[]> = {};
-    
+
     sortedItems.forEach((item) => {
       let key = 'Non défini';
-      
+
       switch (groupBy) {
         case 'statut':
-          key = section.startsWith('consuel') ? (item.etatActuel || 'Non défini') : (item.statut || 'Non défini');
+          key = section.startsWith('consuel')
+            ? item.etatActuel || 'Non défini'
+            : item.statut || 'Non défini';
           break;
         case 'ville':
           key = item.ville || 'Non défini';
@@ -109,40 +130,64 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
           key = item.typeConsuel || 'Non défini';
           break;
       }
-      
+
       if (!groups[key]) {
         groups[key] = [];
       }
       groups[key].push(item);
     });
-    
+
     return groups;
   }, [sortedItems, groupBy, section]);
 
   const getUrgencyIndicator = (client: ClientRecord) => {
     if (!client.dateEstimative) return null;
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const estimatedDate = new Date(client.dateEstimative);
     estimatedDate.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((estimatedDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
+    const diffDays = Math.ceil(
+      (estimatedDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
     if (diffDays < 0) {
-      return { color: 'from-red-500 to-rose-600', label: 'En retard', urgent: true };
+      return {
+        color: 'from-red-500 to-rose-600',
+        label: 'En retard',
+        urgent: true,
+      };
     } else if (diffDays === 0) {
-      return { color: 'from-red-500 to-orange-500', label: "Aujourd'hui", urgent: true };
+      return {
+        color: 'from-red-500 to-orange-500',
+        label: "Aujourd'hui",
+        urgent: true,
+      };
     } else if (diffDays <= 3) {
-      return { color: 'from-orange-500 to-amber-500', label: 'Urgent', urgent: true };
+      return {
+        color: 'from-orange-500 to-amber-500',
+        label: 'Urgent',
+        urgent: true,
+      };
     } else if (diffDays <= 7) {
-      return { color: 'from-yellow-500 to-amber-500', label: 'Proche', urgent: false };
+      return {
+        color: 'from-yellow-500 to-amber-500',
+        label: 'Proche',
+        urgent: false,
+      };
     }
-    return { color: 'from-emerald-500 to-green-500', label: 'À venir', urgent: false };
+    return {
+      color: 'from-emerald-500 to-green-500',
+      label: 'À venir',
+      urgent: false,
+    };
   };
 
   const renderCard = (client: ClientRecord, index: number) => {
-    const urgency = section.startsWith('dp') ? getUrgencyIndicator(client) : null;
-    
+    const urgency = section.startsWith('dp')
+      ? getUrgencyIndicator(client)
+      : null;
+
     return (
       <div
         key={client.id}
@@ -151,7 +196,7 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
         }`}
         onClick={() => onEdit(client)}
         style={{
-          animation: `slideIn 0.5s ease-out ${index * 30}ms`
+          animation: `slideIn 0.5s ease-out ${index * 30}ms`,
         }}
       >
         {urgency?.urgent && (
@@ -159,9 +204,11 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
             <span className="text-white text-xs font-bold">!</span>
           </div>
         )}
-        
+
         <div className="flex items-start justify-between mb-3">
-          <h3 className={`font-bold text-primary truncate ${cardView === 'compact' ? 'text-sm' : 'text-lg'}`}>
+          <h3
+            className={`font-bold text-primary truncate ${cardView === 'compact' ? 'text-sm' : 'text-lg'}`}
+          >
             {client.client}
           </h3>
           {client.statut && (
@@ -170,7 +217,7 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
             </span>
           )}
         </div>
-        
+
         {cardView === 'detailed' && (
           <>
             <div className="space-y-3 text-sm">
@@ -191,14 +238,20 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
                 <>
                   {client.dateEstimative && urgency && (
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg bg-gradient-to-r ${urgency.color}`}>
+                      <div
+                        className={`p-2 rounded-lg bg-gradient-to-r ${urgency.color}`}
+                      >
                         <Calendar className="h-4 w-4 text-white" />
                       </div>
                       <div>
                         <span className="text-secondary block">
-                          {new Date(client.dateEstimative).toLocaleDateString('fr-FR')}
+                          {new Date(client.dateEstimative).toLocaleDateString(
+                            'fr-FR'
+                          )}
                         </span>
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r ${urgency.color} text-white shadow-sm`}>
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r ${urgency.color} text-white shadow-sm`}
+                        >
                           {urgency.label}
                         </span>
                       </div>
@@ -230,7 +283,10 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
                   {client.typeConsuel && (
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-600 dark:to-indigo-600">
-                        <FileText className="h-4 w-4 text-white" weight="bold" />
+                        <FileText
+                          className="h-4 w-4 text-white"
+                          weight="bold"
+                        />
                       </div>
                       <div>
                         <span className="text-secondary block text-xs uppercase tracking-wide">
@@ -245,7 +301,10 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
                   {client.etatActuel && (
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 dark:from-purple-600 dark:to-violet-600">
-                        <CheckCircle className="h-4 w-4 text-white" weight="bold" />
+                        <CheckCircle
+                          className="h-4 w-4 text-white"
+                          weight="bold"
+                        />
                       </div>
                       <div>
                         <span className="text-secondary block text-xs uppercase tracking-wide">
@@ -283,7 +342,10 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
                   {client.prestataire && (
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg bg-teal-50 dark:bg-teal-900/30">
-                        <Buildings className="h-4 w-4 text-teal-600 dark:text-teal-400" weight="bold" />
+                        <Buildings
+                          className="h-4 w-4 text-teal-600 dark:text-teal-400"
+                          weight="bold"
+                        />
                       </div>
                       <span className="text-secondary truncate">
                         {client.prestataire}
@@ -313,7 +375,7 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
                 </>
               )}
             </div>
-            
+
             <div className="mt-4 pt-4 border-t border-primary flex gap-2">
               <button
                 onClick={(e) => {
@@ -337,7 +399,7 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
             </div>
           </>
         )}
-        
+
         {cardView === 'compact' && (
           <div className="flex items-center gap-2">
             {client.ville && (
@@ -346,7 +408,9 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
               </span>
             )}
             {urgency && (
-              <span className={`px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r ${urgency.color} text-white shadow-sm`}>
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r ${urgency.color} text-white shadow-sm`}
+              >
                 {urgency.label}
               </span>
             )}
@@ -369,24 +433,36 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
               <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                 Vue Grille
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{items.length} dossiers</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {items.length} dossiers
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setCardView(cardView === 'compact' ? 'detailed' : 'compact')}
+              onClick={() =>
+                setCardView(cardView === 'compact' ? 'detailed' : 'compact')
+              }
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 shadow-sm hover:shadow-md"
               title="Changer la vue"
             >
-              {cardView === 'compact' ? <List className="h-5 w-5 text-gray-700 dark:text-gray-300" /> : <SquaresFour className="h-5 w-5 text-gray-700 dark:text-gray-300" />}
-              <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300">{cardView === 'compact' ? 'Détaillée' : 'Compacte'}</span>
+              {cardView === 'compact' ? (
+                <List className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              ) : (
+                <SquaresFour className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              )}
+              <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300">
+                {cardView === 'compact' ? 'Détaillée' : 'Compacte'}
+              </span>
             </button>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-4 items-center">
           <div className="flex items-center gap-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Trier par:</label>
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Trier par:
+            </label>
             <select
               value={sortField}
               onChange={(e) => setSortField(e.target.value as SortField)}
@@ -402,7 +478,9 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
             </select>
           </div>
           <button
-            onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+            onClick={() =>
+              setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+            }
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 shadow-sm hover:shadow-md"
           >
             {sortDirection === 'asc' ? (
@@ -410,10 +488,14 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
             ) : (
               <SortDescending className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             )}
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{sortDirection === 'asc' ? 'Croissant' : 'Décroissant'}</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {sortDirection === 'asc' ? 'Croissant' : 'Décroissant'}
+            </span>
           </button>
           <div className="flex items-center gap-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Grouper par:</label>
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Grouper par:
+            </label>
             <select
               value={groupBy}
               onChange={(e) => setGroupBy(e.target.value as GroupBy)}
@@ -430,7 +512,9 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
       </div>
 
       {/* Grid */}
-      <div className={`grid gap-4 ${cardView === 'compact' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}`}>
+      <div
+        className={`grid gap-4 ${cardView === 'compact' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}`}
+      >
         {Object.entries(groupedItems).map(([groupKey, groupItems]) => {
           if (groupBy === 'none') {
             return groupItems.map((client, index) => (
@@ -461,11 +545,12 @@ export default function ClientGrid({ section, items, onEdit, onDelete, onMove }:
                   )}
                 </button>
               </div>
-              {isExpanded && groupItems.map((client, index) => (
-                <React.Fragment key={client._id || client.id || index}>
-                  {renderCard(client, index)}
-                </React.Fragment>
-              ))}
+              {isExpanded &&
+                groupItems.map((client, index) => (
+                  <React.Fragment key={client._id || client.id || index}>
+                    {renderCard(client, index)}
+                  </React.Fragment>
+                ))}
             </div>
           );
         })}

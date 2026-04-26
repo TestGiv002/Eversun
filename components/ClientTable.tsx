@@ -42,7 +42,10 @@ import {
   getCauseNonPresenceBadgeColor,
 } from '@/lib/clientTableUtils';
 import PaginationControls from '@/components/PaginationControls';
-import { useClientTableFilters, useClientTablePagination } from '@/hooks/useClientTable';
+import {
+  useClientTableFilters,
+  useClientTablePagination,
+} from '@/hooks/useClientTable';
 import DatePicker from '@/components/ui/DatePicker';
 import FilterChips from '@/components/ui/FilterChips';
 
@@ -213,11 +216,17 @@ function ClientTable({
       { key: 'typeConsuel', label: 'Type de consuel demandé' },
       { key: 'dateDerniereDemarche', label: 'Date dernière démarche' },
       { key: 'numeroContrat', label: 'Numéro de contrat' },
-      { key: 'dateMiseEnService', label: 'Date de Mise en service raccordement' }
+      {
+        key: 'dateMiseEnService',
+        label: 'Date de Mise en service raccordement',
+      }
     );
   }
 
-  const paginated = filteredItems.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  const paginated = filteredItems.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
 
   const handleClientClick = (client: ClientRecord) => {
     setSelectedClient(client);
@@ -230,22 +239,46 @@ function ClientTable({
 
   // Build active filters list for FilterChips
   const activeFilters = [
-    ...(filterStatus ? [{ key: 'status', label: 'Statut', value: filterStatus }] : []),
-    ...(filterVille ? [{ key: 'ville', label: 'Ville', value: filterVille }] : []),
-    ...(filterPrestataire ? [{ key: 'prestataire', label: 'Prestataire', value: filterPrestataire }] : []),
-    ...(filterFinancement ? [{ key: 'financement', label: 'Financement', value: filterFinancement }] : []),
-    ...(filterDateFrom ? [{ key: 'dateFrom', label: 'Date de', value: filterDateFrom }] : []),
-    ...(filterDateTo ? [{ key: 'dateTo', label: 'Date à', value: filterDateTo }] : []),
+    ...(filterStatus
+      ? [{ key: 'status', label: 'Statut', value: filterStatus }]
+      : []),
+    ...(filterVille
+      ? [{ key: 'ville', label: 'Ville', value: filterVille }]
+      : []),
+    ...(filterPrestataire
+      ? [{ key: 'prestataire', label: 'Prestataire', value: filterPrestataire }]
+      : []),
+    ...(filterFinancement
+      ? [{ key: 'financement', label: 'Financement', value: filterFinancement }]
+      : []),
+    ...(filterDateFrom
+      ? [{ key: 'dateFrom', label: 'Date de', value: filterDateFrom }]
+      : []),
+    ...(filterDateTo
+      ? [{ key: 'dateTo', label: 'Date à', value: filterDateTo }]
+      : []),
   ];
 
   const handleRemoveFilter = (key: string) => {
     switch (key) {
-      case 'status': setFilterStatus(''); break;
-      case 'ville': setFilterVille(''); break;
-      case 'prestataire': setFilterPrestataire(''); break;
-      case 'financement': setFilterFinancement(''); break;
-      case 'dateFrom': setFilterDateFrom(''); break;
-      case 'dateTo': setFilterDateTo(''); break;
+      case 'status':
+        setFilterStatus('');
+        break;
+      case 'ville':
+        setFilterVille('');
+        break;
+      case 'prestataire':
+        setFilterPrestataire('');
+        break;
+      case 'financement':
+        setFilterFinancement('');
+        break;
+      case 'dateFrom':
+        setFilterDateFrom('');
+        break;
+      case 'dateTo':
+        setFilterDateTo('');
+        break;
     }
   };
 
@@ -254,7 +287,6 @@ function ClientTable({
       <div className="w-full overflow-x-auto py-6">
         {/* Header du tableau - Responsive */}
         <div className="mb-6 flex flex-col gap-4">
-
           {/* Filter Panel */}
           {showFilters && (
             <div
@@ -264,7 +296,9 @@ function ClientTable({
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-1">Statut</label>
+                  <label className="block text-sm font-semibold text-secondary mb-1">
+                    Statut
+                  </label>
                   <input
                     type="text"
                     placeholder="Filtrer par statut"
@@ -275,7 +309,9 @@ function ClientTable({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-1">Ville</label>
+                  <label className="block text-sm font-semibold text-secondary mb-1">
+                    Ville
+                  </label>
                   <input
                     type="text"
                     placeholder="Filtrer par ville"
@@ -286,7 +322,9 @@ function ClientTable({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-1">Prestataire</label>
+                  <label className="block text-sm font-semibold text-secondary mb-1">
+                    Prestataire
+                  </label>
                   <input
                     type="text"
                     placeholder="Filtrer par prestataire"
@@ -297,7 +335,9 @@ function ClientTable({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-1">Financement</label>
+                  <label className="block text-sm font-semibold text-secondary mb-1">
+                    Financement
+                  </label>
                   <input
                     type="text"
                     placeholder="Filtrer par financement"
@@ -308,7 +348,9 @@ function ClientTable({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-1">Date estimative (de)</label>
+                  <label className="block text-sm font-semibold text-secondary mb-1">
+                    Date estimative (de)
+                  </label>
                   <DatePicker
                     value={filterDateFrom}
                     onChange={setFilterDateFrom}
@@ -317,7 +359,9 @@ function ClientTable({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-1">Date estimative (à)</label>
+                  <label className="block text-sm font-semibold text-secondary mb-1">
+                    Date estimative (à)
+                  </label>
                   <DatePicker
                     value={filterDateTo}
                     onChange={setFilterDateTo}
@@ -349,20 +393,22 @@ function ClientTable({
               </div>
             </div>
           )}
-          
+
           {/* Active Filter Chips */}
           <FilterChips
             filters={activeFilters}
             onRemove={handleRemoveFilter}
             onResetAll={resetFilters}
           />
-          
+
           <div className="flex items-center justify-between gap-3 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md">
                 <List className="h-4 w-4" weight="bold" />
               </div>
-              <label className="text-gray-900 dark:text-white font-semibold text-sm">Lignes par page</label>
+              <label className="text-gray-900 dark:text-white font-semibold text-sm">
+                Lignes par page
+              </label>
             </div>
             <select
               value={rowsPerPage}
@@ -400,22 +446,33 @@ function ClientTable({
                     <th
                       key={col.key as string}
                       aria-sort={
-                        sortKey === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'
+                        sortKey === col.key
+                          ? sortDir === 'asc'
+                            ? 'ascending'
+                            : 'descending'
+                          : 'none'
                       }
                       className={`px-3 py-2 font-bold text-left cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 whitespace-nowrap text-[10px] uppercase tracking-wider text-gray-700 dark:text-gray-200 group ${
-                        idx === 0 ? 'sticky left-0 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 shadow-r' : ''
+                        idx === 0
+                          ? 'sticky left-0 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 shadow-r'
+                          : ''
                       }`}
                       onClick={() => setSortKey(col.key as string)}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className="group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">{col.label}</span>
+                        <span className="group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                          {col.label}
+                        </span>
                         {sortKey === col.key && (
                           <span className="text-amber-600 dark:text-amber-400 font-bold">
                             {sortDir === 'asc' ? '↑' : '↓'}
                           </span>
                         )}
                         {sortKey !== col.key && (
-                          <CaretDown className="w-2.5 h-2.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" weight="bold" />
+                          <CaretDown
+                            className="w-2.5 h-2.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                            weight="bold"
+                          />
                         )}
                       </div>
                     </th>
@@ -437,7 +494,9 @@ function ClientTable({
                   <tr
                     key={item._id || item.id || index}
                     className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/10 dark:hover:to-indigo-900/10 transition-all duration-200 group cursor-pointer ${
-                      index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-800/50'
+                      index % 2 === 0
+                        ? 'bg-white dark:bg-gray-800'
+                        : 'bg-gray-50 dark:bg-gray-800/50'
                     }`}
                     onClick={() => onEdit(item)}
                   >
@@ -445,7 +504,9 @@ function ClientTable({
                       <td
                         key={col.key as string}
                         className={`px-3 py-2 whitespace-nowrap text-xs ${
-                          col.key === 'client' ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'
+                          col.key === 'client'
+                            ? 'font-semibold text-gray-900 dark:text-white'
+                            : 'text-gray-600 dark:text-gray-300'
                         }`}
                       >
                         {col.key === 'client' ? (
@@ -460,20 +521,30 @@ function ClientTable({
                             {(item[col.key] as string) || '-'}
                           </button>
                         ) : col.key === 'dateEnvoi' ||
-                        col.key === 'dateEstimative' ||
-                        col.key === 'dateDerniereDemarche' ||
-                        col.key === 'dateMiseEnService' ||
-                        col.key === 'datePV' ||
-                        col.key === 'pvChantierDate' ? (
+                          col.key === 'dateEstimative' ||
+                          col.key === 'dateDerniereDemarche' ||
+                          col.key === 'dateMiseEnService' ||
+                          col.key === 'datePV' ||
+                          col.key === 'pvChantierDate' ? (
                           <span className="inline-flex items-center gap-1 text-gray-700 dark:text-gray-300 font-medium">
-                            <Calendar className="w-3 h-3 text-amber-500" weight="fill" />
+                            <Calendar
+                              className="w-3 h-3 text-amber-500"
+                              weight="fill"
+                            />
                             {formatDateFR(item[col.key] as string)}
                           </span>
-                        ) : col.key === 'pvChantier' && isInstallation && item.pvChantier ? (
-                          <span className="font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-md text-xs">{item.pvChantier}</span>
+                        ) : col.key === 'pvChantier' &&
+                          isInstallation &&
+                          item.pvChantier ? (
+                          <span className="font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-md text-xs">
+                            {item.pvChantier}
+                          </span>
                         ) : col.key === 'pvChantier' && item.pvChantier ? (
                           <span className="inline-flex items-center gap-1 text-gray-700 dark:text-gray-300 font-medium">
-                            <Calendar className="w-3 h-3 text-amber-500" weight="fill" />
+                            <Calendar
+                              className="w-3 h-3 text-amber-500"
+                              weight="fill"
+                            />
                             {formatDateFR(item[col.key] as string)}
                           </span>
                         ) : col.key === 'portail' &&
@@ -498,50 +569,71 @@ function ClientTable({
                           </span>
                         ) : col.key === 'motDePasse' && item.motDePasse ? (
                           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 font-semibold text-xs border border-red-200 dark:border-red-800 shadow-sm">
-                              <Key className="w-3 h-3" weight="bold" />
-                              {item.motDePasse}
+                            <Key className="w-3 h-3" weight="bold" />
+                            {item.motDePasse}
                           </span>
                         ) : col.key === 'statut' && item.statut ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getStatutBadgeColor(item.statut)}`}>
-                              {item.statut}
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getStatutBadgeColor(item.statut)}`}
+                          >
+                            {item.statut}
+                          </span>
+                        ) : col.key === 'financement' && item.financement ? (
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getFinancementBadgeColor(item.financement)}`}
+                          >
+                            {item.financement}
+                          </span>
+                        ) : col.key === 'raccordement' && item.raccordement ? (
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getRaccordementBadgeColor(item.raccordement)}`}
+                          >
+                            {item.raccordement}
+                          </span>
+                        ) : col.key === 'etatActuel' && item.etatActuel ? (
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getEtatActuelBadgeColor(item.etatActuel)}`}
+                          >
+                            {item.etatActuel}
+                          </span>
+                        ) : col.key === 'typeConsuel' && item.typeConsuel ? (
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getTypeConsuelBadgeColor(item.typeConsuel)}`}
+                          >
+                            {item.typeConsuel}
+                          </span>
+                        ) : col.key === 'prestataire' && item.prestataire ? (
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getPrestataireBadgeColor(item.prestataire)}`}
+                          >
+                            <Buildings className="w-3 h-3 mr-1" weight="bold" />
+                            {item.prestataire}
+                          </span>
+                        ) : col.key === 'causeNonPresence' &&
+                          item.causeNonPresence ? (
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getCauseNonPresenceBadgeColor(item.causeNonPresence)}`}
+                          >
+                            {item.causeNonPresence}
+                          </span>
+                        ) : col.key === 'commentaires' && item.commentaires ? (
+                          <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                            <ChatCircle
+                              className="w-3 h-3 text-amber-500"
+                              weight="fill"
+                            />
+                            <span
+                              className="max-w-xs truncate"
+                              title={item.commentaires}
+                            >
+                              {item.commentaires}
                             </span>
-                          ) : col.key === 'financement' && item.financement ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getFinancementBadgeColor(item.financement)}`}>
-                              {item.financement}
-                            </span>
-                          ) : col.key === 'raccordement' && item.raccordement ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getRaccordementBadgeColor(item.raccordement)}`}>
-                              {item.raccordement}
-                            </span>
-                          ) : col.key === 'etatActuel' && item.etatActuel ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getEtatActuelBadgeColor(item.etatActuel)}`}>
-                              {item.etatActuel}
-                            </span>
-                          ) : col.key === 'typeConsuel' && item.typeConsuel ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getTypeConsuelBadgeColor(item.typeConsuel)}`}>
-                              {item.typeConsuel}
-                            </span>
-                          ) : col.key === 'prestataire' && item.prestataire ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getPrestataireBadgeColor(item.prestataire)}`}>
-                              <Buildings className="w-3 h-3 mr-1" weight="bold" />
-                              {item.prestataire}
-                            </span>
-                          ) : col.key === 'causeNonPresence' && item.causeNonPresence ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getCauseNonPresenceBadgeColor(item.causeNonPresence)}`}>
-                              {item.causeNonPresence}
-                            </span>
-                          ) : col.key === 'commentaires' && item.commentaires ? (
-                            <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                              <ChatCircle className="w-3 h-3 text-amber-500" weight="fill" />
-                              <span className="max-w-xs truncate" title={item.commentaires}>
-                                {item.commentaires}
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="font-medium text-primary">
-                              {(item[col.key] as string) || '-'}
-                            </span>
-                          )}
+                          </div>
+                        ) : (
+                          <span className="font-medium text-primary">
+                            {(item[col.key] as string) || '-'}
+                          </span>
+                        )}
                       </td>
                     ))}
                   </tr>
@@ -579,4 +671,3 @@ function ClientTable({
 }
 
 export default memo(ClientTable);
-

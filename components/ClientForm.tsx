@@ -104,7 +104,9 @@ export default function ClientForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isEditing, setIsEditing] = useState(false);
   const [dpAccordesClients, setDpAccordesClients] = useState<string[]>([]);
-  const [dpAccordesData, setDpAccordesData] = useState<Record<string, { noDp: string; ville: string }>>({});
+  const [dpAccordesData, setDpAccordesData] = useState<
+    Record<string, { noDp: string; ville: string }>
+  >({});
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElementRef = useRef<HTMLElement | null>(null);
 
@@ -115,13 +117,16 @@ export default function ClientForm({
         .then((res) => res.json())
         .then((response) => {
           const data = response.data || response;
-          const clients = Array.isArray(data) ? data.map((item: any) => item.client).filter(Boolean) : [];
+          const clients = Array.isArray(data)
+            ? data.map((item: any) => item.client).filter(Boolean)
+            : [];
           // Deduplicate client names
           const uniqueClients = [...new Set(clients)];
           setDpAccordesClients(uniqueClients);
-          
+
           // Store client data for auto-population (use first occurrence for duplicates)
-          const clientDataMap: Record<string, { noDp: string; ville: string }> = {};
+          const clientDataMap: Record<string, { noDp: string; ville: string }> =
+            {};
           if (Array.isArray(data)) {
             data.forEach((item: any) => {
               if (item.client && !clientDataMap[item.client]) {
@@ -134,7 +139,12 @@ export default function ClientForm({
           }
           setDpAccordesData(clientDataMap);
         })
-        .catch((err) => console.error('Erreur lors du chargement des clients DP Accordés:', err));
+        .catch((err) =>
+          console.error(
+            'Erreur lors du chargement des clients DP Accordés:',
+            err
+          )
+        );
     }
   }, [section]);
 
@@ -228,14 +238,12 @@ export default function ClientForm({
       const next = { ...prev, [key]: value };
 
       if (section.startsWith('dp') && key === 'dateEnvoi' && value) {
-
         const d = new Date(value);
         if (!isNaN(d.getTime())) {
           d.setMonth(d.getMonth() + (prev.statut === 'ABF' ? 2 : 1));
           next.dateEstimative = d.toISOString().slice(0, 10);
         }
       }
-
 
       if (section.startsWith('dp') && key === 'statut') {
         if (value === 'ABF' && prev.dateEnvoi) {
@@ -248,25 +256,38 @@ export default function ClientForm({
       }
 
       // Automated Date Estimatives calculation for Consuel based on type
-      if (section.startsWith('consuel') && (key === 'typeConsuel' || key === 'dateDerniereDemarche')) {
+      if (
+        section.startsWith('consuel') &&
+        (key === 'typeConsuel' || key === 'dateDerniereDemarche')
+      ) {
         const typeConsuel = key === 'typeConsuel' ? value : prev.typeConsuel;
-        const dateDerniereDemarche = key === 'dateDerniereDemarche' ? value : prev.dateDerniereDemarche;
-        
+        const dateDerniereDemarche =
+          key === 'dateDerniereDemarche' ? value : prev.dateDerniereDemarche;
+
         if (typeConsuel && dateDerniereDemarche) {
           const d = new Date(dateDerniereDemarche);
           if (!isNaN(d.getTime())) {
-            const weeksToAdd = typeConsuel === 'Bleu' ? 2 : typeConsuel === 'Violet' ? 4 : 0;
-            d.setDate(d.getDate() + (weeksToAdd * 7));
+            const weeksToAdd =
+              typeConsuel === 'Bleu' ? 2 : typeConsuel === 'Violet' ? 4 : 0;
+            d.setDate(d.getDate() + weeksToAdd * 7);
             next.dateEstimative = d.toISOString().slice(0, 10);
           }
         }
       }
 
-      if (section === 'installation' && key === 'statut' && value === 'En attente date de pose') {
+      if (
+        section === 'installation' &&
+        key === 'statut' &&
+        value === 'En attente date de pose'
+      ) {
         next.pvChantier = 'En attente';
       }
 
-      if (section === 'installation' && key === 'dateEstimative' && prev.statut === 'En attente date de pose') {
+      if (
+        section === 'installation' &&
+        key === 'dateEstimative' &&
+        prev.statut === 'En attente date de pose'
+      ) {
         next.pvChantier = 'En attente';
       }
 
@@ -310,7 +331,6 @@ export default function ClientForm({
       .toISOString()
       .slice(0, 10);
     return localISO;
-
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -328,13 +348,16 @@ export default function ClientForm({
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const { id, ...rest } = form;
-      
+
       let finalSection = section;
       if (section === 'consuel-en-cours' && form.etatActuel === 'Consuel OK') {
         finalSection = 'consuel-finalise';
       }
 
-      if (section === 'raccordement' && form.raccordement === 'Mise en service') {
+      if (
+        section === 'raccordement' &&
+        form.raccordement === 'Mise en service'
+      ) {
         finalSection = 'raccordement-mes';
       }
 
@@ -397,8 +420,10 @@ export default function ClientForm({
   };
 
   const getSectionColor = () => {
-    if (isDp) return 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-primary-200 dark:border-primary-800';
-    if (isConsuel) return 'bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300 border-success-200 dark:border-success-800';
+    if (isDp)
+      return 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-primary-200 dark:border-primary-800';
+    if (isConsuel)
+      return 'bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300 border-success-200 dark:border-success-800';
     if (isRaccordement)
       return 'bg-warning-50 dark:bg-warning-900/20 text-warning-700 dark:text-warning-300 border-warning-200 dark:border-warning-800';
     return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
@@ -410,7 +435,13 @@ export default function ClientForm({
         className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-in fade-in duration-300"
         onClick={onClose}
       />
-      <div ref={modalRef} className="relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col animate-in zoom-in-95 duration-300" role="dialog" aria-modal="true" aria-label={client ? 'Modifier le dossier' : 'Ajouter un dossier'}>
+      <div
+        ref={modalRef}
+        className="relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col animate-in zoom-in-95 duration-300"
+        role="dialog"
+        aria-modal="true"
+        aria-label={client ? 'Modifier le dossier' : 'Ajouter un dossier'}
+      >
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/30">
@@ -436,44 +467,73 @@ export default function ClientForm({
         <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
           <div className="sticky top-0 z-10 mb-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-lg border border-gray-200/80 dark:border-gray-700/80 p-2 shadow-sm">
             <div className="flex flex-wrap gap-1.5">
-              <Button type="button" variant="ghost" size="sm" onClick={() => scrollToSection('form-general')} className="hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400 transition-all px-3 py-1.5 text-xs">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => scrollToSection('form-general')}
+                className="hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400 transition-all px-3 py-1.5 text-xs"
+              >
                 <User className="w-3 h-3 mr-1" /> Général
               </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => scrollToSection('form-workflow')} className="hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400 transition-all px-3 py-1.5 text-xs">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => scrollToSection('form-workflow')}
+                className="hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400 transition-all px-3 py-1.5 text-xs"
+              >
                 <Clock className="w-3 h-3 mr-1" /> Workflow
               </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => scrollToSection('form-details')} className="hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400 transition-all px-3 py-1.5 text-xs">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => scrollToSection('form-details')}
+                className="hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400 transition-all px-3 py-1.5 text-xs"
+              >
                 <FileText className="w-3 h-3 mr-1" /> Détails
               </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => scrollToSection('form-footer')} className="hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400 transition-all px-3 py-1.5 text-xs">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => scrollToSection('form-footer')}
+                className="hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400 transition-all px-3 py-1.5 text-xs"
+              >
                 <Gear className="w-3 h-3 mr-1" /> Actions
               </Button>
             </div>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {section.startsWith('consuel') && form.etatActuel === 'Consuel OK' && (
-              <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-2.5">
-                <div className="flex items-center gap-2">
-                  <Info className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-                  <span className="text-xs font-semibold text-primary-800 dark:text-primary-200">
-                    Déplacement vers "Consuel Finalisé"
-                  </span>
+            {section.startsWith('consuel') &&
+              form.etatActuel === 'Consuel OK' && (
+                <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-2.5">
+                  <div className="flex items-center gap-2">
+                    <Info className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                    <span className="text-xs font-semibold text-primary-800 dark:text-primary-200">
+                      Déplacement vers "Consuel Finalisé"
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
-            {section === 'raccordement' && form.raccordement === 'Mise en service' && (
-              <div className="bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg p-2.5">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-success-600 dark:text-success-400" />
-                  <span className="text-xs font-semibold text-success-800 dark:text-success-200">
-                    Déplacement vers "Raccordement MES"
-                  </span>
+              )}
+            {section === 'raccordement' &&
+              form.raccordement === 'Mise en service' && (
+                <div className="bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg p-2.5">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-success-600 dark:text-success-400" />
+                    <span className="text-xs font-semibold text-success-800 dark:text-success-200">
+                      Déplacement vers "Raccordement MES"
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {!isDaact && (
-              <div id="form-general" className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div
+                id="form-general"
+                className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300"
+              >
                 <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md">
                     <User className="h-3.5 w-3.5" weight="bold" />
@@ -485,7 +545,9 @@ export default function ClientForm({
                     <Select
                       label="Financement *"
                       value={form.financement}
-                      onChange={(e) => handleChange('financement', e.target.value)}
+                      onChange={(e) =>
+                        handleChange('financement', e.target.value)
+                      }
                       options={financementOptionsList}
                       placeholder="Sélectionner un financement"
                       required
@@ -493,9 +555,6 @@ export default function ClientForm({
                       icon={<Buildings className="h-4 w-4" weight="bold" />}
                     />
                   )}
-
-
-
 
                   <Input
                     label="Client *"
@@ -505,7 +564,6 @@ export default function ClientForm({
                     required
                     error={errors.client}
                     icon={<User className="h-4 w-4" />}
-
                     name="client"
                   />
 
@@ -517,7 +575,6 @@ export default function ClientForm({
                       options={statutOptions}
                       placeholder="Sélectionner un statut"
                       required
-
                       error={errors.statut}
                     />
                   )}
@@ -526,7 +583,10 @@ export default function ClientForm({
             )}
 
             {isDp && (
-              <div id="form-workflow" className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-amber-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div
+                id="form-workflow"
+                className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-amber-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300"
+              >
                 <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md">
                     <Calendar className="h-3.5 w-3.5" weight="bold" />
@@ -554,7 +614,9 @@ export default function ClientForm({
                   <Select
                     label="Financement"
                     value={form.financement}
-                    onChange={(e) => handleChange('financement', e.target.value)}
+                    onChange={(e) =>
+                      handleChange('financement', e.target.value)
+                    }
                     options={financementOptionsList}
                     placeholder="Sélectionner un financement"
                   />
@@ -562,7 +624,10 @@ export default function ClientForm({
               </div>
             )}
             {isDp && (
-              <div id="form-details" className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-purple-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div
+                id="form-details"
+                className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-purple-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300"
+              >
                 <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-md">
                     <Gear className="h-3.5 w-3.5" weight="bold" />
@@ -576,7 +641,6 @@ export default function ClientForm({
                     onChange={(e) => handleChange('noDp', e.target.value)}
                     placeholder="Numéro de déclaration"
                     icon={<FileText className="h-4 w-4" />}
-
                     name="noDp"
                   />
                   <Input
@@ -585,7 +649,6 @@ export default function ClientForm({
                     onChange={(e) => handleChange('ville', e.target.value)}
                     placeholder="Ville du projet"
                     icon={<MapPin className="h-4 w-4" />}
-
                     name="ville"
                   />
                   <Input
@@ -594,16 +657,16 @@ export default function ClientForm({
                     onChange={(e) => handleChange('portail', e.target.value)}
                     placeholder="Nom du portail"
                     icon={<Globe className="h-4 w-4" />}
-
                     name="portail"
                   />
                   <Input
                     label="Identifiant"
                     value={form.identifiant}
-                    onChange={(e) => handleChange('identifiant', e.target.value)}
+                    onChange={(e) =>
+                      handleChange('identifiant', e.target.value)
+                    }
                     placeholder="Identifiant de connexion"
                     icon={<Shield className="h-4 w-4" />}
-
                     name="identifiant"
                   />
                   <Input
@@ -619,7 +682,10 @@ export default function ClientForm({
               </div>
             )}
             {isInstallation && (
-              <div id="form-installation" className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-green-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div
+                id="form-installation"
+                className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-green-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300"
+              >
                 <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-md">
                     <House className="h-3.5 w-3.5" weight="bold" />
@@ -631,14 +697,20 @@ export default function ClientForm({
                     label="Statut"
                     value={form.statut}
                     onChange={(e) => handleChange('statut', e.target.value)}
-                    options={installationStatuts.map((s) => ({ value: s, label: s }))}
+                    options={installationStatuts.map((s) => ({
+                      value: s,
+                      label: s,
+                    }))}
                     placeholder="Sélectionner un statut"
                   />
                   <Select
                     label="PV Chantier"
                     value={form.pvChantier}
                     onChange={(e) => handleChange('pvChantier', e.target.value)}
-                    options={pvChantierStatusOptions.map((value) => ({ value, label: value }))}
+                    options={pvChantierStatusOptions.map((value) => ({
+                      value,
+                      label: value,
+                    }))}
                     placeholder="Sélectionner un statut PV"
                   />
                   <DatePicker
@@ -659,7 +731,9 @@ export default function ClientForm({
                     <Input
                       label="Commentaires"
                       value={form.commentaires}
-                      onChange={(e) => handleChange('commentaires', e.target.value)}
+                      onChange={(e) =>
+                        handleChange('commentaires', e.target.value)
+                      }
                       placeholder="Ajouter des commentaires..."
                       icon={<FileText className="h-4 w-4" />}
                     />
@@ -687,12 +761,22 @@ export default function ClientForm({
                   <Select
                     label="Cause de non présence Consuel"
                     value={form.causeNonPresence}
-                    onChange={(e) => handleChange('causeNonPresence', e.target.value)}
-
+                    onChange={(e) =>
+                      handleChange('causeNonPresence', e.target.value)
+                    }
                     options={[
-                      { value: 'Consuel non demandé', label: 'Consuel non demandé' },
-                      { value: 'Consuel refusé pour cause technique', label: 'Consuel refusé pour cause technique' },
-                      { value: 'Consuel refusé pour cause administrative', label: 'Consuel refusé pour cause administrative' },
+                      {
+                        value: 'Consuel non demandé',
+                        label: 'Consuel non demandé',
+                      },
+                      {
+                        value: 'Consuel refusé pour cause technique',
+                        label: 'Consuel refusé pour cause technique',
+                      },
+                      {
+                        value: 'Consuel refusé pour cause administrative',
+                        label: 'Consuel refusé pour cause administrative',
+                      },
                       { value: 'Consuel envoyé', label: 'Consuel envoyé' },
                     ]}
                     placeholder="Sélectionner une cause"
@@ -707,7 +791,9 @@ export default function ClientForm({
                   <Select
                     label="Type de consuel demandé"
                     value={form.typeConsuel}
-                    onChange={(e) => handleChange('typeConsuel', e.target.value)}
+                    onChange={(e) =>
+                      handleChange('typeConsuel', e.target.value)
+                    }
                     options={[
                       { value: 'Violet', label: 'Violet' },
                       { value: 'Bleu', label: 'Bleu' },
@@ -717,7 +803,9 @@ export default function ClientForm({
                   <DatePicker
                     label="Date dernière démarche"
                     value={form.dateDerniereDemarche}
-                    onChange={(value) => handleChange('dateDerniereDemarche', value)}
+                    onChange={(value) =>
+                      handleChange('dateDerniereDemarche', value)
+                    }
                     icon={<Calendar className="h-4 w-4" />}
                     name="dateDerniereDemarche"
                   />
@@ -753,14 +841,19 @@ export default function ClientForm({
             {isRaccordement && (
               <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <Buildings className="h-4 w-4 text-primary-500" weight="bold" />
+                  <Buildings
+                    className="h-4 w-4 text-primary-500"
+                    weight="bold"
+                  />
                   Raccordement
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Select
                     label="Type de consuel demandé"
                     value={form.typeConsuel}
-                    onChange={(e) => handleChange('typeConsuel', e.target.value)}
+                    onChange={(e) =>
+                      handleChange('typeConsuel', e.target.value)
+                    }
                     options={[
                       { value: 'Violet', label: 'Violet' },
                       { value: 'Bleu', label: 'Bleu' },
@@ -770,11 +863,18 @@ export default function ClientForm({
                   <Select
                     label="Raccordement"
                     value={form.raccordement}
-                    onChange={(e) => handleChange('raccordement', e.target.value)}
-
+                    onChange={(e) =>
+                      handleChange('raccordement', e.target.value)
+                    }
                     options={[
-                      { value: 'Demande à effectuer', label: 'Demande à effectuer' },
-                      { value: 'Demande transmise', label: 'Demande transmise' },
+                      {
+                        value: 'Demande à effectuer',
+                        label: 'Demande à effectuer',
+                      },
+                      {
+                        value: 'Demande transmise',
+                        label: 'Demande transmise',
+                      },
                       { value: 'Mise en service', label: 'Mise en service' },
                     ]}
                     placeholder="Sélectionner un raccordement"
@@ -782,7 +882,9 @@ export default function ClientForm({
                   <DatePicker
                     label="Date dernière démarche"
                     value={form.dateDerniereDemarche}
-                    onChange={(value) => handleChange('dateDerniereDemarche', value)}
+                    onChange={(value) =>
+                      handleChange('dateDerniereDemarche', value)
+                    }
                     icon={<Calendar className="h-4 w-4" />}
                     name="dateDerniereDemarche"
                   />
@@ -810,7 +912,9 @@ export default function ClientForm({
                   <Input
                     label="Numéro de contrat"
                     value={form.numeroContrat}
-                    onChange={(e) => handleChange('numeroContrat', e.target.value)}
+                    onChange={(e) =>
+                      handleChange('numeroContrat', e.target.value)
+                    }
                     placeholder="Numéro de contrat"
                     icon={<FileText className="h-4 w-4" />}
                     name="numeroContrat"
@@ -818,7 +922,9 @@ export default function ClientForm({
                   <DatePicker
                     label="Date de Mise en service"
                     value={form.dateMiseEnService}
-                    onChange={(value) => handleChange('dateMiseEnService', value)}
+                    onChange={(value) =>
+                      handleChange('dateMiseEnService', value)
+                    }
                     icon={<Calendar className="h-4 w-4" />}
                     name="dateMiseEnService"
                   />
@@ -882,10 +988,12 @@ export default function ClientForm({
               </div>
             )}
 
-            <div id="form-footer" className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div
+              id="form-footer"
+              className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700"
+            >
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 {form.statut === 'Accord favorable' && (
-
                   <Badge className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700 animate-pulse text-xs">
                     ⚠️ Déplacement vers "DP Accordés"
                   </Badge>
@@ -895,7 +1003,6 @@ export default function ClientForm({
                     ⚠️ Déplacement vers "DP Refus"
                   </Badge>
                 )}
-
               </div>
 
               <div className="flex gap-2">
@@ -906,16 +1013,18 @@ export default function ClientForm({
                   disabled={isSubmitting}
                   icon={<X className="h-3 w-3" />}
                   className="px-3 py-1.5 text-xs"
-
                 >
                   Annuler
                 </Button>
                 <Button
                   type="submit"
                   loading={isSubmitting}
-                  icon={isSubmitting ? null : <FloppyDisk className="h-3 w-3" weight="bold" />}
+                  icon={
+                    isSubmitting ? null : (
+                      <FloppyDisk className="h-3 w-3" weight="bold" />
+                    )
+                  }
                   className="px-3 py-1.5 text-xs"
-
                 >
                   {isSubmitting
                     ? 'Enregistrement...'
@@ -931,4 +1040,3 @@ export default function ClientForm({
     </div>
   );
 }
-

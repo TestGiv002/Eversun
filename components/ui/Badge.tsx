@@ -21,10 +21,14 @@ const Badge = ({
   ...props
 }: BadgeProps) => {
   const variants = {
-    default: 'bg-secondary text-text-primary border border-border dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600',
-    success: 'bg-green-50 text-success border border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700',
-    warning: 'bg-yellow-50 text-warning border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700',
-    error: 'bg-red-50 text-error border border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700',
+    default:
+      'bg-secondary text-text-primary border border-border dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600',
+    success:
+      'bg-green-50 text-success border border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700',
+    warning:
+      'bg-yellow-50 text-warning border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700',
+    error:
+      'bg-red-50 text-error border border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700',
     info: 'bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-700',
   };
 

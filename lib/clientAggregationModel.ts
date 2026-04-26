@@ -35,7 +35,7 @@ export const ClientAggregationSchema = new mongoose.Schema({
       date: String,
       updatedAt: Date,
     },
-    'daact': {
+    daact: {
       statut: String,
       date: String,
       updatedAt: Date,
@@ -50,7 +50,7 @@ export const ClientAggregationSchema = new mongoose.Schema({
       date: String,
       updatedAt: Date,
     },
-    'raccordement': {
+    raccordement: {
       statut: String,
       date: String,
       updatedAt: Date,
@@ -77,4 +77,7 @@ export interface IClientAggregation extends mongoose.Document {
 
 export const ClientAggregationModel =
   mongoose.models.ClientAggregation ||
-  mongoose.model<IClientAggregation>('ClientAggregation', ClientAggregationSchema);
+  mongoose.model<IClientAggregation>(
+    'ClientAggregation',
+    ClientAggregationSchema
+  );

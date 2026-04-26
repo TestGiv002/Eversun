@@ -1,7 +1,13 @@
-﻿"use client";
+﻿'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Envelope, Lock, ArrowLeft, CheckCircle, Warning } from '@phosphor-icons/react';
+import {
+  Envelope,
+  Lock,
+  ArrowLeft,
+  CheckCircle,
+  Warning,
+} from '@phosphor-icons/react';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 
@@ -69,8 +75,12 @@ export default function ResetPasswordPage() {
             <div className="inline-flex items-center justify-center w-14 h-14 bg-teal-600 rounded-xl mb-4 shadow-sm">
               <Lock className="w-7 h-7 text-white" weight="bold" />
             </div>
-            <h1 className="text-3xl font-bold text-primary mb-1">Reinitialisation</h1>
-            <p className="text-secondary">Definissez votre nouveau mot de passe</p>
+            <h1 className="text-3xl font-bold text-primary mb-1">
+              Reinitialisation
+            </h1>
+            <p className="text-secondary">
+              Definissez votre nouveau mot de passe
+            </p>
           </div>
 
           {!success ? (
@@ -111,7 +121,9 @@ export default function ResetPasswordPage() {
               )}
 
               <Button type="submit" loading={isLoading} className="w-full">
-                {isLoading ? 'Reinitialisation en cours...' : 'Reinitialiser le mot de passe'}
+                {isLoading
+                  ? 'Reinitialisation en cours...'
+                  : 'Reinitialiser le mot de passe'}
               </Button>
             </form>
           ) : (
@@ -119,8 +131,12 @@ export default function ResetPasswordPage() {
               <div className="inline-flex items-center justify-center w-14 h-14 bg-emerald-600 rounded-xl mb-4 shadow-sm">
                 <CheckCircle className="w-7 h-7 text-white" weight="bold" />
               </div>
-              <h2 className="text-xl font-bold text-primary mb-2">Mot de passe reinitialise</h2>
-              <p className="text-secondary">Redirection vers la page de connexion...</p>
+              <h2 className="text-xl font-bold text-primary mb-2">
+                Mot de passe reinitialise
+              </h2>
+              <p className="text-secondary">
+                Redirection vers la page de connexion...
+              </p>
             </div>
           )}
         </div>

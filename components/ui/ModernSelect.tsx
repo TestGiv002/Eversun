@@ -23,8 +23,25 @@ interface ModernSelectProps extends WithLabelError, WithIcon {
 }
 
 const ModernSelect = forwardRef<HTMLDivElement, ModernSelectProps>(
-  ({ className, label, error, helperText, id, options, placeholder, icon, value, onChange, name, ...props }, ref) => {
-    const selectId = id || `select-${name || Math.random().toString(36).substr(2, 9)}`;
+  (
+    {
+      className,
+      label,
+      error,
+      helperText,
+      id,
+      options,
+      placeholder,
+      icon,
+      value,
+      onChange,
+      name,
+      ...props
+    },
+    ref
+  ) => {
+    const selectId =
+      id || `select-${name || Math.random().toString(36).substr(2, 9)}`;
     const [isOpen, setIsOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -32,7 +49,10 @@ const ModernSelect = forwardRef<HTMLDivElement, ModernSelectProps>(
 
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
-        if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        if (
+          containerRef.current &&
+          !containerRef.current.contains(event.target as Node)
+        ) {
           setIsOpen(false);
         }
       };
@@ -59,7 +79,9 @@ const ModernSelect = forwardRef<HTMLDivElement, ModernSelectProps>(
         setIsOpen(false);
       } else if (e.key === 'ArrowDown' && isOpen) {
         e.preventDefault();
-        setHighlightedIndex((prev) => (prev < options.length - 1 ? prev + 1 : prev));
+        setHighlightedIndex((prev) =>
+          prev < options.length - 1 ? prev + 1 : prev
+        );
       } else if (e.key === 'ArrowUp' && isOpen) {
         e.preventDefault();
         setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
@@ -94,14 +116,22 @@ const ModernSelect = forwardRef<HTMLDivElement, ModernSelectProps>(
             className={cn(
               'flex h-12 w-full items-center justify-between rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-3 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 focus-visible:border-amber-500 dark:focus-visible:border-amber-500 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500 shadow hover:shadow-md cursor-pointer',
               icon && 'pl-12',
-              error && 'border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500',
+              error &&
+                'border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500',
               'text-base sm:text-sm',
               className
             )}
             {...props}
           >
-            <span className={cn('flex-1 truncate', !value && 'text-gray-400 dark:text-gray-500')}>
-              {selectedOption ? selectedOption.label : placeholder || 'Sélectionner...'}
+            <span
+              className={cn(
+                'flex-1 truncate',
+                !value && 'text-gray-400 dark:text-gray-500'
+              )}
+            >
+              {selectedOption
+                ? selectedOption.label
+                : placeholder || 'Sélectionner...'}
             </span>
             <CaretDown
               className={cn(
@@ -123,7 +153,8 @@ const ModernSelect = forwardRef<HTMLDivElement, ModernSelectProps>(
                     onClick={() => handleSelect(option.value)}
                     className={cn(
                       'flex items-center justify-between px-4 py-3 cursor-pointer transition-colors',
-                      index === highlightedIndex && 'bg-amber-50 dark:bg-amber-900/30',
+                      index === highlightedIndex &&
+                        'bg-amber-50 dark:bg-amber-900/30',
                       option.value === value
                         ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
@@ -131,7 +162,10 @@ const ModernSelect = forwardRef<HTMLDivElement, ModernSelectProps>(
                   >
                     <span className="flex-1 truncate">{option.label}</span>
                     {option.value === value && (
-                      <Check className="h-4 w-4 text-amber-600 dark:text-amber-400" weight="bold" />
+                      <Check
+                        className="h-4 w-4 text-amber-600 dark:text-amber-400"
+                        weight="bold"
+                      />
                     )}
                   </div>
                 ))}
@@ -146,13 +180,20 @@ const ModernSelect = forwardRef<HTMLDivElement, ModernSelectProps>(
             role="alert"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={`${selectId}-helper`} className="text-sm text-gray-500 dark:text-gray-400">
+          <p
+            id={`${selectId}-helper`}
+            className="text-sm text-gray-500 dark:text-gray-400"
+          >
             {helperText}
           </p>
         )}

@@ -6,7 +6,8 @@ import { CaretDown } from '@phosphor-icons/react';
 import type { WithLabelError, WithIcon, SelectOption } from '@/types/common';
 
 interface SelectProps
-  extends React.SelectHTMLAttributes<HTMLSelectElement>,
+  extends
+    React.SelectHTMLAttributes<HTMLSelectElement>,
     WithLabelError,
     WithIcon {
   /** Options disponibles dans le sélecteur */
@@ -82,7 +83,10 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
               </option>
             ))}
           </select>
-          <CaretDown className="absolute right-4 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400 dark:text-gray-500 group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400 transition-colors duration-200" weight="bold" />
+          <CaretDown
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400 dark:text-gray-500 group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400 transition-colors duration-200"
+            weight="bold"
+          />
         </div>
         {error && (
           <p
@@ -91,7 +95,11 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
             role="alert"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             {error}
           </p>

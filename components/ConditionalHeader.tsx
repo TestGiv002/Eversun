@@ -32,7 +32,8 @@ export default function ConditionalHeader() {
     return () => clearInterval(interval);
   }, []);
 
-  const isAuthPage = pathname?.startsWith('/login') || pathname?.startsWith('/reset-password');
+  const isAuthPage =
+    pathname?.startsWith('/login') || pathname?.startsWith('/reset-password');
 
   if (isAuthPage) {
     return null;
@@ -70,7 +71,11 @@ export default function ConditionalHeader() {
             <motion.span
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: 0.15, ease: [0.4, 0, 0.2, 1] }}
+              transition={{
+                duration: 0.3,
+                delay: 0.15,
+                ease: [0.4, 0, 0.2, 1],
+              }}
               className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent tracking-tight"
             >
               Eversun

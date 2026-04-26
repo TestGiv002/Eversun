@@ -15,28 +15,38 @@ interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
-  ({ className, variant = 'info', size = 'md', dot = false, icon, children, ...props }, ref) => {
+  (
+    {
+      className,
+      variant = 'info',
+      size = 'md',
+      dot = false,
+      icon,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const variants = {
       // Modern Success: Emerald
       success:
         'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-300/50 dark:border-emerald-700/50',
-      
+
       // Modern Warning: Amber
       warning:
         'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-300/50 dark:border-amber-700/50',
-      
+
       // Modern Error: Rose
       error:
         'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 border border-rose-300/50 dark:border-rose-700/50',
-      
+
       // Modern Info: Sky
-      info:
-        'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border border-sky-300/50 dark:border-sky-700/50',
-      
+      info: 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border border-sky-300/50 dark:border-sky-700/50',
+
       // Modern Pending: Slate
       pending:
         'bg-slate-100 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border border-slate-300/50 dark:border-slate-700/50',
-      
+
       // Modern Primary: Cyan
       primary:
         'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 border border-primary-300/50 dark:border-primary-700/50',

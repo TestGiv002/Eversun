@@ -21,10 +21,11 @@ export function rateLimit(options: RateLimitOptions) {
 
   return async (request: NextRequest): Promise<NextResponse | null> => {
     // Identifier l'utilisateur par IP
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-               request.headers.get('x-real-ip') || 
-               'unknown';
-    
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0] ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+
     const now = Date.now();
     const record = rateLimitStore.get(ip);
 
@@ -47,18 +48,22 @@ export function rateLimit(options: RateLimitOptions) {
     if (currentRecord.count >= maxRequests) {
       // Limite dépassée
       return NextResponse.json(
-        { 
+        {
           error: 'Trop de requêtes. Veuillez réessayer plus tard.',
-          retryAfter: Math.ceil((currentRecord.resetTime - now) / 1000)
+          retryAfter: Math.ceil((currentRecord.resetTime - now) / 1000),
         },
-        { 
+        {
           status: 429,
           headers: {
-            'Retry-After': Math.ceil((currentRecord.resetTime - now) / 1000).toString(),
+            'Retry-After': Math.ceil(
+              (currentRecord.resetTime - now) / 1000
+            ).toString(),
             'X-RateLimit-Limit': maxRequests.toString(),
             'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': new Date(currentRecord.resetTime).toISOString(),
-          }
+            'X-RateLimit-Reset': new Date(
+              currentRecord.resetTime
+            ).toISOString(),
+          },
         }
       );
     }

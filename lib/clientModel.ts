@@ -69,7 +69,10 @@ ClientSchema.post('find', function (docs: any[]) {
         try {
           doc.motDePasse = decrypt(doc.motDePasse);
         } catch (error) {
-          logger.error({ error }, 'Erreur lors du déchiffrement du mot de passe');
+          logger.error(
+            { error },
+            'Erreur lors du déchiffrement du mot de passe'
+          );
         }
       }
     });

@@ -13,23 +13,25 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'default', padding = 'md', border = true, ...props }, ref) => {
+  (
+    { className, variant = 'default', padding = 'md', border = true, ...props },
+    ref
+  ) => {
     const variants = {
       // Modern Default: Subtle background with border
       default:
         'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-base transition-shadow duration-300',
-      
+
       // Modern Glass: Glassmorphism effect
       glass:
         'bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-lg hover:shadow-xl transition-all duration-300',
-      
+
       // Modern Elevated: Strong shadow
       elevated:
         'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md hover:shadow-lg transition-shadow duration-300',
-      
+
       // Modern Flat: No shadow
-      flat:
-        'bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-300',
+      flat: 'bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-300',
     };
 
     const paddings = {
@@ -93,15 +95,16 @@ CardTitle.displayName = 'CardTitle';
 // Card Description
 interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
 
-const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionProps>(
-  ({ className, ...props }, ref) => (
-    <p
-      ref={ref}
-      className={cn('text-sm text-slate-600 dark:text-slate-400', className)}
-      {...props}
-    />
-  )
-);
+const CardDescription = React.forwardRef<
+  HTMLParagraphElement,
+  CardDescriptionProps
+>(({ className, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn('text-sm text-slate-600 dark:text-slate-400', className)}
+    {...props}
+  />
+));
 
 CardDescription.displayName = 'CardDescription';
 
@@ -123,7 +126,10 @@ const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex items-center justify-between pt-6 border-t border-slate-200 dark:border-slate-700', className)}
+      className={cn(
+        'flex items-center justify-between pt-6 border-t border-slate-200 dark:border-slate-700',
+        className
+      )}
       {...props}
     />
   )
@@ -131,5 +137,12 @@ const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
 
 CardFooter.displayName = 'CardFooter';
 
-export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter };
+export {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+};
 export default Card;

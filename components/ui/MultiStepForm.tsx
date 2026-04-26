@@ -55,12 +55,12 @@ export default function MultiStepForm({
             {Math.round(progress)}%
           </span>
         </div>
-        
+
         {/* Progress Bar */}
         <div className="h-3 bg-tertiary rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-400"
-            initial={{ width: `${((currentStep) / steps.length) * 100}%` }}
+            initial={{ width: `${(currentStep / steps.length) * 100}%` }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
           />
@@ -75,8 +75,8 @@ export default function MultiStepForm({
                   index === currentStep
                     ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md scale-105'
                     : index < currentStep
-                    ? 'bg-green-500 text-white'
-                    : 'bg-tertiary text-tertiary'
+                      ? 'bg-green-500 text-white'
+                      : 'bg-tertiary text-tertiary'
                 }`}
                 initial={false}
                 animate={{ scale: index === currentStep ? 1.1 : 1 }}
@@ -92,8 +92,8 @@ export default function MultiStepForm({
                   index === currentStep
                     ? 'text-amber-600 dark:text-amber-400'
                     : index < currentStep
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-tertiary'
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-tertiary'
                 }`}
               >
                 {step.title}

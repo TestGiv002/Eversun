@@ -10,10 +10,11 @@ export function formatDateFR(dateStr?: string) {
 }
 
 export function getStatutBadgeColor(statut?: string) {
-  if (!statut) return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
-  
+  if (!statut)
+    return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
+
   const statutLower = statut.toLowerCase();
-  
+
   if (statutLower.includes('accord')) {
     return 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 border-emerald-300 dark:from-emerald-900/40 dark:to-green-900/40 dark:text-emerald-400 dark:border-emerald-700';
   }
@@ -32,13 +33,14 @@ export function getStatutBadgeColor(statut?: string) {
   if (statutLower.includes('transmise') || statutLower.includes('effectuer')) {
     return 'bg-gradient-to-r from-cyan-100 to-sky-100 text-cyan-700 border-cyan-300 dark:from-cyan-900/40 dark:to-sky-900/40 dark:text-cyan-400 dark:border-cyan-700';
   }
-  
+
   return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
 }
 
 export function getFinancementBadgeColor(financement?: string) {
-  if (!financement) return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
-  
+  if (!financement)
+    return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
+
   if (financement.toLowerCase() === 'sunlib') {
     return 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border-yellow-300 dark:from-yellow-900/40 dark:to-amber-900/40 dark:text-yellow-400 dark:border-yellow-700';
   }
@@ -48,12 +50,13 @@ export function getFinancementBadgeColor(financement?: string) {
   if (financement.toLowerCase() === 'upfront') {
     return 'bg-gradient-to-r from-cyan-100 to-sky-100 text-cyan-700 border-cyan-300 dark:from-cyan-900/40 dark:to-sky-900/40 dark:text-cyan-400 dark:border-cyan-700';
   }
-  
+
   return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
 }
 
 export function getRaccordementBadgeColor(raccordement?: string) {
-  if (!raccordement) return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
+  if (!raccordement)
+    return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
 
   if (raccordement === 'Demande à effectuer') {
     return 'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-700 border-orange-300 dark:from-orange-900/40 dark:to-amber-900/40 dark:text-orange-400 dark:border-orange-700';
@@ -69,7 +72,8 @@ export function getRaccordementBadgeColor(raccordement?: string) {
 }
 
 export function getEtatActuelBadgeColor(etatActuel?: string) {
-  if (!etatActuel) return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
+  if (!etatActuel)
+    return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
 
   if (etatActuel === "En attente d'instruction") {
     return 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border-yellow-300 dark:from-yellow-900/40 dark:to-amber-900/40 dark:text-yellow-400 dark:border-yellow-700';
@@ -85,7 +89,8 @@ export function getEtatActuelBadgeColor(etatActuel?: string) {
 }
 
 export function getTypeConsuelBadgeColor(typeConsuel?: string) {
-  if (!typeConsuel) return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
+  if (!typeConsuel)
+    return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
 
   if (typeConsuel === 'Violet') {
     return '!bg-purple-600 !text-white !border-purple-700 dark:!bg-purple-700 dark:!border-purple-800';
@@ -98,7 +103,8 @@ export function getTypeConsuelBadgeColor(typeConsuel?: string) {
 }
 
 export function getPrestataireBadgeColor(prestataire?: string) {
-  if (!prestataire) return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
+  if (!prestataire)
+    return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
 
   if (prestataire === 'Eversun') {
     return 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 border-emerald-300 dark:from-emerald-900/40 dark:to-green-900/40 dark:text-emerald-400 dark:border-emerald-700';
@@ -111,7 +117,8 @@ export function getPrestataireBadgeColor(prestataire?: string) {
 }
 
 export function getCauseNonPresenceBadgeColor(causeNonPresence?: string) {
-  if (!causeNonPresence) return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
+  if (!causeNonPresence)
+    return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:text-gray-300 dark:border-gray-600';
 
   if (causeNonPresence === 'Consuel non demandé') {
     return 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-600 border-gray-300 dark:from-gray-800 dark:to-slate-800 dark:text-gray-400 dark:border-gray-700';

@@ -1,14 +1,31 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { User, X, Eye, EyeSlash, Calendar, Buildings, FileText, Key, WarningCircle, Lightning, CheckCircle, ChatCircle, Flag, House, Clock, Copy, Link, Trash, PencilSimple } from '@phosphor-icons/react';
+import {
+  User,
+  X,
+  Eye,
+  EyeSlash,
+  Calendar,
+  Buildings,
+  FileText,
+  Key,
+  WarningCircle,
+  Lightning,
+  CheckCircle,
+  ChatCircle,
+  Flag,
+  House,
+  Clock,
+  Copy,
+  Link,
+  Trash,
+  PencilSimple,
+} from '@phosphor-icons/react';
 import Badge from '@/components/ui/Badge';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { ClientRecord } from '@/types/client';
-import {
-  formatDateFR,
-  getStatutBadgeColor,
-} from '@/lib/clientTableUtils';
+import { formatDateFR, getStatutBadgeColor } from '@/lib/clientTableUtils';
 import { toast } from '@/store/useToastStore';
 
 interface ClientModalProps {
@@ -84,24 +101,46 @@ export default function ClientModal({
   const getUrgencyInfo = () => {
     if (!selectedClient) return null;
     if (!selectedClient.dateEstimative) return null;
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const estimatedDate = new Date(selectedClient.dateEstimative);
     estimatedDate.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((estimatedDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(
+      (estimatedDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     if (diffDays < 0) {
-      return { color: 'from-red-500 to-rose-600', label: 'En retard', urgent: true, diffDays };
+      return {
+        color: 'from-red-500 to-rose-600',
+        label: 'En retard',
+        urgent: true,
+        diffDays,
+      };
     }
     if (diffDays === 0) {
-      return { color: 'from-red-500 to-orange-500', label: "Aujourd'hui", urgent: true, diffDays };
+      return {
+        color: 'from-red-500 to-orange-500',
+        label: "Aujourd'hui",
+        urgent: true,
+        diffDays,
+      };
     }
     if (diffDays <= 3) {
-      return { color: 'from-orange-500 to-amber-500', label: 'Urgent', urgent: true, diffDays };
+      return {
+        color: 'from-orange-500 to-amber-500',
+        label: 'Urgent',
+        urgent: true,
+        diffDays,
+      };
     }
     if (diffDays <= 7) {
-      return { color: 'from-yellow-500 to-amber-500', label: 'Proche', urgent: false, diffDays };
+      return {
+        color: 'from-yellow-500 to-amber-500',
+        label: 'Proche',
+        urgent: false,
+        diffDays,
+      };
     }
     return null;
   };
@@ -156,7 +195,9 @@ export default function ClientModal({
                   {selectedClient.statut || 'Sans statut'}
                 </Badge>
                 {urgency && (
-                  <Badge className={`${urgency.color.replace('from-', 'bg-').split(' ')[0]} text-white border-0`}>
+                  <Badge
+                    className={`${urgency.color.replace('from-', 'bg-').split(' ')[0]} text-white border-0`}
+                  >
                     {urgency.label} ({urgency.diffDays}j)
                   </Badge>
                 )}
@@ -169,7 +210,10 @@ export default function ClientModal({
               className="p-2 rounded-lg hover:bg-secondary transition-colors group"
               title="Modifier"
             >
-              <PencilSimple className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" weight="bold" />
+              <PencilSimple
+                className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                weight="bold"
+              />
             </button>
             {onDelete && (
               <button
@@ -177,7 +221,10 @@ export default function ClientModal({
                 className="p-2 rounded-lg hover:bg-secondary transition-colors group"
                 title="Supprimer"
               >
-                <Trash className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400" weight="bold" />
+                <Trash
+                  className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400"
+                  weight="bold"
+                />
               </button>
             )}
             <button
@@ -185,7 +232,10 @@ export default function ClientModal({
               className="p-3 rounded-lg hover:bg-secondary transition-all duration-200 hover:scale-[1.01] group"
               title="Fermer"
             >
-              <X className="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" weight="bold" />
+              <X
+                className="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"
+                weight="bold"
+              />
             </button>
           </div>
         </div>
@@ -202,9 +252,14 @@ export default function ClientModal({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {selectedClient.prestataire && (
                   <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                    <Buildings className="h-4 w-4 text-teal-500" weight="bold" />
+                    <Buildings
+                      className="h-4 w-4 text-teal-500"
+                      weight="bold"
+                    />
                     <div>
-                      <p className="text-xs font-semibold text-tertiary">Prestataire</p>
+                      <p className="text-xs font-semibold text-tertiary">
+                        Prestataire
+                      </p>
                       <p className="font-medium text-primary">
                         {selectedClient.prestataire}
                       </p>
@@ -215,7 +270,9 @@ export default function ClientModal({
                   <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
                     <Calendar className="h-4 w-4 text-teal-500" weight="bold" />
                     <div>
-                      <p className="text-xs font-semibold text-tertiary">Date d'envoi</p>
+                      <p className="text-xs font-semibold text-tertiary">
+                        Date d'envoi
+                      </p>
                       <p className="font-medium text-primary">
                         {formatDateFR(selectedClient.dateEnvoi)}
                       </p>
@@ -226,7 +283,9 @@ export default function ClientModal({
                   <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
                     <Clock className="h-4 w-4 text-teal-500" weight="bold" />
                     <div>
-                      <p className="text-xs font-semibold text-tertiary">Date estimative</p>
+                      <p className="text-xs font-semibold text-tertiary">
+                        Date estimative
+                      </p>
                       <p className="font-medium text-primary">
                         {formatDateFR(selectedClient.dateEstimative)}
                       </p>
@@ -235,9 +294,14 @@ export default function ClientModal({
                 )}
                 {selectedClient.financement && (
                   <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                    <Lightning className="h-4 w-4 text-teal-500" weight="bold" />
+                    <Lightning
+                      className="h-4 w-4 text-teal-500"
+                      weight="bold"
+                    />
                     <div>
-                      <p className="text-xs font-semibold text-tertiary">Financement</p>
+                      <p className="text-xs font-semibold text-tertiary">
+                        Financement
+                      </p>
                       <p className="font-medium text-primary">
                         {selectedClient.financement}
                       </p>
@@ -248,7 +312,9 @@ export default function ClientModal({
                   <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
                     <FileText className="h-4 w-4 text-teal-500" weight="bold" />
                     <div>
-                      <p className="text-xs font-semibold text-tertiary">Numéro DP</p>
+                      <p className="text-xs font-semibold text-tertiary">
+                        Numéro DP
+                      </p>
                       <p className="font-medium text-primary">
                         {selectedClient.noDp}
                       </p>
@@ -257,9 +323,14 @@ export default function ClientModal({
                 )}
                 {selectedClient.ville && (
                   <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                    <Buildings className="h-4 w-4 text-teal-500" weight="bold" />
+                    <Buildings
+                      className="h-4 w-4 text-teal-500"
+                      weight="bold"
+                    />
                     <div>
-                      <p className="text-xs font-semibold text-tertiary">Ville</p>
+                      <p className="text-xs font-semibold text-tertiary">
+                        Ville
+                      </p>
                       <p className="font-medium text-primary">
                         {selectedClient.ville}
                       </p>
@@ -270,59 +341,81 @@ export default function ClientModal({
             </div>
 
             {/* Identifiants Portail - Affiché uniquement pour DP en cours */}
-            {section.startsWith('dp') && section !== 'dp-accordes' && section !== 'dp-refuses' && (
-              <div className="bg-primary rounded-lg p-6 border border-primary shadow">
-                <h3 className="text-lg font-bold text-primary mb-6 flex items-center gap-2">
-                  <Key className="h-5 w-5 text-teal-500" weight="bold" />
-                  Identifiants Portail
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {selectedClient.portail && (
-                    <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <Buildings className="h-4 w-4 text-teal-500" weight="bold" />
-                      <div className="flex-1">
-                        <p className="text-xs font-semibold text-tertiary">Portail</p>
-                        <p className="font-medium text-primary">
-                          {selectedClient.portail}
-                        </p>
+            {section.startsWith('dp') &&
+              section !== 'dp-accordes' &&
+              section !== 'dp-refuses' && (
+                <div className="bg-primary rounded-lg p-6 border border-primary shadow">
+                  <h3 className="text-lg font-bold text-primary mb-6 flex items-center gap-2">
+                    <Key className="h-5 w-5 text-teal-500" weight="bold" />
+                    Identifiants Portail
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedClient.portail && (
+                      <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
+                        <Buildings
+                          className="h-4 w-4 text-teal-500"
+                          weight="bold"
+                        />
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-tertiary">
+                            Portail
+                          </p>
+                          <p className="font-medium text-primary">
+                            {selectedClient.portail}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {selectedClient.identifiant && (
-                    <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <User className="h-4 w-4 text-teal-500" weight="bold" />
-                      <div className="flex-1">
-                        <p className="text-xs font-semibold text-tertiary">Identifiant</p>
-                        <p className="font-medium text-primary">
-                          {selectedClient.identifiant}
-                        </p>
+                    )}
+                    {selectedClient.identifiant && (
+                      <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
+                        <User className="h-4 w-4 text-teal-500" weight="bold" />
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-tertiary">
+                            Identifiant
+                          </p>
+                          <p className="font-medium text-primary">
+                            {selectedClient.identifiant}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {selectedClient.motDePasse && (
-                    <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <Key className="h-4 w-4 text-primary-500" weight="bold" />
-                      <div className="flex-1">
-                        <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">Mot de passe</p>
-                        <p className="font-medium text-gray-900 dark:text-white">
-                          {showPassword ? selectedClient.motDePasse : '••••••••'}
-                        </p>
+                    )}
+                    {selectedClient.motDePasse && (
+                      <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
+                        <Key
+                          className="h-4 w-4 text-primary-500"
+                          weight="bold"
+                        />
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                            Mot de passe
+                          </p>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {showPassword
+                              ? selectedClient.motDePasse
+                              : '••••••••'}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="p-2 rounded-lg hover:bg-secondary transition-colors"
+                        >
+                          {showPassword ? (
+                            <EyeSlash
+                              className="h-4 w-4 text-gray-500"
+                              weight="bold"
+                            />
+                          ) : (
+                            <Eye
+                              className="h-4 w-4 text-gray-500"
+                              weight="bold"
+                            />
+                          )}
+                        </button>
                       </div>
-                      <button
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="p-2 rounded-lg hover:bg-secondary transition-colors"
-                      >
-                        {showPassword ? (
-                          <EyeSlash className="h-4 w-4 text-gray-500" weight="bold" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-gray-500" weight="bold" />
-                        )}
-                      </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Informations Consuel - Affiché uniquement pour Consuel */}
             {section.startsWith('consuel') && (
@@ -334,9 +427,14 @@ export default function ClientModal({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedClient.pvChantierDate && (
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <Calendar className="h-4 w-4 text-teal-500" weight="bold" />
+                      <Calendar
+                        className="h-4 w-4 text-teal-500"
+                        weight="bold"
+                      />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">PV Chantier</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          PV Chantier
+                        </p>
                         <p className="font-medium text-primary">
                           {formatDateFR(selectedClient.pvChantierDate)}
                         </p>
@@ -345,9 +443,14 @@ export default function ClientModal({
                   )}
                   {selectedClient.causeNonPresence && (
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <WarningCircle className="h-4 w-4 text-red-500" weight="bold" />
+                      <WarningCircle
+                        className="h-4 w-4 text-red-500"
+                        weight="bold"
+                      />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">Cause non présence</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          Cause non présence
+                        </p>
                         <p className="font-medium text-primary">
                           {selectedClient.causeNonPresence}
                         </p>
@@ -356,9 +459,14 @@ export default function ClientModal({
                   )}
                   {selectedClient.etatActuel && (
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <CheckCircle className="h-4 w-4 text-emerald-500" weight="bold" />
+                      <CheckCircle
+                        className="h-4 w-4 text-emerald-500"
+                        weight="bold"
+                      />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">État actuel</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          État actuel
+                        </p>
                         <p className="font-medium text-primary">
                           {selectedClient.etatActuel}
                         </p>
@@ -367,9 +475,14 @@ export default function ClientModal({
                   )}
                   {selectedClient.typeConsuel && (
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <Lightning className="h-4 w-4 text-amber-500" weight="bold" />
+                      <Lightning
+                        className="h-4 w-4 text-amber-500"
+                        weight="bold"
+                      />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">Type Consuel</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          Type Consuel
+                        </p>
                         <p className="font-medium text-primary">
                           {selectedClient.typeConsuel}
                         </p>
@@ -378,9 +491,14 @@ export default function ClientModal({
                   )}
                   {selectedClient.dateDerniereDemarche && (
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <Calendar className="h-4 w-4 text-teal-500" weight="bold" />
+                      <Calendar
+                        className="h-4 w-4 text-teal-500"
+                        weight="bold"
+                      />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">Dernière démarche</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          Dernière démarche
+                        </p>
                         <p className="font-medium text-primary">
                           {formatDateFR(selectedClient.dateDerniereDemarche)}
                         </p>
@@ -391,7 +509,9 @@ export default function ClientModal({
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
                       <Clock className="h-4 w-4 text-teal-500" weight="bold" />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">Date Estimatives</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          Date Estimatives
+                        </p>
                         <p className="font-medium text-primary">
                           {formatDateFR(selectedClient.dateEstimative)}
                         </p>
@@ -403,19 +523,25 @@ export default function ClientModal({
             )}
 
             {/* Commentaires - Affiché pour Consuel, Raccordement et Raccordement MES */}
-            {(section.startsWith('consuel') || section === 'raccordement' || section === 'raccordement-mes') && selectedClient.commentaires && (
-              <div className="bg-primary rounded-lg p-6 border border-primary shadow">
-                <h3 className="text-lg font-bold text-primary mb-6 flex items-center gap-2">
-                  <ChatCircle className="h-5 w-5 text-teal-500" weight="bold" />
-                  Commentaires
-                </h3>
-                <div className="p-4 bg-secondary rounded-lg border border-primary">
-                  <p className="font-medium text-primary whitespace-pre-wrap">
-                    {selectedClient.commentaires}
-                  </p>
+            {(section.startsWith('consuel') ||
+              section === 'raccordement' ||
+              section === 'raccordement-mes') &&
+              selectedClient.commentaires && (
+                <div className="bg-primary rounded-lg p-6 border border-primary shadow">
+                  <h3 className="text-lg font-bold text-primary mb-6 flex items-center gap-2">
+                    <ChatCircle
+                      className="h-5 w-5 text-teal-500"
+                      weight="bold"
+                    />
+                    Commentaires
+                  </h3>
+                  <div className="p-4 bg-secondary rounded-lg border border-primary">
+                    <p className="font-medium text-primary whitespace-pre-wrap">
+                      {selectedClient.commentaires}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Informations Raccordement - Affiché uniquement pour Raccordement */}
             {section === 'raccordement' && (
@@ -427,9 +553,14 @@ export default function ClientModal({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedClient.typeConsuel && (
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <Lightning className="h-4 w-4 text-amber-500" weight="bold" />
+                      <Lightning
+                        className="h-4 w-4 text-amber-500"
+                        weight="bold"
+                      />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">Type de consuel</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          Type de consuel
+                        </p>
                         <p className="font-medium text-primary">
                           {selectedClient.typeConsuel}
                         </p>
@@ -440,7 +571,9 @@ export default function ClientModal({
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
                       <Flag className="h-4 w-4 text-teal-500" />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">Raccordement</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          Raccordement
+                        </p>
                         <p className="font-medium text-primary">
                           {selectedClient.raccordement}
                         </p>
@@ -449,9 +582,14 @@ export default function ClientModal({
                   )}
                   {selectedClient.dateDerniereDemarche && (
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <Calendar className="h-4 w-4 text-teal-500" weight="bold" />
+                      <Calendar
+                        className="h-4 w-4 text-teal-500"
+                        weight="bold"
+                      />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">Date dernière démarche</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          Date dernière démarche
+                        </p>
                         <p className="font-medium text-primary">
                           {formatDateFR(selectedClient.dateDerniereDemarche)}
                         </p>
@@ -462,7 +600,9 @@ export default function ClientModal({
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
                       <Clock className="h-4 w-4 text-teal-500" weight="bold" />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">Date Estimatives</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          Date Estimatives
+                        </p>
                         <p className="font-medium text-primary">
                           {formatDateFR(selectedClient.dateEstimative)}
                         </p>
@@ -483,9 +623,14 @@ export default function ClientModal({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedClient.numeroContrat && (
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <FileText className="h-4 w-4 text-teal-500" weight="bold" />
+                      <FileText
+                        className="h-4 w-4 text-teal-500"
+                        weight="bold"
+                      />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">Numéro de contrat</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          Numéro de contrat
+                        </p>
                         <p className="font-medium text-primary">
                           {selectedClient.numeroContrat}
                         </p>
@@ -494,9 +639,14 @@ export default function ClientModal({
                   )}
                   {selectedClient.dateMiseEnService && (
                     <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary">
-                      <Calendar className="h-4 w-4 text-teal-500" weight="bold" />
+                      <Calendar
+                        className="h-4 w-4 text-teal-500"
+                        weight="bold"
+                      />
                       <div>
-                        <p className="text-xs font-semibold text-tertiary">Date de Mise en service</p>
+                        <p className="text-xs font-semibold text-tertiary">
+                          Date de Mise en service
+                        </p>
                         <p className="font-medium text-primary">
                           {formatDateFR(selectedClient.dateMiseEnService)}
                         </p>

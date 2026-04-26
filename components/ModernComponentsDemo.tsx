@@ -1,12 +1,17 @@
 'use client';
 
 import React from 'react';
-import { CheckCircleIcon, XCircleIcon, ExclamationCircleIcon, ClockIcon } from '@heroicons/react/24/solid';
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  ExclamationCircleIcon,
+  ClockIcon,
+} from '@heroicons/react/24/solid';
 import { cn } from '@/lib/utils';
 
 /**
  * MODERN COMPONENTS EXAMPLES
- * 
+ *
  * Ce fichier montre des exemples de composants modernisés
  * pour démontrer le design et les interactions
  */
@@ -26,42 +31,52 @@ interface ModernKPICardProps {
 
 const colorClasses = {
   cyan: 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400',
-  violet: 'bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-400',
-  emerald: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
+  violet:
+    'bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-400',
+  emerald:
+    'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
   amber: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
   rose: 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400',
 };
 
-export function ModernKPICard({ 
-  title, 
-  value, 
-  icon, 
-  color, 
-  trend, 
-  description 
+export function ModernKPICard({
+  title,
+  value,
+  icon,
+  color,
+  trend,
+  description,
 }: ModernKPICardProps) {
   return (
     <div className="group">
-      <div className={cn(
-        'relative overflow-hidden rounded-2xl p-6',
-        'bg-white/80 dark:bg-slate-800/80',
-        'backdrop-blur-md',
-        'border border-slate-200/50 dark:border-slate-700/50',
-        'shadow-base hover:shadow-lg',
-        'transition-all duration-300',
-        'hover:scale-[1.02]'
-      )}>
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-2xl p-6',
+          'bg-white/80 dark:bg-slate-800/80',
+          'backdrop-blur-md',
+          'border border-slate-200/50 dark:border-slate-700/50',
+          'shadow-base hover:shadow-lg',
+          'transition-all duration-300',
+          'hover:scale-[1.02]'
+        )}
+      >
         {/* Gradient bg on hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300" 
-             style={{ background: `linear-gradient(135deg, var(--color), transparent)` }} />
-        
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300"
+          style={{
+            background: `linear-gradient(135deg, var(--color), transparent)`,
+          }}
+        />
+
         <div className="relative z-10 flex items-start justify-between">
           <div className="flex-1">
             <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">
               {title}
             </p>
-            <p className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 
-                          dark:from-primary-300 dark:to-primary-400 bg-clip-text text-transparent">
+            <p
+              className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 
+                          dark:from-primary-300 dark:to-primary-400 bg-clip-text text-transparent"
+            >
               {value}
             </p>
             {description && (
@@ -70,17 +85,19 @@ export function ModernKPICard({
               </p>
             )}
           </div>
-          
-          <div className={cn(
-            'p-4 rounded-xl',
-            'transition-all duration-300',
-            'group-hover:scale-110 group-hover:rotate-6',
-            colorClasses[color]
-          )}>
+
+          <div
+            className={cn(
+              'p-4 rounded-xl',
+              'transition-all duration-300',
+              'group-hover:scale-110 group-hover:rotate-6',
+              colorClasses[color]
+            )}
+          >
             {icon}
           </div>
         </div>
-        
+
         {/* Trend indicator */}
         {trend !== undefined && (
           <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -88,7 +105,9 @@ export function ModernKPICard({
               {trend > 0 ? (
                 <span className="text-emerald-500 font-bold">↑ {trend}%</span>
               ) : (
-                <span className="text-rose-500 font-bold">↓ {Math.abs(trend)}%</span>
+                <span className="text-rose-500 font-bold">
+                  ↓ {Math.abs(trend)}%
+                </span>
               )}
               <span className="text-xs text-slate-500 dark:text-slate-400">
                 vs last month
@@ -113,7 +132,11 @@ interface ModernStatusBadgeProps {
   icon?: React.ReactNode;
 }
 
-export function ModernStatusBadge({ status, label, icon }: ModernStatusBadgeProps) {
+export function ModernStatusBadge({
+  status,
+  label,
+  icon,
+}: ModernStatusBadgeProps) {
   const statusConfig = {
     success: {
       bg: 'bg-emerald-100 dark:bg-emerald-900/30',
@@ -148,16 +171,18 @@ export function ModernStatusBadge({ status, label, icon }: ModernStatusBadgeProp
   const config = statusConfig[status];
 
   return (
-    <div className={cn(
-      'inline-flex items-center gap-2 px-3 py-1.5',
-      'rounded-lg border',
-      'text-sm font-medium',
-      'transition-all duration-200',
-      'hover:shadow-base',
-      config.bg,
-      config.border,
-      config.text
-    )}>
+    <div
+      className={cn(
+        'inline-flex items-center gap-2 px-3 py-1.5',
+        'rounded-lg border',
+        'text-sm font-medium',
+        'transition-all duration-200',
+        'hover:shadow-base',
+        config.bg,
+        config.border,
+        config.text
+      )}
+    >
       <div className={cn('h-2 w-2 rounded-full', config.dot)} />
       {icon || config.defaultIcon}
       <span>{label}</span>
@@ -169,24 +194,26 @@ export function ModernStatusBadge({ status, label, icon }: ModernStatusBadgeProp
 // 3. MODERN TABLE ROW
 // ============================================================================
 
-export function ModernTableRow({ 
-  cells, 
-  isHovered 
-}: { 
-  cells: React.ReactNode[]
-  isHovered?: boolean
+export function ModernTableRow({
+  cells,
+  isHovered,
+}: {
+  cells: React.ReactNode[];
+  isHovered?: boolean;
 }) {
   return (
-    <tr className={cn(
-      'border-b border-slate-200 dark:border-slate-700',
-      'transition-all duration-200',
-      'group',
-      // Striped effect
-      'hover:bg-slate-50/50 dark:hover:bg-slate-900/30',
-      isHovered && 'bg-primary-50/50 dark:bg-primary-900/20'
-    )}>
+    <tr
+      className={cn(
+        'border-b border-slate-200 dark:border-slate-700',
+        'transition-all duration-200',
+        'group',
+        // Striped effect
+        'hover:bg-slate-50/50 dark:hover:bg-slate-900/30',
+        isHovered && 'bg-primary-50/50 dark:bg-primary-900/20'
+      )}
+    >
       {cells.map((cell, idx) => (
-        <td 
+        <td
           key={idx}
           className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300"
         >
@@ -219,38 +246,42 @@ export function ModernModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/20 backdrop-blur-md 
                    animate-fade-in opacity-100"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="relative w-full max-w-md mx-4 animate-scale-in">
-        <div className={cn(
-          'rounded-2xl',
-          'bg-white/95 dark:bg-slate-800/95',
-          'backdrop-blur-lg',
-          'border border-slate-200/50 dark:border-slate-700/50',
-          'shadow-2xl',
-          'overflow-hidden'
-        )}>
+        <div
+          className={cn(
+            'rounded-2xl',
+            'bg-white/95 dark:bg-slate-800/95',
+            'backdrop-blur-lg',
+            'border border-slate-200/50 dark:border-slate-700/50',
+            'shadow-2xl',
+            'overflow-hidden'
+          )}
+        >
           {/* Header */}
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">
               {title}
             </h2>
           </div>
-          
+
           {/* Content */}
           <div className="px-6 py-4 max-h-[60vh] overflow-y-auto">
             {children}
           </div>
-          
+
           {/* Footer */}
           {actions && (
-            <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 
-                           flex justify-end gap-3">
+            <div
+              className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 
+                           flex justify-end gap-3"
+            >
               {actions}
             </div>
           )}
@@ -271,8 +302,10 @@ export function ModernComponentsDemo() {
     <div className="space-y-8 p-8">
       {/* Section Title */}
       <div>
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 
-                       dark:from-primary-300 dark:to-primary-400 bg-clip-text text-transparent">
+        <h1
+          className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 
+                       dark:from-primary-300 dark:to-primary-400 bg-clip-text text-transparent"
+        >
           Modern Design Components
         </h1>
         <p className="text-slate-600 dark:text-slate-400 mt-2">
@@ -339,17 +372,21 @@ export function ModernComponentsDemo() {
         <h2 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">
           Exemple de tableau
         </h2>
-        <div className={cn(
-          'rounded-2xl overflow-hidden',
-          'bg-white/80 dark:bg-slate-800/80',
-          'border border-slate-200/50 dark:border-slate-700/50',
-          'shadow-base'
-        )}>
+        <div
+          className={cn(
+            'rounded-2xl overflow-hidden',
+            'bg-white/80 dark:bg-slate-800/80',
+            'border border-slate-200/50 dark:border-slate-700/50',
+            'shadow-base'
+          )}
+        >
           <table className="w-full">
-            <thead className={cn(
-              'border-b border-slate-200 dark:border-slate-700',
-              'bg-slate-50/50 dark:bg-slate-900/30'
-            )}>
+            <thead
+              className={cn(
+                'border-b border-slate-200 dark:border-slate-700',
+                'bg-slate-50/50 dark:bg-slate-900/30'
+              )}
+            >
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900 dark:text-white">
                   Client
@@ -366,21 +403,33 @@ export function ModernComponentsDemo() {
               <ModernTableRow
                 cells={[
                   'Jean Dupont',
-                  <ModernStatusBadge key="1" status="success" label="Accordé" />,
+                  <ModernStatusBadge
+                    key="1"
+                    status="success"
+                    label="Accordé"
+                  />,
                   '12 Avril 2026',
                 ]}
               />
               <ModernTableRow
                 cells={[
                   'Marie Martin',
-                  <ModernStatusBadge key="2" status="pending" label="En cours" />,
+                  <ModernStatusBadge
+                    key="2"
+                    status="pending"
+                    label="En cours"
+                  />,
                   '10 Avril 2026',
                 ]}
               />
               <ModernTableRow
                 cells={[
                   'Pierre Bernard',
-                  <ModernStatusBadge key="3" status="warning" label="En attente" />,
+                  <ModernStatusBadge
+                    key="3"
+                    status="warning"
+                    label="En attente"
+                  />,
                   '08 Avril 2026',
                 ]}
               />

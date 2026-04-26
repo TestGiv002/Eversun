@@ -31,8 +31,27 @@ interface ModernDatePickerProps extends WithLabelError, WithIcon {
 }
 
 const ModernDatePicker = forwardRef<ReactDatePicker, ModernDatePickerProps>(
-  ({ className, label, error, helperText, id, icon, name, value, onChange, placeholderText, minDate, maxDate, disabled, ...props }, ref) => {
-    const inputId = id || `datepicker-${name || Math.random().toString(36).substr(2, 9)}`;
+  (
+    {
+      className,
+      label,
+      error,
+      helperText,
+      id,
+      icon,
+      name,
+      value,
+      onChange,
+      placeholderText,
+      minDate,
+      maxDate,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
+    const inputId =
+      id || `datepicker-${name || Math.random().toString(36).substr(2, 9)}`;
 
     // Convertir string ISO vers Date
     const getDateObject = (): Date | null => {
@@ -93,11 +112,14 @@ const ModernDatePicker = forwardRef<ReactDatePicker, ModernDatePickerProps>(
             dayClassName={(date) => {
               const today = new Date();
               const selectedDate = getDateObject();
-              
+
               if (date.toDateString() === today.toDateString()) {
                 return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full font-bold';
               }
-              if (selectedDate && date.toDateString() === selectedDate.toDateString()) {
+              if (
+                selectedDate &&
+                date.toDateString() === selectedDate.toDateString()
+              ) {
                 return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full font-bold';
               }
               return 'text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-full transition-colors';
@@ -116,20 +138,43 @@ const ModernDatePicker = forwardRef<ReactDatePicker, ModernDatePickerProps>(
                   disabled={prevMonthButtonDisabled}
                   className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <svg
+                    className="w-5 h-5 text-gray-700 dark:text-gray-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
                   </svg>
                 </button>
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {monthDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                  {monthDate.toLocaleDateString('fr-FR', {
+                    month: 'long',
+                    year: 'numeric',
+                  })}
                 </span>
                 <button
                   onClick={increaseMonth}
                   disabled={nextMonthButtonDisabled}
                   className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg
+                    className="w-5 h-5 text-gray-700 dark:text-gray-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </button>
               </div>
@@ -144,13 +189,20 @@ const ModernDatePicker = forwardRef<ReactDatePicker, ModernDatePickerProps>(
             role="alert"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={`${inputId}-helper`} className="text-sm text-gray-500 dark:text-gray-400">
+          <p
+            id={`${inputId}-helper`}
+            className="text-sm text-gray-500 dark:text-gray-400"
+          >
             {helperText}
           </p>
         )}

@@ -28,19 +28,20 @@ export default function UserMenu() {
         <SignOut className="h-4 w-4 text-tertiary" weight="bold" />
       </button>
 
-      {showConfirm && createPortal(
-        <ConfirmDialog
-          isOpen={showConfirm}
-          onClose={() => setShowConfirm(false)}
-          onConfirm={handleLogout}
-          title="Déconnexion"
-          message="Êtes-vous sûr de vouloir vous déconnecter ?"
-          confirmText="Se déconnecter"
-          cancelText="Annuler"
-          variant="danger"
-        />,
-        document.getElementById('logout-dialog-portal')!
-      )}
+      {showConfirm &&
+        createPortal(
+          <ConfirmDialog
+            isOpen={showConfirm}
+            onClose={() => setShowConfirm(false)}
+            onConfirm={handleLogout}
+            title="Déconnexion"
+            message="Êtes-vous sûr de vouloir vous déconnecter ?"
+            confirmText="Se déconnecter"
+            cancelText="Annuler"
+            variant="danger"
+          />,
+          document.getElementById('logout-dialog-portal')!
+        )}
     </>
   );
 }

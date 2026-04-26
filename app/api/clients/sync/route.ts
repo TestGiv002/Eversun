@@ -10,10 +10,16 @@ export async function POST(request: Request) {
     const data = await request.json();
 
     if (!data.client) {
-      return NextResponse.json({ error: 'Client name is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Client name is required' },
+        { status: 400 }
+      );
     }
     if (!data.section) {
-      return NextResponse.json({ error: 'Section is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Section is required' },
+        { status: 400 }
+      );
     }
 
     const Model =

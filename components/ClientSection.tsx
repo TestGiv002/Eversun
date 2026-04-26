@@ -59,7 +59,9 @@ export default function ClientSection({ section }: ClientSectionProps) {
 
   // Expose loading state for parent component
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent('sectionLoading', { detail: { section, loading } }));
+    window.dispatchEvent(
+      new CustomEvent('sectionLoading', { detail: { section, loading } })
+    );
   }, [section, loading]);
 
   useEffect(() => {
@@ -107,7 +109,9 @@ export default function ClientSection({ section }: ClientSectionProps) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const dpEnCoursClients = clients.filter((c) => c.section === 'dp-en-cours' && c.dateEstimative);
+    const dpEnCoursClients = clients.filter(
+      (c) => c.section === 'dp-en-cours' && c.dateEstimative
+    );
 
     dpEnCoursClients.forEach((client) => {
       if (client.dateEstimative) {
@@ -132,7 +136,7 @@ export default function ClientSection({ section }: ClientSectionProps) {
       'dp-en-cours': 'Déclaration Préalable – En cours',
       'dp-accordes': 'Déclaration Préalable – Accordés',
       'dp-refuses': 'Déclaration Préalable – Refus',
-      'daact': 'Déclaration attestant l\'achèvement et la conformité des travaux',
+      daact: "Déclaration attestant l'achèvement et la conformité des travaux",
       installation: 'Installation – En cours',
       'consuel-en-cours': 'Consuel – En cours',
       'consuel-finalise': 'Consuel – Finalisé',
@@ -148,7 +152,7 @@ export default function ClientSection({ section }: ClientSectionProps) {
       'dp-en-cours': <FileText className="h-6 w-6" weight="bold" />,
       'dp-accordes': <CheckCircle className="h-6 w-6" weight="bold" />,
       'dp-refuses': <XCircle className="h-6 w-6" weight="bold" />,
-      'daact': <CheckSquare className="h-6 w-6" weight="bold" />,
+      daact: <CheckSquare className="h-6 w-6" weight="bold" />,
       installation: <House className="h-6 w-6" weight="bold" />,
       'consuel-en-cours': <Circle className="h-6 w-6" weight="bold" />,
       'consuel-finalise': <CheckCircle className="h-6 w-6" weight="bold" />,
@@ -164,7 +168,7 @@ export default function ClientSection({ section }: ClientSectionProps) {
       'dp-en-cours': 'from-teal-500 to-cyan-500',
       'dp-accordes': 'from-emerald-500 to-green-500',
       'dp-refuses': 'from-red-500 to-rose-500',
-      'daact': 'from-emerald-500 to-green-500',
+      daact: 'from-emerald-500 to-green-500',
       installation: 'from-sky-500 to-indigo-500',
       'consuel-en-cours': 'from-teal-500 to-cyan-500',
       'consuel-finalise': 'from-emerald-500 to-green-500',
@@ -175,7 +179,10 @@ export default function ClientSection({ section }: ClientSectionProps) {
   }, [section]);
 
   const sectionItems = useMemo(() => {
-    let items = section === 'clients' ? clients : clients.filter((clientItem) => clientItem.section === section);
+    let items =
+      section === 'clients'
+        ? clients
+        : clients.filter((clientItem) => clientItem.section === section);
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -236,7 +243,11 @@ export default function ClientSection({ section }: ClientSectionProps) {
     const oldSection = section;
     let newSection = record.section;
 
-    if (section === 'dp-en-cours' && (record.statut === 'Accord favorable' || record.statut === 'Accord tacite')) {
+    if (
+      section === 'dp-en-cours' &&
+      (record.statut === 'Accord favorable' ||
+        record.statut === 'Accord tacite')
+    ) {
       toSave.section = 'dp-accordes';
       newSection = 'dp-accordes';
     }
@@ -244,7 +255,11 @@ export default function ClientSection({ section }: ClientSectionProps) {
       toSave.section = 'dp-refuses';
       newSection = 'dp-refuses';
     }
-    if (section === 'consuel-en-cours' && record.causeNonPresence === 'Consuel envoyé' && record.etatActuel === 'Consuel Visé') {
+    if (
+      section === 'consuel-en-cours' &&
+      record.causeNonPresence === 'Consuel envoyé' &&
+      record.etatActuel === 'Consuel Visé'
+    ) {
       toSave.section = 'consuel-finalise';
       newSection = 'consuel-finalise';
     }
@@ -261,7 +276,9 @@ export default function ClientSection({ section }: ClientSectionProps) {
         setClients((prev) => prev.filter((item) => item._id !== record._id));
       } else {
         setClients((prev) =>
-          prev.map((item) => (item._id === record._id ? optimisticRecord : item))
+          prev.map((item) =>
+            item._id === record._id ? optimisticRecord : item
+          )
         );
       }
 
@@ -275,7 +292,9 @@ export default function ClientSection({ section }: ClientSectionProps) {
         if (res.ok) {
           const saved = await res.json();
           if (oldSection !== newSection) {
-            toast.success(`${record.client} a été déplacé vers ${newSection.replace('-', ' ').toUpperCase()}`);
+            toast.success(
+              `${record.client} a été déplacé vers ${newSection.replace('-', ' ').toUpperCase()}`
+            );
             fetchSectionCounts();
           } else {
             setClients((prev) =>
@@ -286,7 +305,9 @@ export default function ClientSection({ section }: ClientSectionProps) {
         } else {
           setClients(previousClients);
           const error = await res.json();
-          toast.error(`Impossible de mettre à jour ${record.client}: ${error.error || 'Erreur inconnue'}`);
+          toast.error(
+            `Impossible de mettre à jour ${record.client}: ${error.error || 'Erreur inconnue'}`
+          );
         }
       } catch (error) {
         setClients(previousClients);
@@ -319,7 +340,9 @@ export default function ClientSection({ section }: ClientSectionProps) {
       } else {
         setClients(previousClients);
         const error = await res.json();
-        toast.error(`Impossible de créer le dossier: ${error.error || 'Erreur inconnue'}`);
+        toast.error(
+          `Impossible de créer le dossier: ${error.error || 'Erreur inconnue'}`
+        );
       }
     } catch (error) {
       setClients(previousClients);
@@ -334,18 +357,15 @@ export default function ClientSection({ section }: ClientSectionProps) {
       // Store client for undo before deletion
       const clientCopy = { ...client };
       const section = client.section;
-      
+
       // Optimistic UI: Remove from UI immediately
       const previousClients = [...clients];
       setClients((prev) => prev.filter((item) => item._id !== _id));
-      
+
       try {
-        const res = await fetch(
-          `/api/clients/${_id}`,
-          {
-            method: 'DELETE',
-          }
-        );
+        const res = await fetch(`/api/clients/${_id}`, {
+          method: 'DELETE',
+        });
         if (res.ok) {
           // Push undo action
           pushUndoAction({
@@ -363,7 +383,9 @@ export default function ClientSection({ section }: ClientSectionProps) {
           // Revert optimistic update on error
           setClients(previousClients);
           const error = await res.json();
-          toast.error(`Impossible de supprimer ${client.client}: ${error.error || 'Erreur inconnue'}`);
+          toast.error(
+            `Impossible de supprimer ${client.client}: ${error.error || 'Erreur inconnue'}`
+          );
         }
       } catch (error) {
         // Revert optimistic update on error
@@ -436,7 +458,11 @@ export default function ClientSection({ section }: ClientSectionProps) {
               </div>
             </div>
           </div>
-          {displayedTab === 'table' ? <TableSkeleton rows={5} /> : <GridSkeleton items={8} />}
+          {displayedTab === 'table' ? (
+            <TableSkeleton rows={5} />
+          ) : (
+            <GridSkeleton items={8} />
+          )}
         </div>
       ) : (
         <div className="bg-primary backdrop-blur-xl border border-primary rounded-lg p-3 md:p-4 mb-4 shadow-md">
@@ -455,7 +481,10 @@ export default function ClientSection({ section }: ClientSectionProps) {
                     {sectionItems.length === 1 ? 'dossier' : 'dossiers'}
                   </div>
                   {Object.entries(statusCounts).map(([statut, count]) => (
-                    <div key={statut} className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-md text-xs font-semibold">
+                    <div
+                      key={statut}
+                      className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-md text-xs font-semibold"
+                    >
                       {count} {statut}
                     </div>
                   ))}
@@ -464,7 +493,10 @@ export default function ClientSection({ section }: ClientSectionProps) {
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
               <div className="relative flex-1 sm:w-56">
-                <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" weight="bold" />
+                <MagnifyingGlass
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500"
+                  weight="bold"
+                />
                 <Input
                   type="text"
                   placeholder="Rechercher..."
@@ -485,11 +517,19 @@ export default function ClientSection({ section }: ClientSectionProps) {
                 >
                   Rafraîchir
                 </Button>
-                {section !== 'dp-accordes' && section !== 'dp-refuses' && section !== 'consuel-finalise' && section !== 'raccordement-mes' && (
-                  <Button onClick={openAddForm} icon={<Plus className="w-3 h-3" weight="bold" />} variant="primary" className="rounded-md px-3 py-1.5 text-xs">
-                    Nouveau
-                  </Button>
-                )}
+                {section !== 'dp-accordes' &&
+                  section !== 'dp-refuses' &&
+                  section !== 'consuel-finalise' &&
+                  section !== 'raccordement-mes' && (
+                    <Button
+                      onClick={openAddForm}
+                      icon={<Plus className="w-3 h-3" weight="bold" />}
+                      variant="primary"
+                      className="rounded-md px-3 py-1.5 text-xs"
+                    >
+                      Nouveau
+                    </Button>
+                  )}
               </div>
             </div>
           </div>
@@ -521,7 +561,7 @@ export default function ClientSection({ section }: ClientSectionProps) {
             <GridFour className="h-4 w-4" weight="bold" />
             Grille
           </button>
-          {(section === 'dp-en-cours') && (
+          {section === 'dp-en-cours' && (
             <button
               onClick={() => handleTabChange('calendar')}
               className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 flex items-center gap-2 ${
@@ -648,11 +688,13 @@ export default function ClientSection({ section }: ClientSectionProps) {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Statistiques de la section
                   </h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow transition-all duration-200 hover:scale-[1.01]">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">Total</span>
+                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                          Total
+                        </span>
                         <div className="p-2 rounded-lg bg-primary-500 text-white shadow-md">
                           <FileText className="h-5 w-5" />
                         </div>
@@ -660,12 +702,16 @@ export default function ClientSection({ section }: ClientSectionProps) {
                       <div className="text-3xl font-bold text-gray-900 dark:text-white">
                         {sectionItems.length}
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Dossiers</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Dossiers
+                      </p>
                     </div>
 
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow transition-all duration-200 hover:scale-[1.01]">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">Validés</span>
+                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                          Validés
+                        </span>
                         <div className="p-2 rounded-lg bg-success-500 text-white shadow-md">
                           <CheckCircle className="h-5 w-5" />
                         </div>
@@ -681,12 +727,16 @@ export default function ClientSection({ section }: ClientSectionProps) {
                           ).length
                         }
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Dossiers terminés</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Dossiers terminés
+                      </p>
                     </div>
 
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow transition-all duration-200 hover:scale-[1.01]">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">En cours</span>
+                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                          En cours
+                        </span>
                         <div className="p-2 rounded-lg bg-warning-500 text-white shadow-md">
                           <Clock className="h-5 w-5" />
                         </div>
@@ -700,12 +750,16 @@ export default function ClientSection({ section }: ClientSectionProps) {
                           ).length
                         }
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">En traitement</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        En traitement
+                      </p>
                     </div>
 
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow transition-all duration-200 hover:scale-[1.01]">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">Refusés</span>
+                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                          Refusés
+                        </span>
                         <div className="p-2 rounded-lg bg-error-500 text-white shadow-md">
                           <XCircle className="h-5 w-5" />
                         </div>
@@ -719,7 +773,9 @@ export default function ClientSection({ section }: ClientSectionProps) {
                           ).length
                         }
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Dossiers refusés</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Dossiers refusés
+                      </p>
                     </div>
                   </div>
 
@@ -730,7 +786,10 @@ export default function ClientSection({ section }: ClientSectionProps) {
                     </h4>
                     <div className="space-y-3">
                       {Object.entries(statusCounts).map(([statut, count]) => {
-                        const percentage = sectionItems.length > 0 ? (count / sectionItems.length) * 100 : 0;
+                        const percentage =
+                          sectionItems.length > 0
+                            ? (count / sectionItems.length) * 100
+                            : 0;
                         const colors = [
                           'bg-primary-500',
                           'bg-success-500',
@@ -738,13 +797,19 @@ export default function ClientSection({ section }: ClientSectionProps) {
                           'bg-accent-500',
                           'bg-error-500',
                         ];
-                        const colorIndex = Object.keys(statusCounts).indexOf(statut) % colors.length;
-                        
+                        const colorIndex =
+                          Object.keys(statusCounts).indexOf(statut) %
+                          colors.length;
+
                         return (
                           <div key={statut}>
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{statut}</span>
-                              <span className="text-sm font-bold text-gray-900 dark:text-white">{count} ({percentage.toFixed(1)}%)</span>
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {statut}
+                              </span>
+                              <span className="text-sm font-bold text-gray-900 dark:text-white">
+                                {count} ({percentage.toFixed(1)}%)
+                              </span>
                             </div>
                             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                               <div
@@ -759,24 +824,31 @@ export default function ClientSection({ section }: ClientSectionProps) {
                   </div>
 
                   {/* Statistiques par prestataire */}
-                  {sectionItems.some(c => c.prestataire) && (
+                  {sectionItems.some((c) => c.prestataire) && (
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-md">
                       <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
                         Répartition par prestataire
                       </h4>
                       <div className="space-y-3">
                         {Object.entries(
-                          sectionItems.reduce((acc, client) => {
-                            if (client.prestataire) {
-                              acc[client.prestataire] = (acc[client.prestataire] || 0) + 1;
-                            }
-                            return acc;
-                          }, {} as Record<string, number>)
+                          sectionItems.reduce(
+                            (acc, client) => {
+                              if (client.prestataire) {
+                                acc[client.prestataire] =
+                                  (acc[client.prestataire] || 0) + 1;
+                              }
+                              return acc;
+                            },
+                            {} as Record<string, number>
+                          )
                         )
                           .sort((a, b) => b[1] - a[1])
                           .slice(0, 5)
                           .map(([prestataire, count]) => {
-                            const percentage = sectionItems.length > 0 ? (count / sectionItems.length) * 100 : 0;
+                            const percentage =
+                              sectionItems.length > 0
+                                ? (count / sectionItems.length) * 100
+                                : 0;
                             const colors = [
                               'bg-primary-500',
                               'bg-success-500',
@@ -784,13 +856,19 @@ export default function ClientSection({ section }: ClientSectionProps) {
                               'bg-accent-500',
                               'bg-error-500',
                             ];
-                            const colorIndex = Object.keys(statusCounts).indexOf(prestataire) % colors.length;
-                            
+                            const colorIndex =
+                              Object.keys(statusCounts).indexOf(prestataire) %
+                              colors.length;
+
                             return (
                               <div key={prestataire}>
                                 <div className="flex items-center justify-between mb-1">
-                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{prestataire}</span>
-                                  <span className="text-sm font-bold text-gray-900 dark:text-white">{count} ({percentage.toFixed(1)}%)</span>
+                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {prestataire}
+                                  </span>
+                                  <span className="text-sm font-bold text-gray-900 dark:text-white">
+                                    {count} ({percentage.toFixed(1)}%)
+                                  </span>
                                 </div>
                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                                   <div

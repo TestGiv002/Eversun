@@ -14,7 +14,10 @@ interface ErrorBoundaryProps {
   onError?: (error: Error, errorInfo: any) => void;
 }
 
-export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export default class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -53,13 +56,17 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
       return (
         <div className="flex flex-col items-center justify-center min-h-[400px] p-12 text-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-100 to-rose-100 dark:from-red-900/30 dark:to-rose-900/30 flex items-center justify-center mb-6">
-            <Warning className="h-10 w-10 text-red-600 dark:text-red-400" weight="bold" />
+            <Warning
+              className="h-10 w-10 text-red-600 dark:text-red-400"
+              weight="bold"
+            />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
             Une erreur est survenue
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-            {this.state.error?.message || 'Une erreur inattendue s\'est produite. Veuillez réessayer.'}
+            {this.state.error?.message ||
+              "Une erreur inattendue s'est produite. Veuillez réessayer."}
           </p>
           <button
             onClick={this.handleRetry}

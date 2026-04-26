@@ -2,7 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { ClientRecord } from '@/types/client';
-import { User, CheckCircle, Clock, XCircle, Buildings, Lightning, FileText, House } from '@phosphor-icons/react';
+import {
+  User,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Buildings,
+  Lightning,
+  FileText,
+  House,
+} from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -113,15 +122,26 @@ export default function ClientAggregationView() {
 
   const getStatusColor = (statut: string) => {
     if (!statut) return 'bg-secondary text-tertiary border border-primary';
-    
+
     const lowerStatut = statut.toLowerCase();
-    if (lowerStatut.includes('accord') || lowerStatut.includes('favorable') || lowerStatut.includes('visé') || lowerStatut.includes('validé') || lowerStatut.includes('ok') || lowerStatut.includes('fait')) {
+    if (
+      lowerStatut.includes('accord') ||
+      lowerStatut.includes('favorable') ||
+      lowerStatut.includes('visé') ||
+      lowerStatut.includes('validé') ||
+      lowerStatut.includes('ok') ||
+      lowerStatut.includes('fait')
+    ) {
       return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-700';
     }
     if (lowerStatut.includes('refus') || lowerStatut.includes('ko')) {
       return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-700';
     }
-    if (lowerStatut.includes('en cours') || lowerStatut.includes('attente') || lowerStatut.includes('effectuer')) {
+    if (
+      lowerStatut.includes('en cours') ||
+      lowerStatut.includes('attente') ||
+      lowerStatut.includes('effectuer')
+    ) {
       return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-700';
     }
     return 'bg-secondary text-tertiary border border-primary';
@@ -129,9 +149,16 @@ export default function ClientAggregationView() {
 
   const getStatusIcon = (statut: string) => {
     if (!statut) return <Clock className="h-3 w-3" />;
-    
+
     const lowerStatut = statut.toLowerCase();
-    if (lowerStatut.includes('accord') || lowerStatut.includes('favorable') || lowerStatut.includes('visé') || lowerStatut.includes('validé') || lowerStatut.includes('ok') || lowerStatut.includes('fait')) {
+    if (
+      lowerStatut.includes('accord') ||
+      lowerStatut.includes('favorable') ||
+      lowerStatut.includes('visé') ||
+      lowerStatut.includes('validé') ||
+      lowerStatut.includes('ok') ||
+      lowerStatut.includes('fait')
+    ) {
       return <CheckCircle className="h-3 w-3" />;
     }
     if (lowerStatut.includes('refus') || lowerStatut.includes('ko')) {
@@ -140,10 +167,11 @@ export default function ClientAggregationView() {
     return <Clock className="h-3 w-3" />;
   };
 
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.ville?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.noDp?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredClients = clients.filter(
+    (client) =>
+      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.ville?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.noDp?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading) {
@@ -176,10 +204,15 @@ export default function ClientAggregationView() {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg">
-                  <User className="h-6 w-6 text-amber-600 dark:text-amber-400" weight="bold" />
+                  <User
+                    className="h-6 w-6 text-amber-600 dark:text-amber-400"
+                    weight="bold"
+                  />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-primary">{client.name}</h3>
+                  <h3 className="text-lg font-bold text-primary">
+                    {client.name}
+                  </h3>
                   <div className="flex items-center gap-4 text-sm text-tertiary mt-1">
                     {client.noDp && <span>DP: {client.noDp}</span>}
                     {client.ville && <span>• {client.ville}</span>}
@@ -199,11 +232,15 @@ export default function ClientAggregationView() {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     {getStageIcon(section)}
-                    <span className="text-xs font-semibold">{getStageLabel(section)}</span>
+                    <span className="text-xs font-semibold">
+                      {getStageLabel(section)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
                     {getStatusIcon(stage.statut)}
-                    <span className="text-sm font-medium truncate">{stage.statut || 'Non défini'}</span>
+                    <span className="text-sm font-medium truncate">
+                      {stage.statut || 'Non défini'}
+                    </span>
                   </div>
                   {stage.date && (
                     <div className="text-xs mt-1 opacity-75">

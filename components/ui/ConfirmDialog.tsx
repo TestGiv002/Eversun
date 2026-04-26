@@ -93,9 +93,7 @@ export default function ConfirmDialog({
         <div
           className={`mx-auto flex items-center justify-center h-20 w-20 rounded-full border-2 ${styles.iconBg} ${styles.iconBorder} mb-6 shadow-lg`}
         >
-          <div className={styles.iconColor}>
-            {styles.icon}
-          </div>
+          <div className={styles.iconColor}>{styles.icon}</div>
         </div>
 
         {/* Title with better typography */}

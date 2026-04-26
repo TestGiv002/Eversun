@@ -11,10 +11,10 @@ interface SkeletonLoaderProps {
   className?: string;
 }
 
-export default function SkeletonLoader({ 
-  lines = 3, 
+export default function SkeletonLoader({
+  lines = 3,
   showAvatar = false,
-  className 
+  className,
 }: SkeletonLoaderProps) {
   return (
     <div className={cn('space-y-3', className)}>
@@ -22,12 +22,18 @@ export default function SkeletonLoader({
         <div className="flex items-center space-x-4">
           <div className="h-12 w-12 rounded-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-shimmer" />
           <div className="space-y-2 flex-1">
-            <div className="h-4 w-3/4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded animate-shimmer" style={{ animationDelay: '0.1s' }} />
-            <div className="h-3 w-1/2 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded animate-shimmer" style={{ animationDelay: '0.2s' }} />
+            <div
+              className="h-4 w-3/4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded animate-shimmer"
+              style={{ animationDelay: '0.1s' }}
+            />
+            <div
+              className="h-3 w-1/2 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded animate-shimmer"
+              style={{ animationDelay: '0.2s' }}
+            />
           </div>
         </div>
       )}
-      
+
       {Array.from({ length: lines }).map((_, i) => (
         <div
           key={i}
@@ -62,18 +68,27 @@ export function TableSkeleton({ rows = 5, cols = 4 }: TableSkeletonProps) {
           />
         ))}
       </div>
-      
+
       {/* Rows */}
       {Array.from({ length: rows }).map((_, rowIndex) => (
-        <div key={`row-${rowIndex}`} className="flex gap-4 p-4 border-b dark:border-gray-700">
+        <div
+          key={`row-${rowIndex}`}
+          className="flex gap-4 p-4 border-b dark:border-gray-700"
+        >
           {Array.from({ length: cols }).map((_, colIndex) => (
             <div
               key={`cell-${rowIndex}-${colIndex}`}
               className={cn(
                 'h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded animate-shimmer',
-                colIndex === 0 ? 'w-32' : colIndex === cols - 1 ? 'w-20' : 'w-full'
+                colIndex === 0
+                  ? 'w-32'
+                  : colIndex === cols - 1
+                    ? 'w-20'
+                    : 'w-full'
               )}
-              style={{ animationDelay: `${(rowIndex * cols + colIndex) * 0.08}s` }}
+              style={{
+                animationDelay: `${(rowIndex * cols + colIndex) * 0.08}s`,
+              }}
             />
           ))}
         </div>

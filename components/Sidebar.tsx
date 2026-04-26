@@ -116,7 +116,9 @@ function Sidebar({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobile, setIsMobile] = useState(false);
-  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(sectionGroups.map((group) => group.title)));
+  const [openGroups, setOpenGroups] = useState<Set<string>>(
+    new Set(sectionGroups.map((group) => group.title))
+  );
 
   // Debounce le handler de resize
   const checkMobile = useCallback(() => {
@@ -163,12 +165,14 @@ function Sidebar({
   };
 
   // Filter sections based on search query
-  const filteredSectionGroups = sectionGroups.map(group => ({
-    ...group,
-    sections: group.sections.filter(section =>
-      section.label.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  })).filter(group => group.sections.length > 0);
+  const filteredSectionGroups = sectionGroups
+    .map((group) => ({
+      ...group,
+      sections: group.sections.filter((section) =>
+        section.label.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    }))
+    .filter((group) => group.sections.length > 0);
 
   return (
     <>
@@ -197,144 +201,166 @@ function Sidebar({
         role="navigation"
         aria-label="Navigation principale"
       >
-      {/* Mobile Close Button */}
-      {isMobile && (
-        <button
-          onClick={onMobileClose}
-          className="absolute right-4 top-4 z-50 p-2 bg-primary rounded-lg shadow border border-primary hover:scale-[1.01] transition-transform duration-200 md:hidden"
-          aria-label="Fermer la sidebar"
-        >
-          <X className="h-5 w-5 text-secondary" weight="bold" />
-        </button>
-      )}
+        {/* Mobile Close Button */}
+        {isMobile && (
+          <button
+            onClick={onMobileClose}
+            className="absolute right-4 top-4 z-50 p-2 bg-primary rounded-lg shadow border border-primary hover:scale-[1.01] transition-transform duration-200 md:hidden"
+            aria-label="Fermer la sidebar"
+          >
+            <X className="h-5 w-5 text-secondary" weight="bold" />
+          </button>
+        )}
 
-
-      {/* Search Bar */}
-      {!isCollapsed && (
-        <div className="px-3 py-2">
-          <div className="relative">
-            <MagnifyingGlass className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
-            <Input
-              type="text"
-              placeholder="Rechercher..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 py-1.5 pl-8 pr-8 text-xs shadow-none hover:shadow-none"
-              aria-label="Rechercher une section"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                aria-label="Effacer la recherche"
-              >
-                <X className="h-3 w-3" weight="bold" />
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      <nav className="py-2 flex-1 overflow-y-auto">
-        {filteredSectionGroups.map((group, groupIndex) => {
-          const isGroupOpen = isCollapsed || openGroups.has(group.title) || searchQuery.trim() !== '';
-          return (
-            <div key={group.title} className="mb-4">
-              {!isCollapsed && (
+        {/* Search Bar */}
+        {!isCollapsed && (
+          <div className="px-3 py-2">
+            <div className="relative">
+              <MagnifyingGlass className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+              <Input
+                type="text"
+                placeholder="Rechercher..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-8 py-1.5 pl-8 pr-8 text-xs shadow-none hover:shadow-none"
+                aria-label="Rechercher une section"
+              />
+              {searchQuery && (
                 <button
-                  type="button"
-                  onClick={() => toggleGroup(group.title)}
-                  className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 rounded-md hover:bg-secondary/50 transition-colors"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  aria-label="Effacer la recherche"
                 >
-                  <span>{group.title}</span>
-                  <CaretDown
-                    weight="bold"
-                    className={`h-3 w-3 transition-transform ${isGroupOpen ? 'rotate-180' : ''}`}
-                  />
+                  <X className="h-3 w-3" weight="bold" />
                 </button>
               )}
-              {isGroupOpen && (
-                <ul className="space-y-1.5 px-2 mt-2" role="list">
-                  {group.sections.map((section, sectionIndex) => {
-                    const globalIndex = sectionGroups
-                      .slice(0, groupIndex)
-                      .reduce((acc, g) => acc + g.sections.length, 0) + sectionIndex + 1;
-                    return (
-                      <li key={section.id} role="listitem">
-                        <button
-                          onClick={() => setActiveSection(section.id)}
-                          className={`w-full text-left rounded-md text-xs font-semibold transition-all duration-200 flex items-center group relative overflow-hidden
+            </div>
+          </div>
+        )}
+
+        <nav className="py-2 flex-1 overflow-y-auto">
+          {filteredSectionGroups.map((group, groupIndex) => {
+            const isGroupOpen =
+              isCollapsed ||
+              openGroups.has(group.title) ||
+              searchQuery.trim() !== '';
+            return (
+              <div key={group.title} className="mb-4">
+                {!isCollapsed && (
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.title)}
+                    className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 rounded-md hover:bg-secondary/50 transition-colors"
+                  >
+                    <span>{group.title}</span>
+                    <CaretDown
+                      weight="bold"
+                      className={`h-3 w-3 transition-transform ${isGroupOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                )}
+                {isGroupOpen && (
+                  <ul className="space-y-1.5 px-2 mt-2" role="list">
+                    {group.sections.map((section, sectionIndex) => {
+                      const globalIndex =
+                        sectionGroups
+                          .slice(0, groupIndex)
+                          .reduce((acc, g) => acc + g.sections.length, 0) +
+                        sectionIndex +
+                        1;
+                      return (
+                        <li key={section.id} role="listitem">
+                          <button
+                            onClick={() => setActiveSection(section.id)}
+                            className={`w-full text-left rounded-md text-xs font-semibold transition-all duration-200 flex items-center group relative overflow-hidden
                             ${
-                              isCollapsed ? 'justify-center px-2 py-2' : 'px-3 py-2 gap-2'
+                              isCollapsed
+                                ? 'justify-center px-2 py-2'
+                                : 'px-3 py-2 gap-2'
                             }
                             ${
                               activeSection === section.id
                                 ? 'bg-primary-500 text-white shadow-sm ring-2 ring-primary-500 ring-offset-2 ring-offset-gray-100 dark:ring-offset-gray-900'
                                 : 'text-secondary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900'
                             }`}
-                          tabIndex={0}
-                          aria-current={activeSection === section.id ? 'page' : undefined}
-                          title={isCollapsed ? `${section.label} (Alt+${globalIndex})` : undefined}
-                        >
-                          {activeSection === section.id && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                          )}
-                          {section.icon && (
-                            <section.icon
-                              weight="regular"
-                              className={`h-4 w-4 flex-shrink-0 transition-all duration-200 ${
-                                activeSection === section.id ? 'text-white scale-110' : 'text-gray-400 dark:text-gray-500 group-hover:text-primary-500 dark:group-hover:text-primary-400 group-hover:scale-110'
-                              }`}
-                              aria-hidden="true"
-                            />
-                          )}
-                          {!isCollapsed && (
-                            <>
-                              <span className="flex-1 relative z-10">{section.label}</span>
-                              {sectionCounts && sectionCounts[section.id] !== undefined && (
-                                <span
-                                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full transition-all duration-200 relative z-10 ${
-                                    activeSection === section.id
-                                      ? 'bg-white dark:bg-gray-800 text-primary-600 shadow'
-                                      : 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 group-hover:bg-primary-200 dark:group-hover:bg-primary-800/50'
-                                  }`}
-                                >
-                                  {sectionCounts[section.id]}
+                            tabIndex={0}
+                            aria-current={
+                              activeSection === section.id ? 'page' : undefined
+                            }
+                            title={
+                              isCollapsed
+                                ? `${section.label} (Alt+${globalIndex})`
+                                : undefined
+                            }
+                          >
+                            {activeSection === section.id && (
+                              <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                            )}
+                            {section.icon && (
+                              <section.icon
+                                weight="regular"
+                                className={`h-4 w-4 flex-shrink-0 transition-all duration-200 ${
+                                  activeSection === section.id
+                                    ? 'text-white scale-110'
+                                    : 'text-gray-400 dark:text-gray-500 group-hover:text-primary-500 dark:group-hover:text-primary-400 group-hover:scale-110'
+                                }`}
+                                aria-hidden="true"
+                              />
+                            )}
+                            {!isCollapsed && (
+                              <>
+                                <span className="flex-1 relative z-10">
+                                  {section.label}
                                 </span>
-                              )}
-                            </>
-                          )}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
+                                {sectionCounts &&
+                                  sectionCounts[section.id] !== undefined && (
+                                    <span
+                                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full transition-all duration-200 relative z-10 ${
+                                        activeSection === section.id
+                                          ? 'bg-white dark:bg-gray-800 text-primary-600 shadow'
+                                          : 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 group-hover:bg-primary-200 dark:group-hover:bg-primary-800/50'
+                                      }`}
+                                    >
+                                      {sectionCounts[section.id]}
+                                    </span>
+                                  )}
+                              </>
+                            )}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
             );
           })}
-      </nav>
+        </nav>
 
-      {/* Collapse Toggle - Desktop only */}
-      {!isMobile && (
-        <div className="px-2 py-2 border-t border-primary">
-          <button
-            onClick={handleCollapse}
-            className="w-full flex items-center justify-center gap-2 p-1.5 bg-secondary rounded-md hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200"
-            aria-label={isCollapsed ? 'Étendre la sidebar' : 'Réduire la sidebar'}
-          >
-            {isCollapsed ? (
-              <CaretRight className="h-3 w-3 text-secondary" />
-            ) : (
-              <>
-                <CaretLeft className="h-3 w-3 text-secondary" />
-                <span className="text-xs font-medium text-secondary">Réduire</span>
-              </>
-            )}
-          </button>
-        </div>
-      )}
-    </aside>
+        {/* Collapse Toggle - Desktop only */}
+        {!isMobile && (
+          <div className="px-2 py-2 border-t border-primary">
+            <button
+              onClick={handleCollapse}
+              className="w-full flex items-center justify-center gap-2 p-1.5 bg-secondary rounded-md hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200"
+              aria-label={
+                isCollapsed ? 'Étendre la sidebar' : 'Réduire la sidebar'
+              }
+            >
+              {isCollapsed ? (
+                <CaretRight className="h-3 w-3 text-secondary" />
+              ) : (
+                <>
+                  <CaretLeft className="h-3 w-3 text-secondary" />
+                  <span className="text-xs font-medium text-secondary">
+                    Réduire
+                  </span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </aside>
     </>
   );
 }

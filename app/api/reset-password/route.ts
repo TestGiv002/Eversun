@@ -16,7 +16,10 @@ export async function POST(request: NextRequest) {
 
     if (newPassword.length < 6) {
       return NextResponse.json(
-        { success: false, error: 'Le mot de passe doit contenir au moins 6 caractères' },
+        {
+          success: false,
+          error: 'Le mot de passe doit contenir au moins 6 caractères',
+        },
         { status: 400 }
       );
     }
@@ -34,16 +37,16 @@ export async function POST(request: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    await User.updateOne(
-      { email },
-      { password: hashedPassword }
-    );
+    await User.updateOne({ email }, { password: hashedPassword });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Erreur lors de la réinitialisation du mot de passe:', error);
     return NextResponse.json(
-      { success: false, error: 'Erreur lors de la réinitialisation du mot de passe' },
+      {
+        success: false,
+        error: 'Erreur lors de la réinitialisation du mot de passe',
+      },
       { status: 500 }
     );
   }

@@ -5,11 +5,12 @@ import { cn } from '@/lib/utils';
 import type { Size, Variant, WithLoading, WithIcon } from '@/types/common';
 
 interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    WithLoading,
-    WithIcon {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, WithLoading, WithIcon {
   /** Variante de style du bouton */
-  variant?: Extract<Variant, 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'>;
+  variant?: Extract<
+    Variant,
+    'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+  >;
   /** Taille du bouton */
   size?: Extract<Size, 'sm' | 'md' | 'lg'>;
   /** Contenu du bouton */
@@ -37,19 +38,19 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       // Modern cyan gradient with glassmorphism on hover
       primary:
         'bg-primary-600 hover:bg-primary-700 text-white shadow-sm hover:shadow',
-      
+
       // Modern slate secondary
       secondary:
         'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700',
-      
+
       // Modern cyan outline with glassmorphism
       outline:
         'bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 border border-primary-300 dark:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20',
-      
+
       // Modern ghost
       ghost:
         'bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:shadow-sm',
-      
+
       // Modern rose danger
       danger:
         'bg-error-600 hover:bg-error-700 text-white shadow-sm hover:shadow',

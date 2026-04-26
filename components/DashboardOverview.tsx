@@ -16,7 +16,19 @@ import {
   Calendar,
   CaretDown,
 } from '@phosphor-icons/react';
-import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 
 interface KPICardProps {
   title: string;
@@ -27,14 +39,19 @@ interface KPICardProps {
   description?: string;
 }
 
-function KPICard({ title, value, icon, color, trend, description }: KPICardProps) {
+function KPICard({
+  title,
+  value,
+  icon,
+  color,
+  trend,
+  description,
+}: KPICardProps) {
   return (
     <div className="bg-primary rounded-lg p-6 border border-primary shadow-sm hover:shadow transition-colors duration-200 group">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-semibold text-tertiary mb-2">
-            {title}
-          </p>
+          <p className="text-sm font-semibold text-tertiary mb-2">{title}</p>
           <p className="text-4xl font-bold text-warning-600 dark:text-warning-400">
             {value}
           </p>
@@ -44,7 +61,9 @@ function KPICard({ title, value, icon, color, trend, description }: KPICardProps
             </p>
           )}
         </div>
-        <div className={`p-4 rounded-lg bg-gradient-to-br ${color} shadow-sm transition-colors duration-200`}>
+        <div
+          className={`p-4 rounded-lg bg-gradient-to-br ${color} shadow-sm transition-colors duration-200`}
+        >
           {icon}
         </div>
       </div>
@@ -55,7 +74,9 @@ function KPICard({ title, value, icon, color, trend, description }: KPICardProps
           ) : (
             <ArrowDown className="h-4 w-4 text-red-500" weight="bold" />
           )}
-          <span className={`text-sm font-bold ${trend > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+          <span
+            className={`text-sm font-bold ${trend > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+          >
             {Math.abs(trend)}%
           </span>
           <span className="text-sm text-tertiary">vs mois dernier</span>
@@ -78,9 +99,7 @@ function SectionProgress({ title, count, total, color }: SectionProgressProps) {
   return (
     <div className="bg-primary rounded-lg p-5 border border-primary shadow-sm hover:shadow transition-colors duration-200 group">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-semibold text-secondary">
-          {title}
-        </span>
+        <span className="text-sm font-semibold text-secondary">{title}</span>
         <span className="text-sm font-bold text-warning-600 dark:text-warning-400">
           {count}/{total}
         </span>
@@ -101,7 +120,9 @@ function SectionProgress({ title, count, total, color }: SectionProgressProps) {
 function DashboardOverview() {
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<'week' | 'month' | 'quarter' | 'all'>('all');
+  const [dateRange, setDateRange] = useState<
+    'week' | 'month' | 'quarter' | 'all'
+  >('all');
   const [showDateDropdown, setShowDateDropdown] = useState(false);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -116,25 +137,44 @@ function DashboardOverview() {
         // Store historical snapshot for trend calculation
         const today = new Date().toISOString().split('T')[0];
         const historicalKey = `dashboard-history-${today}`;
-        const existingHistory = JSON.parse(localStorage.getItem('dashboard-history') || '[]');
-        
+        const existingHistory = JSON.parse(
+          localStorage.getItem('dashboard-history') || '[]'
+        );
+
         // Check if we already have a snapshot for today
-        const todaySnapshot = existingHistory.find((h: any) => h.date === today);
+        const todaySnapshot = existingHistory.find(
+          (h: any) => h.date === today
+        );
         if (!todaySnapshot) {
           const snapshot = {
             date: today,
             totalClients: Array.isArray(data) ? data.length : 0,
-            dpEnCours: Array.isArray(data) ? data.filter((c: any) => c.section === 'dp-en-cours').length : 0,
-            dpAccordes: Array.isArray(data) ? data.filter((c: any) => c.section === 'dp-accordes').length : 0,
-            consuelEnCours: Array.isArray(data) ? data.filter((c: any) => c.section === 'consuel-en-cours').length : 0,
-            consuelFinalise: Array.isArray(data) ? data.filter((c: any) => c.section === 'consuel-finalise').length : 0,
-            raccordement: Array.isArray(data) ? data.filter((c: any) => c.section === 'raccordement').length : 0,
-            raccordementMes: Array.isArray(data) ? data.filter((c: any) => c.section === 'raccordement-mes').length : 0,
+            dpEnCours: Array.isArray(data)
+              ? data.filter((c: any) => c.section === 'dp-en-cours').length
+              : 0,
+            dpAccordes: Array.isArray(data)
+              ? data.filter((c: any) => c.section === 'dp-accordes').length
+              : 0,
+            consuelEnCours: Array.isArray(data)
+              ? data.filter((c: any) => c.section === 'consuel-en-cours').length
+              : 0,
+            consuelFinalise: Array.isArray(data)
+              ? data.filter((c: any) => c.section === 'consuel-finalise').length
+              : 0,
+            raccordement: Array.isArray(data)
+              ? data.filter((c: any) => c.section === 'raccordement').length
+              : 0,
+            raccordementMes: Array.isArray(data)
+              ? data.filter((c: any) => c.section === 'raccordement-mes').length
+              : 0,
           };
-          
+
           // Keep only last 30 days of history
           const updatedHistory = [...existingHistory, snapshot].slice(-30);
-          localStorage.setItem('dashboard-history', JSON.stringify(updatedHistory));
+          localStorage.setItem(
+            'dashboard-history',
+            JSON.stringify(updatedHistory)
+          );
         }
       })
       .catch(() => {
@@ -166,17 +206,20 @@ function DashboardOverview() {
 
   // Calculate trends based on historical data
   const calculateTrend = (currentValue: number, metricKey: string): number => {
-    const history = JSON.parse(localStorage.getItem('dashboard-history') || '[]');
+    const history = JSON.parse(
+      localStorage.getItem('dashboard-history') || '[]'
+    );
     if (history.length < 2) return 0;
 
     // Get snapshot from ~30 days ago
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const targetDate = thirtyDaysAgo.toISOString().split('T')[0];
-    
-    const oldSnapshot = history.find((h: any) => h.date === targetDate) || history[0];
+
+    const oldSnapshot =
+      history.find((h: any) => h.date === targetDate) || history[0];
     const oldValue = oldSnapshot[metricKey] || 0;
-    
+
     if (oldValue === 0) return 0;
     return ((currentValue - oldValue) / oldValue) * 100;
   };
@@ -190,17 +233,23 @@ function DashboardOverview() {
       case 'week': {
         const weekAgo = new Date(today);
         weekAgo.setDate(weekAgo.getDate() - 7);
-        return clients.filter(c => c.dateEnvoi && new Date(c.dateEnvoi) >= weekAgo);
+        return clients.filter(
+          (c) => c.dateEnvoi && new Date(c.dateEnvoi) >= weekAgo
+        );
       }
       case 'month': {
         const monthAgo = new Date(today);
         monthAgo.setMonth(monthAgo.getMonth() - 1);
-        return clients.filter(c => c.dateEnvoi && new Date(c.dateEnvoi) >= monthAgo);
+        return clients.filter(
+          (c) => c.dateEnvoi && new Date(c.dateEnvoi) >= monthAgo
+        );
       }
       case 'quarter': {
         const quarterAgo = new Date(today);
         quarterAgo.setMonth(quarterAgo.getMonth() - 3);
-        return clients.filter(c => c.dateEnvoi && new Date(c.dateEnvoi) >= quarterAgo);
+        return clients.filter(
+          (c) => c.dateEnvoi && new Date(c.dateEnvoi) >= quarterAgo
+        );
       }
       default:
         return clients;
@@ -211,20 +260,28 @@ function DashboardOverview() {
       <div className="p-6 md:p-8 space-y-8">
         {/* Header Skeleton */}
         <div className="bg-gray-200 dark:bg-gray-700 rounded-lg p-8 animate-pulse" />
-        
+
         {/* KPI Cards Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-lg p-6 animate-pulse" style={{ animationDelay: `${i * 100}ms` }} />
+            <div
+              key={i}
+              className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-lg p-6 animate-pulse"
+              style={{ animationDelay: `${i * 100}ms` }}
+            />
           ))}
         </div>
-        
+
         {/* Section Progress Skeleton */}
         <div className="space-y-4">
           <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-48 animate-pulse" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-lg p-5 animate-pulse" style={{ animationDelay: `${i * 50}ms` }} />
+              <div
+                key={i}
+                className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-lg p-5 animate-pulse"
+                style={{ animationDelay: `${i * 50}ms` }}
+              />
             ))}
           </div>
         </div>
@@ -233,13 +290,27 @@ function DashboardOverview() {
   }
 
   const totalClients = filteredClients.length;
-  const dpEnCours = filteredClients.filter((c) => c.section === 'dp-en-cours').length;
-  const dpAccordes = filteredClients.filter((c) => c.section === 'dp-accordes').length;
-  const dpRefuses = filteredClients.filter((c) => c.section === 'dp-refuses').length;
-  const consuelEnCours = filteredClients.filter((c) => c.section === 'consuel-en-cours').length;
-  const consuelFinalise = filteredClients.filter((c) => c.section === 'consuel-finalise').length;
-  const raccordement = filteredClients.filter((c) => c.section === 'raccordement').length;
-  const raccordementMes = filteredClients.filter((c) => c.section === 'raccordement-mes').length;
+  const dpEnCours = filteredClients.filter(
+    (c) => c.section === 'dp-en-cours'
+  ).length;
+  const dpAccordes = filteredClients.filter(
+    (c) => c.section === 'dp-accordes'
+  ).length;
+  const dpRefuses = filteredClients.filter(
+    (c) => c.section === 'dp-refuses'
+  ).length;
+  const consuelEnCours = filteredClients.filter(
+    (c) => c.section === 'consuel-en-cours'
+  ).length;
+  const consuelFinalise = filteredClients.filter(
+    (c) => c.section === 'consuel-finalise'
+  ).length;
+  const raccordement = filteredClients.filter(
+    (c) => c.section === 'raccordement'
+  ).length;
+  const raccordementMes = filteredClients.filter(
+    (c) => c.section === 'raccordement-mes'
+  ).length;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -247,9 +318,9 @@ function DashboardOverview() {
   // Calculate alerts with different priority levels
   const alerts = {
     critical: 0, // 0-1 days (urgent)
-    high: 0,     // 2-3 days
-    medium: 0,   // 4-7 days
-    total: 0
+    high: 0, // 2-3 days
+    medium: 0, // 4-7 days
+    total: 0,
   };
 
   filteredClients.forEach((c) => {
@@ -273,7 +344,8 @@ function DashboardOverview() {
   });
 
   const completed = dpAccordes + consuelFinalise + raccordementMes;
-  const completionRate = totalClients > 0 ? ((completed / totalClients) * 100).toFixed(1) : '0';
+  const completionRate =
+    totalClients > 0 ? ((completed / totalClients) * 100).toFixed(1) : '0';
 
   return (
     <div className="p-6 md:p-8">
@@ -307,9 +379,16 @@ function DashboardOverview() {
                 <CaretDown className="h-4 w-4" weight="bold" />
               </button>
               {showDateDropdown && (
-                <div id="dashboard-date-range-menu" role="menu" className="absolute right-0 mt-2 w-48 bg-primary rounded-lg shadow-lg border border-primary z-10">
+                <div
+                  id="dashboard-date-range-menu"
+                  role="menu"
+                  className="absolute right-0 mt-2 w-48 bg-primary rounded-lg shadow-lg border border-primary z-10"
+                >
                   <button
-                    onClick={() => { setDateRange('all'); setShowDateDropdown(false); }}
+                    onClick={() => {
+                      setDateRange('all');
+                      setShowDateDropdown(false);
+                    }}
                     role="menuitemradio"
                     aria-checked={dateRange === 'all'}
                     className="w-full text-left px-4 py-2 text-sm text-secondary hover:bg-secondary transition-colors first:rounded-t-lg"
@@ -317,7 +396,10 @@ function DashboardOverview() {
                     Tout le temps
                   </button>
                   <button
-                    onClick={() => { setDateRange('week'); setShowDateDropdown(false); }}
+                    onClick={() => {
+                      setDateRange('week');
+                      setShowDateDropdown(false);
+                    }}
                     role="menuitemradio"
                     aria-checked={dateRange === 'week'}
                     className="w-full text-left px-4 py-2 text-sm text-secondary hover:bg-secondary transition-colors"
@@ -325,7 +407,10 @@ function DashboardOverview() {
                     Cette semaine
                   </button>
                   <button
-                    onClick={() => { setDateRange('month'); setShowDateDropdown(false); }}
+                    onClick={() => {
+                      setDateRange('month');
+                      setShowDateDropdown(false);
+                    }}
                     role="menuitemradio"
                     aria-checked={dateRange === 'month'}
                     className="w-full text-left px-4 py-2 text-sm text-secondary hover:bg-secondary transition-colors"
@@ -333,7 +418,10 @@ function DashboardOverview() {
                     Ce mois
                   </button>
                   <button
-                    onClick={() => { setDateRange('quarter'); setShowDateDropdown(false); }}
+                    onClick={() => {
+                      setDateRange('quarter');
+                      setShowDateDropdown(false);
+                    }}
                     role="menuitemradio"
                     aria-checked={dateRange === 'quarter'}
                     className="w-full text-left px-4 py-2 text-sm text-secondary hover:bg-secondary transition-colors last:rounded-b-lg"
@@ -345,22 +433,30 @@ function DashboardOverview() {
             </div>
           </div>
           <p className="text-white/80 text-lg mb-4">
-            Vue d'ensemble de vos dossiers et métriques clés
+            Vue d&apos;ensemble de vos dossiers et métriques clés
           </p>
           <div className="mt-4 flex gap-4">
             <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-white text-sm">
-              <span className="font-semibold">{totalClients}</span> dossiers au total
+              <span className="font-semibold">{totalClients}</span> dossiers au
+              total
             </div>
             <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-white text-sm">
-              <span className="font-semibold">{alerts.total}</span> alertes actives
+              <span className="font-semibold">{alerts.total}</span> alertes
+              actives
               {alerts.critical > 0 && (
-                <span className="ml-2 px-2 py-0.5 bg-red-500 rounded text-xs font-bold">Critique: {alerts.critical}</span>
+                <span className="ml-2 px-2 py-0.5 bg-red-500 rounded text-xs font-bold">
+                  Critique: {alerts.critical}
+                </span>
               )}
               {alerts.high > 0 && (
-                <span className="ml-2 px-2 py-0.5 bg-orange-500 rounded text-xs font-bold">Haute: {alerts.high}</span>
+                <span className="ml-2 px-2 py-0.5 bg-orange-500 rounded text-xs font-bold">
+                  Haute: {alerts.high}
+                </span>
               )}
               {alerts.medium > 0 && (
-                <span className="ml-2 px-2 py-0.5 bg-yellow-500 rounded text-xs font-bold">Moyenne: {alerts.medium}</span>
+                <span className="ml-2 px-2 py-0.5 bg-yellow-500 rounded text-xs font-bold">
+                  Moyenne: {alerts.medium}
+                </span>
               )}
             </div>
           </div>
@@ -382,7 +478,10 @@ function DashboardOverview() {
           value={dpEnCours + consuelEnCours + raccordement}
           icon={<Clock className="h-6 w-6 text-white" weight="bold" />}
           color="from-amber-500 to-orange-500"
-          trend={calculateTrend(dpEnCours + consuelEnCours + raccordement, 'dpEnCours')}
+          trend={calculateTrend(
+            dpEnCours + consuelEnCours + raccordement,
+            'dpEnCours'
+          )}
           description="Dossiers en attente"
         />
         <KPICard
@@ -390,7 +489,10 @@ function DashboardOverview() {
           value={dpAccordes + consuelFinalise + raccordementMes}
           icon={<CheckCircle className="h-6 w-6 text-white" weight="bold" />}
           color="from-emerald-500 to-green-500"
-          trend={calculateTrend(dpAccordes + consuelFinalise + raccordementMes, 'dpAccordes')}
+          trend={calculateTrend(
+            dpAccordes + consuelFinalise + raccordementMes,
+            'dpAccordes'
+          )}
           description="Dossiers validés"
         />
         <KPICard
@@ -530,26 +632,56 @@ function DashboardOverview() {
             Évolution des dossiers (30 derniers jours)
           </h3>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={(() => {
-              const history = JSON.parse(localStorage.getItem('dashboard-history') || '[]');
-              return history.map((h: any) => ({
-                date: new Date(h.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
-                total: h.totalClients,
-                dpEnCours: h.dpEnCours,
-                accordés: h.dpAccordes + h.consuelFinalise + h.raccordementMes,
-              }));
-            })()}>
+            <LineChart
+              data={(() => {
+                const history = JSON.parse(
+                  localStorage.getItem('dashboard-history') || '[]'
+                );
+                return history.map((h: any) => ({
+                  date: new Date(h.date).toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: 'short',
+                  }),
+                  total: h.totalClients,
+                  dpEnCours: h.dpEnCours,
+                  accordés:
+                    h.dpAccordes + h.consuelFinalise + h.raccordementMes,
+                }));
+              })()}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="date" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }}
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1f2937',
+                  border: '1px solid #374151',
+                  borderRadius: '8px',
+                }}
                 itemStyle={{ color: '#f9fafb' }}
               />
               <Legend />
-              <Line type="monotone" dataKey="total" stroke="#14b8a6" strokeWidth={2} name="Total" />
-              <Line type="monotone" dataKey="dpEnCours" stroke="#f59e0b" strokeWidth={2} name="DP En cours" />
-              <Line type="monotone" dataKey="accordés" stroke="#10b981" strokeWidth={2} name="Accordés" />
+              <Line
+                type="monotone"
+                dataKey="total"
+                stroke="#14b8a6"
+                strokeWidth={2}
+                name="Total"
+              />
+              <Line
+                type="monotone"
+                dataKey="dpEnCours"
+                stroke="#f59e0b"
+                strokeWidth={2}
+                name="DP En cours"
+              />
+              <Line
+                type="monotone"
+                dataKey="accordés"
+                stroke="#10b981"
+                strokeWidth={2}
+                name="Accordés"
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -567,9 +699,21 @@ function DashboardOverview() {
                   { name: 'DP En cours', value: dpEnCours, color: '#3b82f6' },
                   { name: 'DP Accordés', value: dpAccordes, color: '#10b981' },
                   { name: 'DP Refusés', value: dpRefuses, color: '#ef4444' },
-                  { name: 'Consuel En cours', value: consuelEnCours, color: '#f59e0b' },
-                  { name: 'Consuel Finalisés', value: consuelFinalise, color: '#10b981' },
-                  { name: 'Raccordement', value: raccordement, color: '#f59e0b' },
+                  {
+                    name: 'Consuel En cours',
+                    value: consuelEnCours,
+                    color: '#f59e0b',
+                  },
+                  {
+                    name: 'Consuel Finalisés',
+                    value: consuelFinalise,
+                    color: '#10b981',
+                  },
+                  {
+                    name: 'Raccordement',
+                    value: raccordement,
+                    color: '#f59e0b',
+                  },
                   { name: 'MES', value: raccordementMes, color: '#14b8a6' },
                 ]}
                 cx="50%"
@@ -577,7 +721,9 @@ function DashboardOverview() {
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                label={({ name, percent }) =>
+                  `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`
+                }
               >
                 <Cell fill="#3b82f6" />
                 <Cell fill="#10b981" />
@@ -587,8 +733,12 @@ function DashboardOverview() {
                 <Cell fill="#f59e0b" />
                 <Cell fill="#14b8a6" />
               </Pie>
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }}
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1f2937',
+                  border: '1px solid #374151',
+                  borderRadius: '8px',
+                }}
                 itemStyle={{ color: '#f9fafb' }}
               />
             </PieChart>

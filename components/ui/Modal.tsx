@@ -35,7 +35,9 @@ const Modal = ({
       modalRef.current.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       )
-    ).filter((el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden'));
+    ).filter(
+      (el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden')
+    );
   };
 
   useEffect(() => {
@@ -134,14 +136,20 @@ const Modal = ({
               {/* Header */}
               {title && (
                 <div className="flex items-center justify-between px-6 py-4 border-b border-primary bg-secondary">
-                  <h2 id="modal-title" className="text-xl font-bold text-primary">
+                  <h2
+                    id="modal-title"
+                    className="text-xl font-bold text-primary"
+                  >
                     {title}
                   </h2>
                   <button
                     onClick={onClose}
                     className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-[1.01] group"
                   >
-                    <X className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-400" weight="bold" />
+                    <X
+                      className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-400"
+                      weight="bold"
+                    />
                   </button>
                 </div>
               )}

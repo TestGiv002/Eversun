@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useToastStore } from '@/store/useToastStore';
-import { CheckCircle, XCircle, Warning, Info, X, ArrowClockwise } from '@phosphor-icons/react';
+import {
+  CheckCircle,
+  XCircle,
+  Warning,
+  Info,
+  X,
+  ArrowClockwise,
+} from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ToastProvider() {

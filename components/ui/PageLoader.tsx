@@ -13,15 +13,15 @@ interface PageLoaderProps extends HTMLAttributes<HTMLDivElement> {
   showProgress?: boolean;
 }
 
-export default function PageLoader({ 
-  message = 'Chargement...', 
+export default function PageLoader({
+  message = 'Chargement...',
   progress,
   showProgress = false,
   className,
-  ...props 
+  ...props
 }: PageLoaderProps) {
   return (
-    <div 
+    <div
       className={cn(
         'fixed inset-0 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900',
         'flex items-center justify-center z-50',
@@ -34,10 +34,10 @@ export default function PageLoader({
         <div className="relative">
           <div className="absolute inset-0 bg-primary-500/20 rounded-full blur-xl animate-pulse" />
           <div className="relative bg-white dark:bg-gray-800 rounded-full p-6 shadow-2xl">
-            <Spinner 
-              size={48} 
-              weight="bold" 
-              className="text-primary-500 animate-spin" 
+            <Spinner
+              size={48}
+              weight="bold"
+              className="text-primary-500 animate-spin"
             />
           </div>
         </div>
