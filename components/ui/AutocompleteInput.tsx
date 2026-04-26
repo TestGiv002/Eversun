@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useId } from 'react';
+import React, { useState, useRef, useEffect, useId, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { CaretDown, X } from '@phosphor-icons/react';
 import type { WithLabelError, WithIcon } from '@/types/common';
@@ -43,11 +43,12 @@ const AutocompleteInput = React.forwardRef<
     ref
   ) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
     const [isReadOnly, setIsReadOnly] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
+    const [searchValue, setSearchValue] = useState('');
     const inputRef = useRef<HTMLInputElement | null>(null);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const generatedId = useId();
     const inputId = id || generatedId;
@@ -58,48 +59,65 @@ const AutocompleteInput = React.forwardRef<
       }
     }, [value, readOnlyAfterSelect, isReadOnly]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Cleanup debounce timer on unmount
+    useEffect(() => {
+      return () => {
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+        }
+      };
+    }, []);
+
+    // Memoize filtered options for performance
+    const filteredOptions = useMemo(() => {
+      if (searchValue.length === 0) return [];
+      return options.filter((option) =>
+        option.toLowerCase().includes(searchValue.toLowerCase())
+      );
+    }, [options, searchValue]);
+
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       if (isReadOnly) return;
 
       const inputValue = e.target.value;
       onChange?.(e);
+      setSearchValue(inputValue);
 
-      if (inputValue.length > 0) {
-        const filtered = options.filter((option) =>
-          option.toLowerCase().includes(inputValue.toLowerCase())
-        );
-        setFilteredOptions(filtered);
-        setIsOpen(filtered.length > 0);
-      } else {
-        setFilteredOptions([]);
-        setIsOpen(false);
+      // Clear previous debounce timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
-      setHighlightedIndex(-1);
-    };
 
-    const handleSelectOption = (option: string) => {
+      // Debounce the dropdown opening
+      debounceTimerRef.current = setTimeout(() => {
+        setIsOpen(inputValue.length > 0 && filteredOptions.length > 0);
+        setHighlightedIndex(-1);
+      }, 150);
+    }, [isReadOnly, onChange, filteredOptions]);
+
+    const handleSelectOption = useCallback((option: string) => {
       onChange?.({
         target: { value: option },
       } as React.ChangeEvent<HTMLInputElement>);
       setIsOpen(false);
-      setFilteredOptions([]);
+      setSearchValue('');
       onSelect?.(option);
       if (readOnlyAfterSelect) {
         setIsReadOnly(true);
       }
-    };
+    }, [onChange, onSelect, readOnlyAfterSelect]);
 
-    const handleClear = () => {
+    const handleClear = useCallback(() => {
       onChange?.({
         target: { value: '' },
       } as React.ChangeEvent<HTMLInputElement>);
       setIsReadOnly(false);
-      setFilteredOptions([]);
+      setSearchValue('');
       setIsOpen(false);
       inputRef.current?.focus();
-    };
+    }, [onChange]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
       if (isReadOnly) return;
 
       if (e.key === 'ArrowDown') {
@@ -120,7 +138,7 @@ const AutocompleteInput = React.forwardRef<
         setIsOpen(false);
         setHighlightedIndex(-1);
       }
-    };
+    }, [isReadOnly, filteredOptions, highlightedIndex, handleSelectOption]);
 
     const handleClickOutside = (e: MouseEvent) => {
       if (
