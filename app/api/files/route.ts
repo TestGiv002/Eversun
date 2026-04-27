@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
+import ClientFile from '@/lib/clientFileModel';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/eversun';
 
-async function getClient() {
+async function connectDB() {
   if (mongoose.connection.readyState === 1) {
-    return mongoose.connection;
+    return;
   }
   
   if (!MONGODB_URI) {
@@ -13,7 +14,6 @@ async function getClient() {
   }
 
   await mongoose.connect(MONGODB_URI);
-  return mongoose.connection;
 }
 
 export async function GET(request: Request) {
