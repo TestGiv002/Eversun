@@ -463,9 +463,8 @@ export default function ClientModal({
                       <a
                         key={file.id}
                         href={file.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary hover:bg-tertiary transition-colors"
+                        download={file.name}
+                        className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary hover:bg-tertiary transition-colors cursor-pointer"
                       >
                         <FileText className="h-5 w-5 text-teal-500" weight="bold" />
                         <div className="flex-1 min-w-0">

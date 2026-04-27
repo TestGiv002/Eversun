@@ -1,40 +1,19 @@
 import { NextResponse } from 'next/server';
-import { google } from 'googleapis';
+import mongoose from 'mongoose';
 
-const DRIVE_FOLDER_ID = '1HUKQRoSM6ndKV2YPd9dGR0lnUzqTqu9B';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/eversun';
 
-async function getDriveClient() {
-  const auth = new google.auth.OAuth2(
-    process.env.GOOGLE_DRIVE_CLIENT_ID,
-    process.env.GOOGLE_DRIVE_CLIENT_SECRET,
-    process.env.GOOGLE_DRIVE_REDIRECT_URI
-  );
-
-  auth.setCredentials({
-    refresh_token: process.env.GOOGLE_DRIVE_REFRESH_TOKEN,
-  });
-
-  return google.drive({ version: 'v3', auth });
-}
-
-async function findClientFolder(drive: any, clientName: string) {
-  try {
-    const sanitizedFolderName = clientName.replace(/[^a-zA-Z0-9\s-]/g, '').trim();
-
-    const response = await drive.files.list({
-      q: `name = '${sanitizedFolderName}' and '${DRIVE_FOLDER_ID}' in parents and trashed = false`,
-      fields: 'files(id, name)',
-    });
-
-    if (response.data.files && response.data.files.length > 0) {
-      return response.data.files[0].id;
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Erreur lors de la recherche du dossier client:', error);
-    return null;
+async function getClient() {
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
   }
+  
+  if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI is not defined');
+  }
+
+  await mongoose.connect(MONGODB_URI);
+  return mongoose.connection;
 }
 
 export async function GET(request: Request) {
@@ -49,41 +28,27 @@ export async function GET(request: Request) {
       );
     }
 
-    // Vérifier si les credentials Google Drive sont configurés
-    if (!process.env.GOOGLE_DRIVE_CLIENT_ID || !process.env.GOOGLE_DRIVE_CLIENT_SECRET) {
-      // Mode de développement: retourner des fichiers simulés
-      console.warn('Google Drive credentials non configurés, mode simulation activé');
-      
-      return NextResponse.json({
-        success: true,
-        files: [],
-        message: 'Mode simulation: Configurez GOOGLE_DRIVE_CLIENT_ID et GOOGLE_DRIVE_CLIENT_SECRET pour lister les fichiers réels',
-      });
-    }
+    const db = await getClient();
+    const Client = db.models.Client;
 
-    // Mode production: lister les fichiers réels
-    const drive = await getDriveClient();
-    const clientFolderId = await findClientFolder(drive, clientName);
+    // Find client by name
+    const client = await Client.findOne({ client: clientName });
 
-    if (!clientFolderId) {
+    if (!client) {
       return NextResponse.json({
         success: true,
         files: [],
       });
     }
 
-    const response = await drive.files.list({
-      q: `'${clientFolderId}' in parents and trashed = false`,
-      fields: 'files(id, name, webViewLink, size, mimeType, createdTime)',
-    });
-
-    const files = response.data.files?.map((file: any) => ({
+    // Return files with base64 data for download/viewing
+    const files = (client.files || []).map((file: any) => ({
       id: file.id,
       name: file.name,
-      url: file.webViewLink,
-      size: parseInt(file.size || '0'),
-      type: file.mimeType,
-      created: file.createdTime,
+      url: `data:${file.type};base64,${file.data}`,
+      size: file.size,
+      type: file.type,
+      uploadedAt: file.uploadedAt,
     })) || [];
 
     return NextResponse.json({
