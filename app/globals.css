@@ -1466,4 +1466,53 @@ select option {
   background: var(--text-tertiary);
 }
 
+/* Advanced Dropdown Styles */
+.advanced-dropdown-trigger {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.advanced-dropdown-trigger:hover {
+  opacity: 0.8;
+}
+
+.advanced-dropdown-popover {
+  animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.advanced-dropdown-item {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.advanced-dropdown-item:hover {
+  transform: translateX(2px);
+}
+
+.advanced-dropdown-submenu {
+  animation: submenuSlideIn 0.15s ease-out;
+}
+
+@keyframes submenuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 
