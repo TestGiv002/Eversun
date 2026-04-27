@@ -684,7 +684,7 @@ export default function ClientForm({
               </div>
             )}
 
-            {isDp && form.client && (
+            {isDp && (
               <div className="bg-blue-50 dark:bg-gray-800 rounded-lg p-3 border border-blue-200 dark:border-gray-700 shadow-sm">
                 <h3 className="text-xs font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-1.5">
                   <div className="p-1 rounded bg-blue-500 text-white">
@@ -693,7 +693,7 @@ export default function ClientForm({
                   Documents
                 </h3>
                 <FileUpload
-                  clientName={form.client}
+                  clientName={form.client || 'Nouveau client'}
                   section={section}
                   onUploadComplete={(files) => setUploadedFiles((prev) => [...prev, ...files])}
                 />
@@ -841,7 +841,7 @@ export default function ClientForm({
               </div>
             )}
 
-            {isConsuel && form.client && (
+            {isConsuel && (
               <div className="bg-blue-50 dark:bg-gray-800 rounded-lg p-3 border border-blue-200 dark:border-gray-700 shadow-sm">
                 <h3 className="text-xs font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-1.5">
                   <div className="p-1 rounded bg-blue-500 text-white">
@@ -850,7 +850,7 @@ export default function ClientForm({
                   Documents
                 </h3>
                 <FileUpload
-                  clientName={form.client}
+                  clientName={form.client || 'Nouveau client'}
                   section={section}
                   onUploadComplete={(files) => setUploadedFiles((prev) => [...prev, ...files])}
                 />
