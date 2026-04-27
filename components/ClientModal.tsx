@@ -49,8 +49,9 @@ export default function ClientModal({
   setShowPassword,
 }: ClientModalProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [clientFiles, setClientFiles] = useState<Array<{ id: string; name: string; url: string; size: number }>>([]);
+  const [clientFiles, setClientFiles] = useState<Array<{ id: string; name: string; url: string; size: number; type: string }>>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
+  const [previewFile, setPreviewFile] = useState<{ name: string; url: string; type: string } | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElementRef = useRef<HTMLElement | null>(null);
 
@@ -460,11 +461,9 @@ export default function ClientModal({
                 ) : (
                   <div className="space-y-3">
                     {clientFiles.map((file) => (
-                      <a
+                      <div
                         key={file.id}
-                        href={file.url}
-                        download={file.name}
-                        className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary hover:bg-tertiary transition-colors cursor-pointer"
+                        className="flex items-center gap-3 p-4 bg-secondary rounded-lg border border-primary hover:bg-tertiary transition-colors"
                       >
                         <FileText className="h-5 w-5 text-teal-500" weight="bold" />
                         <div className="flex-1 min-w-0">
@@ -473,8 +472,24 @@ export default function ClientModal({
                             {(file.size / 1024).toFixed(2)} KB
                           </p>
                         </div>
-                        <Link className="h-5 w-5 text-gray-500 hover:text-teal-500" weight="bold" />
-                      </a>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setPreviewFile({ name: file.name, url: file.url, type: file.type })}
+                            className="p-2 text-gray-500 hover:text-teal-500 transition-colors"
+                            title="Prévisualiser"
+                          >
+                            <Eye className="h-5 w-5" weight="bold" />
+                          </button>
+                          <a
+                            href={file.url}
+                            download={file.name}
+                            className="p-2 text-gray-500 hover:text-teal-500 transition-colors"
+                            title="Télécharger"
+                          >
+                            <Link className="h-5 w-5" weight="bold" />
+                          </a>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -748,6 +763,50 @@ export default function ClientModal({
         cancelText="Annuler"
         variant="danger"
       />
+
+      {/* File Preview Modal */}
+      {previewFile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+          <div className="bg-primary rounded-lg max-w-4xl max-h-[90vh] w-full mx-4 overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-primary">
+              <h3 className="text-lg font-bold text-primary">{previewFile.name}</h3>
+              <button
+                onClick={() => setPreviewFile(null)}
+                className="p-2 text-gray-500 hover:text-white transition-colors"
+              >
+                <X className="h-6 w-6" weight="bold" />
+              </button>
+            </div>
+            <div className="p-4 overflow-auto" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+              {previewFile.type?.startsWith('image/') ? (
+                <img
+                  src={previewFile.url}
+                  alt={previewFile.name}
+                  className="max-w-full h-auto mx-auto"
+                />
+              ) : previewFile.type === 'application/pdf' ? (
+                <iframe
+                  src={previewFile.url}
+                  className="w-full h-[70vh]"
+                  title={previewFile.name}
+                />
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="h-16 w-16 text-gray-500 mx-auto mb-4" weight="bold" />
+                  <p className="text-gray-400">Prévisualisation non disponible pour ce type de fichier</p>
+                  <a
+                    href={previewFile.url}
+                    download={previewFile.name}
+                    className="inline-block mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+                  >
+                    Télécharger le fichier
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
