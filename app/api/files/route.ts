@@ -28,32 +28,24 @@ export async function GET(request: Request) {
       );
     }
 
-    const db = await getClient();
-    const Client = db.models.Client;
+    await connectDB();
 
-    // Find client by name
-    const client = await Client.findOne({ client: clientName });
-
-    if (!client) {
-      return NextResponse.json({
-        success: true,
-        files: [],
-      });
-    }
+    // Find files by client name
+    const files = await ClientFile.find({ clientName: clientName }).sort({ uploadedAt: -1 });
 
     // Return files with base64 data for download/viewing
-    const files = (client.files || []).map((file: any) => ({
-      id: file.id,
-      name: file.name,
-      url: `data:${file.type};base64,${file.data}`,
-      size: file.size,
-      type: file.type,
+    const formattedFiles = files.map((file) => ({
+      id: file._id.toString(),
+      name: file.fileName,
+      url: `data:${file.fileType};base64,${file.fileData}`,
+      size: file.fileSize,
+      type: file.fileType,
       uploadedAt: file.uploadedAt,
     })) || [];
 
     return NextResponse.json({
       success: true,
-      files,
+      files: formattedFiles,
     });
   } catch (error) {
     console.error('Erreur lors de la récupération des fichiers:', error);

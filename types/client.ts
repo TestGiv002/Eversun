@@ -77,13 +77,4 @@ export interface ClientRecord {
     date?: string;
     updatedAt?: string | Date;
   }>;
-  /** Fichiers associés au client (stockés en base64) */
-  files?: Array<{
-    id: string;
-    name: string;
-    data: string; // base64
-    size: number;
-    type: string;
-    uploadedAt: string;
-  }>;
 }

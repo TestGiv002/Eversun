@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { MongoClient } from 'mongodb';
 import mongoose from 'mongoose';
+import ClientFile from '@/lib/clientFileModel';
+import { ClientModel as Client } from '@/lib/clientModel';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/eversun';
 
-async function getClient() {
+async function connectDB() {
   if (mongoose.connection.readyState === 1) {
-    return mongoose.connection;
+    return;
   }
   
   if (!MONGODB_URI) {
@@ -14,7 +15,6 @@ async function getClient() {
   }
 
   await mongoose.connect(MONGODB_URI);
-  return mongoose.connection;
 }
 
 // Helper to convert file to base64
@@ -38,8 +38,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const db = await getClient();
-    const Client = db.models.Client;
+    await connectDB();
 
     // Find client by name and section
     const client = await Client.findOne({ 
@@ -54,39 +53,32 @@ export async function POST(request: Request) {
       );
     }
 
-    // Convert files to base64 and add to client record
+    // Convert files to base64 and store in clients_files collection
     const uploadedFiles = [];
     
     for (const file of files) {
       const base64Data = await fileToBase64(file);
-      const fileRecord = {
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      const fileRecord = await ClientFile.create({
+        clientId: client._id,
+        clientName: clientName,
+        section: section,
+        fileName: file.name,
+        fileData: base64Data,
+        fileSize: file.size,
+        fileType: file.type,
+      });
+      
+      uploadedFiles.push({
+        id: fileRecord._id.toString(),
         name: file.name,
-        data: base64Data,
         size: file.size,
         type: file.type,
-        uploadedAt: new Date().toISOString(),
-      };
-      
-      uploadedFiles.push(fileRecord);
+      });
     }
-
-    // Add files to client record
-    if (!client.files) {
-      client.files = [];
-    }
-    client.files.push(...uploadedFiles);
-    
-    await client.save();
 
     return NextResponse.json({
       success: true,
-      files: uploadedFiles.map(f => ({
-        id: f.id,
-        name: f.name,
-        size: f.size,
-        type: f.type,
-      })),
+      files: uploadedFiles,
     });
   } catch (error) {
     console.error('Erreur lors de l\'upload:', error);
