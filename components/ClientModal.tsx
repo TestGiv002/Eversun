@@ -220,9 +220,13 @@ export default function ClientModal({
                 {selectedClient.client}
               </h2>
               <div className="flex items-center gap-2 mt-0.5">
-                {!section.startsWith('consuel') && (
+                {section.startsWith('consuel') ? (
                   <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs">
-                    {selectedClient.statut || 'Sans statut'}
+                    {selectedClient.causeNonPresence || selectedClient.statut || 'Sans statut'}
+                  </Badge>
+                ) : (
+                  <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs">
+                    {selectedClient.statut || selectedClient.raccordement || 'Sans statut'}
                   </Badge>
                 )}
                 {urgency && !section.startsWith('consuel') && (
@@ -553,7 +557,7 @@ export default function ClientModal({
                       />
                       <div>
                         <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          Cause non présence
+                          Statut
                         </p>
                         <p className="text-sm font-medium text-slate-900 dark:text-white">
                           {selectedClient.causeNonPresence}
@@ -614,7 +618,7 @@ export default function ClientModal({
                       <Clock className="h-3.5 w-3.5 text-cyan-500" weight="bold" />
                       <div>
                         <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          {section === 'installation' ? 'Date de pose' : 'DatE Ed poess'}
+                          {section === 'installation' ? 'Date de pose' : 'Date estimative'}
                         </p>
                         <p className="text-sm font-medium text-slate-900 dark:text-white">
                           {formatDateFR(selectedClient.dateEstimative)}
@@ -671,15 +675,15 @@ export default function ClientModal({
                       </div>
                     </div>
                   )}
-                  {selectedClient.raccordement && (
+                  {(selectedClient.statut || selectedClient.raccordement) && (
                     <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
                       <Flag className="h-3.5 w-3.5 text-cyan-500" />
                       <div>
                         <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          Raccordement
+                          Statut
                         </p>
                         <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {selectedClient.raccordement}
+                          {selectedClient.statut || selectedClient.raccordement}
                         </p>
                       </div>
                     </div>
@@ -705,7 +709,7 @@ export default function ClientModal({
                       <Clock className="h-3.5 w-3.5 text-cyan-500" weight="bold" />
                       <div>
                         <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          {section === 'installation' ? 'Date de pose' : 'DatE Ed poess'}
+                          {section === 'installation' ? 'Date de pose' : 'Date estimative'}
                         </p>
                         <p className="text-sm font-medium text-slate-900 dark:text-white">
                           {formatDateFR(selectedClient.dateEstimative)}

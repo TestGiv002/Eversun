@@ -279,6 +279,18 @@ export async function POST(request: Request) {
         },
       };
 
+      if (data.section === 'installation' && data.pvChantier === 'Reçu') {
+        createPayload.section = 'daact';
+        createPayload.statut = createPayload.statut || 'DAACT à faire';
+        createPayload.stages = {
+          daact: {
+            statut: createPayload.statut,
+            date: stageDate,
+            updatedAt: new Date(),
+          },
+        };
+      }
+
       const client = await Model.create(createPayload);
 
       // Si le client est dans dp-accordes avec statut Accord tacite ou Accord favorable,
@@ -343,35 +355,6 @@ export async function POST(request: Request) {
           }
         } catch (copyError: unknown) {
           console.error('Erreur lors de la copie vers Consuel En Cours:', copyError);
-        }
-
-        try {
-          const daactQuery: Record<string, unknown> = { section: 'daact' };
-          if (data.clientId) {
-            daactQuery.clientId = data.clientId;
-          } else if (data.client) {
-            daactQuery.client = data.client;
-          }
-          const existingDaact = await Model.findOne(daactQuery).lean();
-          if (!existingDaact) {
-            const daactPayload = {
-              ...data,
-              section: 'daact',
-              statut: 'DAACT à faire',
-              _id: undefined,
-              stages: {
-                ...createPayload.stages,
-                daact: {
-                  statut: 'DAACT à faire',
-                  date: new Date().toISOString(),
-                  updatedAt: new Date(),
-                },
-              },
-            };
-            await Model.create(daactPayload);
-          }
-        } catch (copyError: unknown) {
-          console.error('Erreur lors de la copie vers DAACT:', copyError);
         }
       }
 

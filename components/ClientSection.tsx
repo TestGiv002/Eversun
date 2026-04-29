@@ -335,6 +335,12 @@ export default function ClientSection({ section }: ClientSectionProps) {
       newSection = 'dp-refuses';
     }
 
+    if (section === 'installation' && record.pvChantier === 'Reçu') {
+      toSave.section = 'daact';
+      newSection = 'daact';
+      toSave.statut = toSave.statut || 'DAACT à faire';
+    }
+
     if (section === 'consuel-en-cours' && record.etatActuel === 'Consuel Visé') {
       toSave.section = 'consuel-finalise';
       newSection = 'consuel-finalise';
@@ -383,9 +389,9 @@ export default function ClientSection({ section }: ClientSectionProps) {
             toast.success(`${record.client} a été mis à jour avec succès`);
           }
 
-          if (shouldCreateRaccordementCopy) {
-            await createRaccordementCopy(saved);
-          }
+          // Le backend prend déjà en charge la création de la fiche Raccordement
+          // lors du passage de Consuel En Cours vers Consuel Finalisé.
+          // On évite donc une duplication côté frontend.
         } else {
           setClients(previousClients);
           const error = await res.json();

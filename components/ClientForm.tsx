@@ -259,7 +259,7 @@ export default function ClientForm({
         }
       }
 
-      // Automated Date Estimatives calculation for Consuel based on type
+      // Automated date estimative calculation for Consuel based on type
       if (
         section.startsWith('consuel') &&
         (key === 'typeConsuel' || key === 'dateDerniereDemarche')
@@ -358,10 +358,7 @@ export default function ClientForm({
         finalSection = 'consuel-finalise';
       }
 
-      if (
-        section === 'raccordement' &&
-        form.raccordement === 'Mise en service'
-      ) {
+      if (section === 'raccordement' && form.statut === 'Mise en service') {
         finalSection = 'raccordement-mes';
       }
 
@@ -376,7 +373,10 @@ export default function ClientForm({
         datePV: formatDateInput(form.datePV ?? ''),
         dateDerniereDemarche: formatDateInput(form.dateDerniereDemarche ?? ''),
         dateMiseEnService: formatDateInput(form.dateMiseEnService ?? ''),
-        raccordement: form.raccordement ?? '',
+        raccordement:
+          section === 'raccordement'
+            ? form.statut ?? ''
+            : form.raccordement ?? '',
         numeroContrat: form.numeroContrat ?? '',
         typeConsuel: form.typeConsuel ?? '',
         causeNonPresence: form.causeNonPresence ?? '',
@@ -523,7 +523,7 @@ export default function ClientForm({
                 </div>
               )}
             {section === 'raccordement' &&
-              form.raccordement === 'Mise en service' && (
+              form.statut === 'Mise en service' && (
                 <div className="bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded p-1.5">
                   <div className="flex items-center gap-1.5">
                     <CheckCircle className="h-3.5 w-3.5 text-success-600 dark:text-success-400" />
@@ -781,7 +781,7 @@ export default function ClientForm({
                     name="pvChantierDate"
                   />
                   <Select
-                    label="Cause de non présence Consuel"
+                    label="Statut"
                     value={form.causeNonPresence}
                     onChange={(e) =>
                       handleChange('causeNonPresence', e.target.value)
@@ -801,7 +801,7 @@ export default function ClientForm({
                       },
                       { value: 'Consuel envoyé', label: 'Consuel envoyé' },
                     ]}
-                    placeholder="Sélectionner une cause"
+                    placeholder="Sélectionner un statut"
                   />
                   <Select
                     label="Etat Actuel"
@@ -832,7 +832,7 @@ export default function ClientForm({
                     name="dateDerniereDemarche"
                   />
                   <DatePicker
-                    label="Date Estimatives"
+                    label="Date estimative"
                     value={form.dateEstimative}
                     onChange={(value) => handleChange('dateEstimative', value)}
                     icon={<Clock className="h-4 w-4" />}
@@ -897,25 +897,6 @@ export default function ClientForm({
                       { value: 'Bleu', label: 'Bleu' },
                     ]}
                     placeholder="Sélectionner un type"
-                  />
-                  <Select
-                    label="Raccordement"
-                    value={form.raccordement}
-                    onChange={(e) =>
-                      handleChange('raccordement', e.target.value)
-                    }
-                    options={[
-                      {
-                        value: 'Demande transmise',
-                        label: 'Demande transmise',
-                      },
-                      {
-                        value: 'Demande à effectuer',
-                        label: 'Demande à effectuer',
-                      },
-                      { value: 'Mise en service', label: 'Mise en service' },
-                    ]}
-                    placeholder="Sélectionner un raccordement"
                   />
                   <Select
                     label="Statut"
