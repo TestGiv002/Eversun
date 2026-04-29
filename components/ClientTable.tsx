@@ -172,35 +172,35 @@ function ClientTable({
     columns.push(
       { key: 'client', label: 'Client' },
       { key: 'pvChantierDate', label: 'PV Chantier' },
-      { key: 'causeNonPresence', label: 'Cause de non présence Consuel' },
+      { key: 'causeNonPresence', label: 'Statut' },
       { key: 'prestataire', label: 'Prestataire' },
       { key: 'etatActuel', label: 'Etat Actuel' },
       { key: 'typeConsuel', label: 'Type de consuel demandé' },
       { key: 'dateDerniereDemarche', label: 'Date dernière démarche' },
       { key: 'commentaires', label: 'Commentaires' },
-      { key: 'dateEstimative', label: 'Date Estimatives' }
+      { key: 'dateEstimative', label: 'Date estimative' }
     );
   } else if (isConsuelFinalise) {
     columns.push(
       { key: 'client', label: 'Nom' },
       { key: 'pvChantierDate', label: 'PV Chantier' },
-      { key: 'causeNonPresence', label: 'Cause de non présence Consuel' },
+      { key: 'causeNonPresence', label: 'Statut' },
       { key: 'prestataire', label: 'Prestataire' },
       { key: 'etatActuel', label: 'Etat Actuel' },
       { key: 'typeConsuel', label: 'Type de consuel demandé' },
       { key: 'dateDerniereDemarche', label: 'Date dernière démarche' },
       { key: 'commentaires', label: 'Commentaires' },
-      { key: 'dateEstimative', label: 'Date Estimatives' }
+      { key: 'dateEstimative', label: 'Date estimative' }
     );
   } else if (isRaccordement) {
     columns.push(
       { key: 'client', label: 'Client' },
       { key: 'prestataire', label: 'Prestataire' },
       { key: 'typeConsuel', label: 'Type de consuel demandé' },
-      { key: 'raccordement', label: 'Raccordement' },
+      { key: 'statut', label: 'Statut' },
       { key: 'dateDerniereDemarche', label: 'Date dernière démarche' },
       { key: 'commentaires', label: 'Commentaires' },
-      { key: 'dateEstimative', label: 'Date Estimatives' }
+      { key: 'dateEstimative', label: 'Date estimative' }
     );
   } else if (isRaccordementMes) {
     columns.push(
@@ -615,11 +615,11 @@ function ClientTable({
                             <Key className="w-3 h-3" weight="bold" />
                             {item.motDePasse}
                           </span>
-                        ) : col.key === 'statut' && item.statut ? (
+                        ) : col.key === 'statut' && (item.statut || item.raccordement) ? (
                           <span
-                            className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getStatutBadgeColor(item.statut)}`}
+                            className={`inline-flex items-center px-2 py-1 rounded-lg font-semibold text-xs border shadow-sm ${getStatutBadgeColor(item.statut || item.raccordement)}`}
                           >
-                            {item.statut}
+                            {item.statut || item.raccordement}
                           </span>
                         ) : col.key === 'financement' && item.financement ? (
                           <span

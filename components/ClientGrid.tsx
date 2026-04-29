@@ -72,11 +72,24 @@ export default function ClientGrid({
           comparison = (a.client || '').localeCompare(b.client || '');
           break;
         case 'statut':
-          comparison = (
-            section.startsWith('consuel') ? a.etatActuel || '' : a.statut || ''
-          ).localeCompare(
-            section.startsWith('consuel') ? b.etatActuel || '' : b.statut || ''
-          );
+          let aStatus = '';
+          let bStatus = '';
+
+          if (section === 'daact') {
+            aStatus = a.statut || '';
+            bStatus = b.statut || '';
+          } else if (section.startsWith('consuel')) {
+            aStatus = a.causeNonPresence || '';
+            bStatus = b.causeNonPresence || '';
+          } else if (section === 'raccordement' || section === 'raccordement-mes') {
+            aStatus = a.statut || a.raccordement || '';
+            bStatus = b.statut || b.raccordement || '';
+          } else {
+            aStatus = a.statut || '';
+            bStatus = b.statut || '';
+          }
+
+          comparison = aStatus.localeCompare(bStatus);
           break;
         case 'dateEnvoi':
           comparison =
@@ -211,11 +224,30 @@ export default function ClientGrid({
           >
             {client.client}
           </h3>
-          {client.statut && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-teal-100 to-cyan-100 dark:from-teal-900/40 dark:to-cyan-900/40 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-700 shadow-sm">
-              {client.statut}
-            </span>
-          )}
+          {(() => {
+            let statusValue = '';
+            let statusLabel = '';
+
+            if (section === 'daact') {
+              statusValue = client.statut || '';
+              statusLabel = 'DAACT';
+            } else if (section.startsWith('consuel')) {
+              statusValue = client.causeNonPresence || '';
+              statusLabel = 'Statut';
+            } else if (section === 'raccordement' || section === 'raccordement-mes') {
+              statusValue = client.statut || client.raccordement || '';
+              statusLabel = 'Statut';
+            } else {
+              statusValue = client.statut || '';
+              statusLabel = 'Statut';
+            }
+
+            return statusValue ? (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-teal-100 to-cyan-100 dark:from-teal-900/40 dark:to-cyan-900/40 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-700 shadow-sm">
+                {statusValue}
+              </span>
+            ) : null;
+          })()}
         </div>
 
         {cardView === 'detailed' && (
