@@ -24,7 +24,6 @@ export const ClientSchema = new mongoose.Schema({
     ],
   },
   client: { type: String, required: true },
-  prestataire: String,
   statut: String,
   dateEnvoi: String,
   dateEstimative: String,
@@ -38,8 +37,6 @@ export const ClientSchema = new mongoose.Schema({
   pvChantier: String,
   pvChantierDate: String,
   datePV: String,
-  causeNonPresence: String,
-  etatActuel: String,
   typeConsuel: String,
   dateDerniereDemarche: String,
   commentaires: String,
@@ -95,7 +92,6 @@ export interface IClient extends mongoose.Document {
   section: Section;
   client: string;
   clientId?: string;
-  prestataire?: string;
   statut?: string;
   dateEnvoi?: string;
   dateEstimative?: string;
@@ -109,12 +105,9 @@ export interface IClient extends mongoose.Document {
   pvChantier?: string;
   pvChantierDate?: string;
   datePV?: string;
-  causeNonPresence?: string;
-  etatActuel?: string;
   typeConsuel?: string;
   dateDerniereDemarche?: string;
   commentaires?: string;
-  raccordement?: string;
   numeroContrat?: string;
   dateMiseEnService?: string;
 }

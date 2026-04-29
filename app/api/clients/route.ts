@@ -19,7 +19,6 @@ interface MappedClient {
   [key: string]: unknown;
   client?: string;
   section?: string;
-  prestataire?: string;
   statut?: string;
   dateEnvoi?: string;
   dateEstimative?: string;
@@ -33,12 +32,9 @@ interface MappedClient {
   pvChantier?: string;
   pvChantierDate?: string;
   datePV?: string;
-  causeNonPresence?: string;
-  etatActuel?: string;
   typeConsuel?: string;
   dateDerniereDemarche?: string;
   commentaires?: string;
-  raccordement?: string;
   numeroContrat?: string;
   dateMiseEnService?: string;
 }
@@ -54,7 +50,6 @@ function mapImportedFields(doc: MappedClient): MappedClient {
     nom: 'client',
     "Date d'envoi DP": 'dateEnvoi',
     'Attente DP': 'dateEstimative',
-    Presta: 'prestataire',
     Financement: 'financement',
     Status: 'statut',
     'Numéro DP': 'noDp',
@@ -64,14 +59,10 @@ function mapImportedFields(doc: MappedClient): MappedClient {
     'Mot de passe': 'motDePasse',
     'PV Chantier': 'pvChantierDate',
     'Date PV': 'datePV',
-    'Cause de non présence Consuel': 'causeNonPresence',
-    Prestataire: 'prestataire',
-    'Etat Actuel': 'etatActuel',
     'Type de consuel demandé': 'typeConsuel',
     'Date dernière démarche': 'dateDerniereDemarche',
     Commentaires: 'commentaires',
     'Date Estimatives': 'dateEstimative',
-    Raccordement: 'raccordement',
     'Numéro de contrat': 'numeroContrat',
     'Date de Mise en service raccordement': 'dateMiseEnService',
   };

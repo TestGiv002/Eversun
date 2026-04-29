@@ -17,6 +17,7 @@ import {
   X,
   List,
   House,
+  Users,
 } from '@phosphor-icons/react';
 import { Section } from '@/types/client';
 import Input from '@/components/ui/Input';
@@ -37,6 +38,8 @@ interface SidebarProps {
   onMobileClose?: () => void;
   /** Callback pour naviguer vers l'accueil */
   onNavigateHome?: () => void;
+  /** Callback pour afficher la vue clients */
+  onShowClientsView?: () => void;
 }
 
 const sectionGroups = [
@@ -115,6 +118,7 @@ function Sidebar({
   isMobileOpen = false,
   onMobileClose,
   onNavigateHome,
+  onShowClientsView,
 }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -122,6 +126,7 @@ function Sidebar({
   const [openGroups, setOpenGroups] = useState<Set<string>>(
     new Set(sectionGroups.map((group) => group.title))
   );
+  const [isHomeOpen, setIsHomeOpen] = useState(true);
 
   // Debounce le handler de resize
   const checkMobile = useCallback(() => {
@@ -242,28 +247,79 @@ function Sidebar({
         )}
 
         <nav className="py-2 flex-1 overflow-y-auto">
-          {/* Accueil Button */}
+          {/* Accueil Dropdown */}
           <div className="px-1.5 mb-4">
-            <button
-              onClick={onNavigateHome}
-              className={`w-full text-left rounded-lg text-xs font-medium transition-all duration-200 ease-out flex items-center group relative overflow-hidden
-              ${
-                isCollapsed
-                  ? 'justify-center px-1.5 py-2.5'
-                  : 'px-3 py-2.5 gap-2.5'
-              }
-              text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900`}
-              aria-label="Accueil"
-            >
-              <House
-                weight="regular"
-                className="h-4.5 w-4.5 flex-shrink-0 transition-all duration-200 text-slate-400 dark:text-slate-500 group-hover:text-primary-500 dark:group-hover:text-primary-400"
-                aria-hidden="true"
-              />
-              {!isCollapsed && (
-                <span className="flex-1 relative z-10">Accueil</span>
-              )}
-            </button>
+            {!isCollapsed && (
+              <button
+                onClick={() => setIsHomeOpen(!isHomeOpen)}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                <span>Accueil</span>
+                <CaretDown
+                  weight="bold"
+                  className={`h-3 w-3 transition-transform ${isHomeOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+            )}
+            {(isCollapsed || isHomeOpen) && (
+              <ul className="space-y-1" role="list">
+                {/* Dashboard */}
+                <li role="listitem">
+                  <button
+                    onClick={onNavigateHome}
+                    className={`w-full text-left rounded-lg text-xs font-medium transition-all duration-200 ease-out flex items-center group relative overflow-hidden
+                    ${
+                      isCollapsed
+                        ? 'justify-center px-1.5 py-2.5'
+                        : 'px-3 py-2.5 gap-2.5'
+                    }
+                    text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900`}
+                    aria-label="Tableau de bord"
+                  >
+                    <House
+                      weight="regular"
+                      className="h-4.5 w-4.5 flex-shrink-0 transition-all duration-200 text-slate-400 dark:text-slate-500 group-hover:text-primary-500 dark:group-hover:text-primary-400"
+                      aria-hidden="true"
+                    />
+                    {!isCollapsed && (
+                      <span className="flex-1 relative z-10">Tableau de bord</span>
+                    )}
+                  </button>
+                </li>
+                {/* Vue Clients */}
+                <li role="listitem">
+                  <button
+                    onClick={onShowClientsView}
+                    className={`w-full text-left rounded-lg text-xs font-medium transition-all duration-200 ease-out flex items-center group relative overflow-hidden
+                    ${
+                      activeSection === 'clients'
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md shadow-cyan-500/25'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }
+                    ${
+                      isCollapsed
+                        ? 'justify-center px-1.5 py-2.5'
+                        : 'px-3 py-2.5 gap-2.5'
+                    }`}
+                    aria-label="Vue Clients"
+                    aria-current={activeSection === 'clients' ? 'page' : undefined}
+                  >
+                    <Users
+                      weight="regular"
+                      className={`h-4.5 w-4.5 flex-shrink-0 transition-all duration-200 ${
+                        activeSection === 'clients'
+                          ? 'text-white'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:text-cyan-500 dark:group-hover:text-cyan-400'
+                      }`}
+                      aria-hidden="true"
+                    />
+                    {!isCollapsed && (
+                      <span className="flex-1 relative z-10">Vue Clients</span>
+                    )}
+                  </button>
+                </li>
+              </ul>
+            )}
           </div>
 
           {filteredSectionGroups.map((group, groupIndex) => {

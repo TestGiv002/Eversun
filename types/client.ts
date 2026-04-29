@@ -29,8 +29,6 @@ export interface ClientRecord {
   section: Section;
   /** Nom du client (requis) */
   client: string;
-  /** Prestataire assigné au dossier */
-  prestataire?: string;
   /** Statut actuel du dossier */
   statut?: string;
   /** Date d'envoi du dossier (format ISO string) */
@@ -55,10 +53,6 @@ export interface ClientRecord {
   pvChantier?: string;
   /** PV Chantier date (pour section Consuel) */
   pvChantierDate?: string;
-  /** Cause de non présence Consuel (pour section Consuel) */
-  causeNonPresence?: string;
-  /** Etat Actuel (pour section Consuel) */
-  etatActuel?: string;
   /** Type de consuel demandé (pour section Consuel) */
   typeConsuel?: string;
   /** Date dernière démarche (pour section Consuel) */
@@ -67,8 +61,6 @@ export interface ClientRecord {
   datePV?: string;
   /** Commentaires (pour section Consuel) */
   commentaires?: string;
-  /** Raccordement (pour section Raccordement) */
-  raccordement?: string;
   /** Numéro de contrat (pour section Raccordement MES) */
   numeroContrat?: string;
   /** Date de Mise en service raccordement (pour section Raccordement MES) */

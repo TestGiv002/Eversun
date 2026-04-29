@@ -23,6 +23,19 @@ export const financementOptions = ['Sunlib', 'Otovo', 'Upfront'] as const;
 export const pvChantierStatusOptions = ['En attente', 'Reçu'] as const;
 export const consuelTypes = ['Violet', 'Bleu'] as const;
 
+export const consuelStatuts = [
+  'Avis de visite',
+  'Demande à effectuer',
+  'Traitement en cours',
+  'Consuel visé',
+] as const;
+
+export const raccordementStatuts = [
+  'Demande à effectuer',
+  'Demande transmise',
+  'Mis en service',
+] as const;
+
 export const sectionLabelMap: Record<Section, string> = {
   clients: 'Clients',
   'dp-en-cours': 'Déclaration Préalable – En cours',

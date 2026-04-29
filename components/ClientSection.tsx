@@ -104,15 +104,49 @@ export default function ClientSection({ section }: ClientSectionProps) {
     fetchSectionCounts();
   }, [section]);
 
+  // Écouter l'événement forceRefresh pour rafraîchir quand l'utilisateur revient sur l'onglet
+  useEffect(() => {
+    const handleForceRefresh = (event: Event) => {
+      const customEvent = event as CustomEvent<{ section: string }>;
+      if (customEvent.detail.section === section) {
+        fetchSectionCounts();
+        // Recharger aussi les clients
+        setLoading(true);
+        fetch(`/api/clients?section=${section}&limit=100`)
+          .then((res) => res.json())
+          .then((response) => {
+            const data = response.data || response;
+            setClients(
+              Array.isArray(data)
+                ? data.map((item) => ({ ...item, id: item._id || item.id }))
+                : []
+            );
+            setLoading(false);
+          })
+          .catch((err) => {
+            console.error('Erreur de rechargement:', err);
+            setLoading(false);
+          });
+      }
+    };
+
+    window.addEventListener('forceRefresh', handleForceRefresh);
+    return () => window.removeEventListener('forceRefresh', handleForceRefresh);
+  }, [section]);
+
   // Créer une copie du client dans la section DAACT (même clientId, nouveau _id MongoDB)
   const createDaactCopy = async (record: ClientRecord) => {
     try {
+      // Générer un clientId si le client n'en a pas (clients existants avant la mise à jour)
+      const clientId = record.clientId || `CLI-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
       const daactRecord = {
         ...record,
+        clientId,
         section: 'daact' as Section,
         statut: 'DAACT à faire',
       };
-      // Retirer _id pour créer une nouvelle entrée, mais garder le clientId
+      // Retirer _id pour créer une nouvelle entrée
       const { _id, id, ...toSend } = daactRecord;
 
       const res = await fetch('/api/clients', {
@@ -122,7 +156,8 @@ export default function ClientSection({ section }: ClientSectionProps) {
       });
 
       if (res.ok) {
-        toast.success(`${record.client} ajouté à DAACT (ID: ${record.clientId})`);
+        const result = await res.json();
+        toast.success(`${record.client} ajouté à DAACT (ID: ${result.clientId || clientId})`);
         fetchSectionCounts();
       }
     } catch (error) {
@@ -133,12 +168,16 @@ export default function ClientSection({ section }: ClientSectionProps) {
   // Créer une copie du client dans la section Raccordement (même clientId)
   const createRaccordementCopy = async (record: ClientRecord) => {
     try {
+      // Générer un clientId si le client n'en a pas (clients existants avant la mise à jour)
+      const clientId = record.clientId || `CLI-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
       const raccordementRecord = {
         ...record,
+        clientId,
         section: 'raccordement' as Section,
         statut: 'Raccordement à faire',
       };
-      // Retirer _id pour créer une nouvelle entrée, mais garder le clientId
+      // Retirer _id pour créer une nouvelle entrée
       const { _id, id, ...toSend } = raccordementRecord;
 
       const res = await fetch('/api/clients', {
@@ -148,7 +187,8 @@ export default function ClientSection({ section }: ClientSectionProps) {
       });
 
       if (res.ok) {
-        toast.success(`${record.client} ajouté à Raccordement (ID: ${record.clientId})`);
+        const result = await res.json();
+        toast.success(`${record.client} ajouté à Raccordement (ID: ${result.clientId || clientId})`);
         fetchSectionCounts();
       }
     } catch (error) {
@@ -275,14 +315,7 @@ export default function ClientSection({ section }: ClientSectionProps) {
   const getStatusCounts = () => {
     const counts: Record<string, number> = {};
     sectionItems.forEach((item) => {
-      let key: string;
-      if (section.startsWith('consuel')) {
-        key = item.etatActuel || 'Non défini';
-      } else if (section.startsWith('raccordement')) {
-        key = item.raccordement || 'Non défini';
-      } else {
-        key = item.statut || 'Non défini';
-      }
+      const key = item.statut || 'Non défini';
       counts[key] = (counts[key] || 0) + 1;
     });
     return counts;
@@ -309,8 +342,7 @@ export default function ClientSection({ section }: ClientSectionProps) {
     }
     if (
       section === 'consuel-en-cours' &&
-      record.causeNonPresence === 'Consuel envoyé' &&
-      record.etatActuel === 'Consuel Visé'
+      record.statut === 'Consuel visé'
     ) {
       toSave.section = 'consuel-finalise';
       newSection = 'consuel-finalise';
@@ -886,65 +918,6 @@ export default function ClientSection({ section }: ClientSectionProps) {
                     </div>
                   </div>
 
-                  {/* Statistiques par prestataire */}
-                  {sectionItems.some((c) => c.prestataire) && (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-md">
-                      <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
-                        Répartition par prestataire
-                      </h4>
-                      <div className="space-y-3">
-                        {Object.entries(
-                          sectionItems.reduce(
-                            (acc, client) => {
-                              if (client.prestataire) {
-                                acc[client.prestataire] =
-                                  (acc[client.prestataire] || 0) + 1;
-                              }
-                              return acc;
-                            },
-                            {} as Record<string, number>
-                          )
-                        )
-                          .sort((a, b) => b[1] - a[1])
-                          .slice(0, 5)
-                          .map(([prestataire, count]) => {
-                            const percentage =
-                              sectionItems.length > 0
-                                ? (count / sectionItems.length) * 100
-                                : 0;
-                            const colors = [
-                              'bg-primary-500',
-                              'bg-success-500',
-                              'bg-warning-500',
-                              'bg-accent-500',
-                              'bg-error-500',
-                            ];
-                            const colorIndex =
-                              Object.keys(statusCounts).indexOf(prestataire) %
-                              colors.length;
-
-                            return (
-                              <div key={prestataire}>
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    {prestataire}
-                                  </span>
-                                  <span className="text-sm font-bold text-gray-900 dark:text-white">
-                                    {count} ({percentage.toFixed(1)}%)
-                                  </span>
-                                </div>
-                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                                  <div
-                                    className={`h-2 rounded-full ${colors[colorIndex]} shadow-md transition-all duration-500`}
-                                    style={{ width: `${percentage}%` }}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          })}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             )}

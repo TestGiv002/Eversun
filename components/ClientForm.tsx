@@ -15,6 +15,8 @@ import {
   financementOptions,
   pvChantierStatusOptions,
   consuelTypes,
+  consuelStatuts,
+  raccordementStatuts,
 } from '@/lib/sectionConfig';
 import {
   FloppyDisk,
@@ -54,13 +56,6 @@ const dpStatuts = [
   'Accord tacite',
   'Refus',
 ];
-const consuelStatuts = [
-  'Avis de visite',
-  'Demande à effectuer',
-  'Consuel Visé',
-  'En cours de traitement',
-];
-const raccordementStatuts = ['Demande transmise', 'Demande à effectuer'];
 const daactStatuts = ['En attente', 'Validé', 'Refusé'];
 
 export default function ClientForm({
@@ -74,8 +69,7 @@ export default function ClientForm({
 
     section,
     client: client?.client || '',
-    prestataire: client?.prestataire || '',
-    statut: client?.statut || '',
+    statut: client?.statut || 'Demande à effectuer',
     dateEnvoi: client?.dateEnvoi ?? '',
     dateEstimative: client?.dateEstimative ?? '',
     financement: client?.financement ?? '',
@@ -88,12 +82,9 @@ export default function ClientForm({
     pvChantier: client?.pvChantier ?? '',
     pvChantierDate: client?.pvChantierDate ?? '',
     datePV: client?.datePV ?? '',
-    causeNonPresence: client?.causeNonPresence ?? '',
-    etatActuel: client?.etatActuel ?? '',
     typeConsuel: client?.typeConsuel ?? '',
     dateDerniereDemarche: client?.dateDerniereDemarche ?? '',
     commentaires: client?.commentaires ?? '',
-    raccordement: client?.raccordement ?? '',
     numeroContrat: client?.numeroContrat ?? '',
     dateMiseEnService: client?.dateMiseEnService ?? '',
   });
@@ -154,8 +145,7 @@ export default function ClientForm({
         ...(typeof client?.id === 'number' ? { id: client.id } : {}),
         section,
         client: client?.client || '',
-        prestataire: client?.prestataire || '',
-        statut: client?.statut || '',
+        statut: client?.statut || 'Demande à effectuer',
         dateEnvoi: client?.dateEnvoi ?? '',
         dateEstimative: client?.dateEstimative ?? '',
         financement: client?.financement ?? '',
@@ -167,13 +157,10 @@ export default function ClientForm({
         type: client?.type ?? '',
         pvChantier: client?.pvChantier ?? '',
         pvChantierDate: client?.pvChantierDate ?? '',
-        causeNonPresence: client?.causeNonPresence ?? '',
-        etatActuel: client?.etatActuel ?? '',
         typeConsuel: client?.typeConsuel ?? '',
         dateDerniereDemarche: client?.dateDerniereDemarche ?? '',
         datePV: client?.datePV ?? '',
         commentaires: client?.commentaires ?? '',
-        raccordement: client?.raccordement ?? '',
         numeroContrat: client?.numeroContrat ?? '',
         dateMiseEnService: client?.dateMiseEnService ?? '',
       });
@@ -349,15 +336,29 @@ export default function ClientForm({
       const { id, ...rest } = form;
 
       let finalSection = section;
-      if (section === 'consuel-en-cours' && form.etatActuel === 'Consuel OK') {
+      if (section === 'consuel-en-cours' && form.statut === 'Consuel visé') {
         finalSection = 'consuel-finalise';
       }
 
       if (
         section === 'raccordement' &&
-        form.raccordement === 'Mise en service'
+        form.statut === 'Mis en service'
       ) {
         finalSection = 'raccordement-mes';
+      }
+
+      if (
+        section === 'dp-en-cours' &&
+        (form.statut === 'Accord favorable' || form.statut === 'Accord tacite')
+      ) {
+        finalSection = 'dp-accordes';
+      }
+
+      if (
+        section === 'dp-en-cours' &&
+        form.statut === 'Refus'
+      ) {
+        finalSection = 'dp-refuses';
       }
 
       const formToSend: ClientRecord = {
@@ -371,11 +372,8 @@ export default function ClientForm({
         datePV: formatDateInput(form.datePV ?? ''),
         dateDerniereDemarche: formatDateInput(form.dateDerniereDemarche ?? ''),
         dateMiseEnService: formatDateInput(form.dateMiseEnService ?? ''),
-        raccordement: form.raccordement ?? '',
         numeroContrat: form.numeroContrat ?? '',
         typeConsuel: form.typeConsuel ?? '',
-        causeNonPresence: form.causeNonPresence ?? '',
-        etatActuel: form.etatActuel ?? '',
         commentaires: form.commentaires ?? '',
       };
 
@@ -507,7 +505,7 @@ export default function ClientForm({
           </div>
           <form onSubmit={handleSubmit} className="space-y-3">
             {section.startsWith('consuel') &&
-              form.etatActuel === 'Consuel OK' && (
+              form.statut === 'Consuel visé' && (
                 <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded p-1.5">
                   <div className="flex items-center gap-1.5">
                     <Info className="h-3.5 w-3.5 text-primary-600 dark:text-primary-400" />
@@ -518,7 +516,7 @@ export default function ClientForm({
                 </div>
               )}
             {section === 'raccordement' &&
-              form.raccordement === 'Mise en service' && (
+              form.statut === 'Mis en service' && (
                 <div className="bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded p-1.5">
                   <div className="flex items-center gap-1.5">
                     <CheckCircle className="h-3.5 w-3.5 text-success-600 dark:text-success-400" />
@@ -776,34 +774,14 @@ export default function ClientForm({
                     name="pvChantierDate"
                   />
                   <Select
-                    label="Cause de non présence Consuel"
-                    value={form.causeNonPresence}
-                    onChange={(e) =>
-                      handleChange('causeNonPresence', e.target.value)
-                    }
-                    options={[
-                      {
-                        value: 'Consuel non demandé',
-                        label: 'Consuel non demandé',
-                      },
-                      {
-                        value: 'Consuel refusé pour cause technique',
-                        label: 'Consuel refusé pour cause technique',
-                      },
-                      {
-                        value: 'Consuel refusé pour cause administrative',
-                        label: 'Consuel refusé pour cause administrative',
-                      },
-                      { value: 'Consuel envoyé', label: 'Consuel envoyé' },
-                    ]}
-                    placeholder="Sélectionner une cause"
-                  />
-                  <Select
-                    label="Etat Actuel"
-                    value={form.etatActuel}
-                    onChange={(e) => handleChange('etatActuel', e.target.value)}
-                    options={statutOptions}
-                    placeholder="Sélectionner un état"
+                    label="Statut"
+                    value={form.statut}
+                    onChange={(e) => handleChange('statut', e.target.value)}
+                    options={consuelStatuts.map((s) => ({
+                      value: s,
+                      label: s,
+                    }))}
+                    placeholder="Sélectionner un statut"
                   />
                   <Select
                     label="Type de consuel demandé"
@@ -881,37 +859,6 @@ export default function ClientForm({
                   Raccordement
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <Select
-                    label="Type de consuel demandé"
-                    value={form.typeConsuel}
-                    onChange={(e) =>
-                      handleChange('typeConsuel', e.target.value)
-                    }
-                    options={[
-                      { value: 'Violet', label: 'Violet' },
-                      { value: 'Bleu', label: 'Bleu' },
-                    ]}
-                    placeholder="Sélectionner un type"
-                  />
-                  <Select
-                    label="Raccordement"
-                    value={form.raccordement}
-                    onChange={(e) =>
-                      handleChange('raccordement', e.target.value)
-                    }
-                    options={[
-                      {
-                        value: 'Demande transmise',
-                        label: 'Demande transmise',
-                      },
-                      {
-                        value: 'Demande à effectuer',
-                        label: 'Demande à effectuer',
-                      },
-                      { value: 'Mise en service', label: 'Mise en service' },
-                    ]}
-                    placeholder="Sélectionner un raccordement"
-                  />
                   <Select
                     label="Statut"
                     value={form.statut}

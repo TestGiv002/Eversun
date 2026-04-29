@@ -1,45 +1,43 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ClientRecord } from '@/types/client';
 import {
   User,
   CheckCircle,
   Clock,
-  XCircle,
   Buildings,
-  Lightning,
-  FileText,
-  House,
   Flag,
   MagnifyingGlass,
   X,
+  TrendUp,
+  Faders,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/useAppStore';
 
 interface ClientStage {
   section: string;
-  statut: string;
+  statut?: string;
   date?: string;
   noDp?: string;
   financement?: string;
   typeConsuel?: string;
-  raccordement?: string;
+  clientId?: string;
 }
 
 interface AggregatedClient {
   name: string;
   stages: Record<string, ClientStage>;
   ville?: string;
-  prestataire?: string;
   financement?: string;
+  clientId?: string;
 }
 
 export default function ClientAggregationView() {
   const [clients, setClients] = useState<AggregatedClient[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterCompleted, setFilterCompleted] = useState(false);
   const { setSectionCounts } = useAppStore();
 
   const fetchSectionCounts = async () => {
@@ -59,6 +57,19 @@ export default function ClientAggregationView() {
     fetchSectionCounts();
   }, []);
 
+  // Rafraîchir les données quand l'utilisateur revient sur l'onglet
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchAllClients();
+        fetchSectionCounts();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   const fetchAllClients = async () => {
     setLoading(true);
     try {
@@ -70,8 +81,8 @@ export default function ClientAggregationView() {
         const aggregatedClients: AggregatedClient[] = data.map((item: any) => ({
           name: item.client,
           ville: item.ville,
-          prestataire: item.prestataire,
           financement: item.financement,
+          clientId: item.clientId,
           stages: item.stages || {},
         }));
         setClients(aggregatedClients);
@@ -83,379 +94,473 @@ export default function ClientAggregationView() {
     }
   };
 
-  const getStageIcon = (section: string) => {
-    switch (section) {
-      case 'dp-en-cours':
-      case 'dp-accordes':
-      case 'dp-refuses':
-        return <FileText className="h-3.5 w-3.5" />;
-      case 'daact':
-        return <Buildings className="h-3.5 w-3.5" />;
-      case 'consuel-en-cours':
-      case 'consuel-finalise':
-        return <Lightning className="h-3.5 w-3.5" />;
-      case 'installation':
-        return <House className="h-3.5 w-3.5" />;
-      case 'raccordement':
-        return <House className="h-3.5 w-3.5" />;
-      case 'raccordement-mes':
-        return <Flag className="h-3.5 w-3.5" />;
+  // Vérifie si un stage est finalisé (vert)
+  const isStageCompleted = (sectionKey: string, stage?: ClientStage) => {
+    if (!stage) return false;
+    
+    const status = stage.statut?.toLowerCase() || '';
+    
+    // DP Accordés - toujours finalisé
+    if (sectionKey === 'dp-accordes') return true;
+    
+    // Consuel Finalisé - toujours finalisé
+    if (sectionKey === 'consuel-finalise') return true;
+    
+    // Raccordement MES - toujours finalisé
+    if (sectionKey === 'raccordement-mes') return true;
+    
+    // DAACT - validé si statut contient validé/fait/ok/transmis
+    if (sectionKey === 'daact') {
+      if (status.includes('validé') || status.includes('fait') || status.includes('ok') || 
+          status.includes('transmis')) return true;
+    }
+    
+    // Raccordement - validé si statut contient service/transmis
+    if (sectionKey === 'raccordement') {
+      if (status.includes('service') || status.includes('mis en service')) return true;
+    }
+    
+    return false;
+  };
+
+  // Vérifie si un stage est en cours/en attente (orange)
+  const isStageInProgress = (sectionKey: string, stage?: ClientStage) => {
+    if (!stage) return false;
+    if (isStageCompleted(sectionKey, stage)) return false;
+    
+    const status = stage.statut?.toLowerCase() || '';
+    
+    // DP En Cours - ABF ou En cours d'instruction
+    if (sectionKey === 'dp-en-cours') {
+      if (status.includes('abf') || status.includes('instruction') || status.includes('cours')) return true;
+    }
+    
+    // Consuel En Cours - Traitement en cours
+    if (sectionKey === 'consuel-en-cours') {
+      if (status.includes('traitement') || status.includes('cours') || status.includes('avis')) return true;
+    }
+    
+    // DAACT - n'importe quel statut non validé = en cours
+    if (sectionKey === 'daact' && stage.statut) return true;
+    
+    // Raccordement - Demande transmise = en cours
+    if (sectionKey === 'raccordement') {
+      if (status.includes('transmis') || status.includes('demande')) return true;
+    }
+    
+    return false;
+  };
+
+  // Détermine le statut à afficher pour un stage
+  const getStageStatus = (sectionKey: string, stage?: ClientStage): 'completed' | 'inprogress' | 'empty' => {
+    if (!stage) return 'empty';
+    if (isStageCompleted(sectionKey, stage)) return 'completed';
+    if (isStageInProgress(sectionKey, stage)) return 'inprogress';
+    return 'empty';
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-emerald-500 text-white border-emerald-600';
+      case 'inprogress':
+        return 'bg-amber-500 text-white border-amber-600';
       default:
-        return <User className="h-3.5 w-3.5" />;
+        return 'bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-800 dark:border-slate-700';
     }
   };
 
-  const getStageLabel = (section: string) => {
-    switch (section) {
-      case 'dp-en-cours':
-        return 'DP';
-      case 'dp-accordes':
-        return 'DP Acc.';
-      case 'dp-refuses':
-        return 'DP Ref.';
-      case 'daact':
-        return 'DAACT';
-      case 'consuel-en-cours':
-        return 'Consuel';
-      case 'consuel-finalise':
-        return 'Consuel OK';
-      case 'installation':
-        return 'Install.';
-      case 'raccordement':
-        return 'Racc.';
-      case 'raccordement-mes':
-        return 'Racc. MES';
-      default:
-        return section;
-    }
+  // Calcule la progression réelle du client
+  const getProgressForClient = (client: AggregatedClient) => {
+    let completed = 0;
+    let inProgress = 0;
+    
+    // Vérifier DP (en cours ou accordé)
+    const dpStage = client.stages['dp-accordes'] || client.stages['dp-en-cours'];
+    if (isStageCompleted('dp-accordes', client.stages['dp-accordes'])) completed++;
+    else if (isStageInProgress('dp-en-cours', client.stages['dp-en-cours'])) inProgress++;
+    
+    // Vérifier DAACT
+    if (isStageCompleted('daact', client.stages['daact'])) completed++;
+    else if (isStageInProgress('daact', client.stages['daact'])) inProgress++;
+    
+    // Vérifier Consuel (en cours ou finalisé)
+    if (isStageCompleted('consuel-finalise', client.stages['consuel-finalise'])) completed++;
+    else if (isStageInProgress('consuel-en-cours', client.stages['consuel-en-cours'])) inProgress++;
+    
+    // Vérifier Raccordement (en cours ou MES)
+    if (isStageCompleted('raccordement-mes', client.stages['raccordement-mes'])) completed++;
+    else if (isStageInProgress('raccordement', client.stages['raccordement'])) inProgress++;
+    
+    const totalStages = 4; // 4 étapes majeures
+    const progressValue = (completed * 100 + inProgress * 50) / totalStages; // 100% pour terminé, 50% pour en cours
+    
+    return { 
+      completed, 
+      inProgress,
+      total: totalStages, 
+      percentage: Math.round(progressValue)
+    };
   };
 
-  const getStatusColor = (statut: string) => {
-    if (!statut) return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700';
-
-    const lowerStatut = statut.toLowerCase();
-    if (
-      lowerStatut.includes('accord') ||
-      lowerStatut.includes('favorable') ||
-      lowerStatut.includes('visé') ||
-      lowerStatut.includes('validé') ||
-      lowerStatut.includes('ok') ||
-      lowerStatut.includes('fait') ||
-      lowerStatut.includes('finalisé')
-    ) {
-      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700';
-    }
-    if (lowerStatut.includes('refus') || lowerStatut.includes('ko')) {
-      return 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border border-rose-200 dark:border-rose-700';
-    }
-    if (
-      lowerStatut.includes('en cours') ||
-      lowerStatut.includes('attente') ||
-      lowerStatut.includes('effectuer')
-    ) {
-      return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-700';
-    }
-    return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700';
-  };
-
-  const getStatusIcon = (statut: string) => {
-    if (!statut) return null;
-
-    const lowerStatut = statut.toLowerCase();
-    if (
-      lowerStatut.includes('accord') ||
-      lowerStatut.includes('favorable') ||
-      lowerStatut.includes('visé') ||
-      lowerStatut.includes('validé') ||
-      lowerStatut.includes('ok') ||
-      lowerStatut.includes('fait') ||
-      lowerStatut.includes('finalisé')
-    ) {
-      return <CheckCircle className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />;
-    }
-    if (lowerStatut.includes('refus') || lowerStatut.includes('ko')) {
-      return <XCircle className="h-3 w-3 text-rose-600 dark:text-rose-400" />;
-    }
-    return <Clock className="h-3 w-3 text-amber-600 dark:text-amber-400" />;
-  };
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return '-';
-    try {
-      return new Date(dateStr).toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: '2-digit',
-      });
-    } catch {
-      return '-';
-    }
-  };
-
-  const filteredClients = clients.filter(
-    (client) =>
-      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredClients = clients.filter((client) => {
+    const matchesSearch = client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       client.ville?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.prestataire?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      client.clientId?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (!matchesSearch) return false;
+    
+    if (filterCompleted) {
+      const progress = getProgressForClient(client);
+      return progress.percentage === 100;
+    }
+    
+    return true;
+  });
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent"></div>
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Professional Header */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-              Vue Clients
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              {filteredClients.length} client{filteredClients.length !== 1 ? 's' : ''}
-            </p>
+    <div className="space-y-4 p-2">
+      {/* Compact Header */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg">
+              <TrendUp className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                Vue Clients
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {filteredClients.length} client{filteredClients.length !== 1 ? 's' : ''}
+              </p>
+            </div>
           </div>
-          <div className="relative">
-            <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Rechercher..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent w-full sm:w-80 transition-all duration-200"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+          
+          <div className="flex items-center gap-2">
+            {/* Compact Filter */}
+            <button
+              onClick={() => setFilterCompleted(!filterCompleted)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all',
+                filterCompleted 
+                  ? 'bg-emerald-100 border-emerald-300 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-700 dark:text-emerald-400'
+                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300'
+              )}
+            >
+              <Faders className="h-3.5 w-3.5" />
+              {filterCompleted ? 'Tous' : 'Terminés'}
+            </button>
+            
+            {/* Compact Search */}
+            <div className="relative">
+              <MagnifyingGlass className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Rechercher..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 pr-7 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 w-40 sm:w-48"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Professional Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
-                <th className="text-left py-4 px-6 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Client
-                </th>
-                <th className="text-left py-4 px-4 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-48">
-                  Déclaration Préalable
-                </th>
-                <th className="text-left py-4 px-4 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-48">
-                  DAACT
-                </th>
-                <th className="text-left py-4 px-4 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-48">
-                  Consuel
-                </th>
-                <th className="text-left py-4 px-4 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-48">
-                  Raccordement
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredClients.map((client, index) => (
-                <tr
-                  key={`${client.name}-${index}`}
-                  className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors duration-150"
-                >
-                  <td className="py-4 px-6">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
-                        <User className="h-5 w-5 text-white" weight="bold" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-slate-900 dark:text-white text-base truncate">
-                          {client.name}
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
-                          {client.ville && (
-                            <>
-                              <span className="flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
-                                {client.ville}
-                              </span>
-                            </>
-                          )}
-                          {client.prestataire && (
-                            <>
-                              <span className="text-slate-300 dark:text-slate-600">•</span>
-                              <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-full text-[10px] font-medium">
-                                {client.prestataire}
-                              </span>
-                            </>
-                          )}
-                        </div>
+      {/* Compact Legend */}
+      <div className="flex items-center gap-4 text-xs px-1">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-emerald-500 flex items-center justify-center">
+            <CheckCircle className="h-2 w-2 text-white" />
+          </div>
+          <span className="text-slate-600 dark:text-slate-400">Validé</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-amber-500 flex items-center justify-center">
+            <Clock className="h-2 w-2 text-white" />
+          </div>
+          <span className="text-slate-600 dark:text-slate-400">En cours</span>
+        </div>
+      </div>
+
+      {/* Clients Grid */}
+      <div className="grid grid-cols-1 gap-4">
+        {filteredClients.map((client, index) => {
+          const progress = getProgressForClient(client);
+          
+          return (
+            <div
+              key={`${client.name}-${index}`}
+              className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+            >
+              {/* Client Header - Compact */}
+              <div className="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-md flex-shrink-0">
+                      <User className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white truncate">
+                        {client.name}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        {client.ville && (
+                          <span className="flex items-center gap-1 truncate">
+                            <span className="w-1 h-1 rounded-full bg-slate-400"></span>
+                            {client.ville}
+                          </span>
+                        )}
                       </div>
                     </div>
-                  </td>
-
-                  {/* DP Column */}
-                  <td className="py-4 px-4">
-                    {(() => {
-                      const dpStage = client.stages['dp-en-cours'] ||
-                                       client.stages['dp-accordes'] ||
-                                       client.stages['dp-refuses'];
-                      if (!dpStage) {
-                        return (
-                          <div className="h-20 flex items-center justify-center text-slate-300 dark:text-slate-600">
-                            <span className="text-xs font-medium">—</span>
-                          </div>
-                        );
-                      }
-                      return (
-                        <div className={cn('h-20 p-3 rounded-lg border text-xs flex flex-col justify-between', getStatusColor(dpStage.statut))}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              {getStageIcon(dpStage.section)}
-                              <span className="font-bold text-xs">{getStageLabel(dpStage.section)}</span>
-                            </div>
-                            {getStatusIcon(dpStage.statut)}
-                          </div>
-                          <div className="font-medium truncate mt-1">
-                            {dpStage.statut || '-'}
-                          </div>
-                          <div className="text-[10px] opacity-75 font-medium">
-                            {formatDate(dpStage.date)}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </td>
-
-                  {/* DAACT Column */}
-                  <td className="py-4 px-4">
-                    {(() => {
-                      const daactStage = client.stages['daact'];
-                      if (!daactStage) {
-                        return (
-                          <div className="h-20 flex items-center justify-center text-slate-300 dark:text-slate-600">
-                            <span className="text-xs font-medium">—</span>
-                          </div>
-                        );
-                      }
-                      return (
-                        <div className={cn('h-20 p-3 rounded-lg border text-xs flex flex-col justify-between', getStatusColor(daactStage.statut))}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              {getStageIcon(daactStage.section)}
-                              <span className="font-bold text-xs">DAACT</span>
-                            </div>
-                            {getStatusIcon(daactStage.statut)}
-                          </div>
-                          <div className="font-medium truncate mt-1">
-                            {daactStage.statut || '-'}
-                          </div>
-                          <div className="text-[10px] opacity-75 font-medium">
-                            {formatDate(daactStage.date)}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </td>
-
-                  {/* Consuel Column */}
-                  <td className="py-4 px-4">
-                    {(() => {
-                      const consuelStage = client.stages['consuel-en-cours'] ||
-                                          client.stages['consuel-finalise'];
-                      if (!consuelStage) {
-                        return (
-                          <div className="h-20 flex items-center justify-center text-slate-300 dark:text-slate-600">
-                            <span className="text-xs font-medium">—</span>
-                          </div>
-                        );
-                      }
-                      return (
-                        <div className={cn('h-20 p-3 rounded-lg border text-xs flex flex-col justify-between', getStatusColor(consuelStage.statut))}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              {getStageIcon(consuelStage.section)}
-                              <span className="font-bold text-xs">{getStageLabel(consuelStage.section)}</span>
-                            </div>
-                            {getStatusIcon(consuelStage.statut)}
-                          </div>
-                          <div className="font-medium truncate mt-1">
-                            {consuelStage.statut || '-'}
-                          </div>
-                          <div className="flex items-center justify-between mt-1">
-                            {consuelStage.typeConsuel && (
-                              <span className="text-[10px] opacity-75 font-medium">
-                                {consuelStage.typeConsuel}
-                              </span>
+                  </div>
+                  
+                  {/* Progress Bar - Compact */}
+                  <div className="flex items-center gap-2 flex-shrink-0 w-28">
+                    <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div 
+                        className={cn(
+                          'h-full rounded-full transition-all duration-500',
+                          progress.percentage === 100 ? 'bg-emerald-500' : 'bg-primary-500'
+                        )}
+                        style={{ width: `${progress.percentage}%` }}
+                      />
+                    </div>
+                    <span className={cn(
+                      'text-xs font-bold whitespace-nowrap',
+                      progress.percentage === 100 ? 'text-emerald-600' : 'text-slate-600 dark:text-slate-400'
+                    )}>
+                      {progress.percentage}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Stages Grid - 4 étapes compactes */}
+              <div className="p-3">
+                <div className="grid grid-cols-4 gap-2">
+                  {/* DP */}
+                  {(() => {
+                    const finalStage = client.stages['dp-accordes'];
+                    const inProgressStage = client.stages['dp-en-cours'];
+                    const isCompleted = isStageCompleted('dp-accordes', finalStage);
+                    const isInProgress = isStageInProgress('dp-en-cours', inProgressStage);
+                    const stage = finalStage || inProgressStage;
+                    const status = isCompleted ? 'completed' : isInProgress ? 'inprogress' : 'empty';
+                    
+                    return (
+                      <div
+                        className={cn(
+                          'relative rounded-lg p-2 border-2 transition-all',
+                          status === 'completed' && 'bg-emerald-50 border-emerald-500 dark:bg-emerald-900/20 dark:border-emerald-500',
+                          status === 'inprogress' && 'bg-amber-50 border-amber-500 dark:bg-amber-900/20 dark:border-amber-500',
+                          status === 'empty' && 'bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700'
+                        )}
+                      >
+                        <div className="flex flex-col items-center text-center gap-0.5">
+                          <div className={cn(
+                            'w-6 h-6 rounded-full flex items-center justify-center',
+                            status === 'completed' && 'bg-emerald-500 text-white',
+                            status === 'inprogress' && 'bg-amber-500 text-white',
+                            status === 'empty' && 'bg-slate-200 text-slate-400 dark:bg-slate-700'
+                          )}>
+                            {status === 'completed' ? (
+                              <CheckCircle className="h-3.5 w-3.5" />
+                            ) : status === 'inprogress' ? (
+                              <Clock className="h-3.5 w-3.5" />
+                            ) : (
+                              <div className="w-3 h-3 rounded-full border-2 border-current" />
                             )}
-                            <span className="text-[10px] opacity-75 font-medium ml-auto">
-                              {formatDate(consuelStage.date)}
-                            </span>
                           </div>
+                          <span className={cn(
+                            'text-[10px] font-bold leading-tight',
+                            status === 'completed' && 'text-emerald-700 dark:text-emerald-400',
+                            status === 'inprogress' && 'text-amber-700 dark:text-amber-400',
+                            status === 'empty' && 'text-slate-400'
+                          )}>DP</span>
+                          {stage?.statut && status !== 'empty' && (
+                            <span className="text-[8px] text-slate-500 truncate w-full px-0.5 leading-tight">{stage.statut}</span>
+                          )}
                         </div>
-                      );
-                    })()}
-                  </td>
+                      </div>
+                    );
+                  })()}
 
-                  {/* Raccordement Column */}
-                  <td className="py-4 px-4">
-                    {(() => {
-                      const raccStage = client.stages['raccordement'] ||
-                                       client.stages['raccordement-mes'];
-                      if (!raccStage) {
-                        return (
-                          <div className="h-20 flex items-center justify-center text-slate-300 dark:text-slate-600">
-                            <span className="text-xs font-medium">—</span>
+                  {/* DAACT */}
+                  {(() => {
+                    const stage = client.stages['daact'];
+                    const isCompleted = isStageCompleted('daact', stage);
+                    const isInProgress = isStageInProgress('daact', stage);
+                    const status = isCompleted ? 'completed' : isInProgress ? 'inprogress' : 'empty';
+                    
+                    return (
+                      <div
+                        className={cn(
+                          'relative rounded-lg p-2 border-2 transition-all',
+                          status === 'completed' && 'bg-emerald-50 border-emerald-500 dark:bg-emerald-900/20 dark:border-emerald-500',
+                          status === 'inprogress' && 'bg-amber-50 border-amber-500 dark:bg-amber-900/20 dark:border-amber-500',
+                          status === 'empty' && 'bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700'
+                        )}
+                      >
+                        <div className="flex flex-col items-center text-center gap-0.5">
+                          <div className={cn(
+                            'w-6 h-6 rounded-full flex items-center justify-center',
+                            status === 'completed' && 'bg-emerald-500 text-white',
+                            status === 'inprogress' && 'bg-amber-500 text-white',
+                            status === 'empty' && 'bg-slate-200 text-slate-400 dark:bg-slate-700'
+                          )}>
+                            {status === 'completed' ? (
+                              <CheckCircle className="h-3.5 w-3.5" />
+                            ) : status === 'inprogress' ? (
+                              <Clock className="h-3.5 w-3.5" />
+                            ) : (
+                              <div className="w-3 h-3 rounded-full border-2 border-current" />
+                            )}
                           </div>
-                        );
-                      }
-                      return (
-                        <div className={cn('h-20 p-3 rounded-lg border text-xs flex flex-col justify-between', getStatusColor(raccStage.statut))}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              {getStageIcon(raccStage.section)}
-                              <span className="font-bold text-xs">{getStageLabel(raccStage.section)}</span>
-                            </div>
-                            {getStatusIcon(raccStage.statut)}
-                          </div>
-                          <div className="font-medium truncate mt-1">
-                            {raccStage.statut || '-'}
-                          </div>
-                          <div className="text-[10px] opacity-75 font-medium">
-                            {formatDate(raccStage.date)}
-                          </div>
+                          <span className={cn(
+                            'text-[10px] font-bold leading-tight',
+                            status === 'completed' && 'text-emerald-700 dark:text-emerald-400',
+                            status === 'inprogress' && 'text-amber-700 dark:text-amber-400',
+                            status === 'empty' && 'text-slate-400'
+                          )}>DAACT</span>
+                          {stage?.statut && status !== 'empty' && (
+                            <span className="text-[8px] text-slate-500 truncate w-full px-0.5 leading-tight">{stage.statut}</span>
+                          )}
                         </div>
-                      );
-                    })()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      </div>
+                    );
+                  })()}
 
-        {/* Empty State */}
-        {filteredClients.length === 0 && (
-          <div className="py-16 text-center">
-            <div className="inline-flex p-4 rounded-full bg-slate-100 dark:bg-slate-700 mb-4">
-              <User className="h-8 w-8 text-slate-400" weight="bold" />
+                  {/* Consuel */}
+                  {(() => {
+                    const finalStage = client.stages['consuel-finalise'];
+                    const inProgressStage = client.stages['consuel-en-cours'];
+                    const isCompleted = isStageCompleted('consuel-finalise', finalStage);
+                    const isInProgress = isStageInProgress('consuel-en-cours', inProgressStage);
+                    const stage = finalStage || inProgressStage;
+                    const status = isCompleted ? 'completed' : isInProgress ? 'inprogress' : 'empty';
+                    
+                    return (
+                      <div
+                        className={cn(
+                          'relative rounded-lg p-2 border-2 transition-all',
+                          status === 'completed' && 'bg-emerald-50 border-emerald-500 dark:bg-emerald-900/20 dark:border-emerald-500',
+                          status === 'inprogress' && 'bg-amber-50 border-amber-500 dark:bg-amber-900/20 dark:border-amber-500',
+                          status === 'empty' && 'bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700'
+                        )}
+                      >
+                        <div className="flex flex-col items-center text-center gap-0.5">
+                          <div className={cn(
+                            'w-6 h-6 rounded-full flex items-center justify-center',
+                            status === 'completed' && 'bg-emerald-500 text-white',
+                            status === 'inprogress' && 'bg-amber-500 text-white',
+                            status === 'empty' && 'bg-slate-200 text-slate-400 dark:bg-slate-700'
+                          )}>
+                            {status === 'completed' ? (
+                              <CheckCircle className="h-3.5 w-3.5" />
+                            ) : status === 'inprogress' ? (
+                              <Clock className="h-3.5 w-3.5" />
+                            ) : (
+                              <div className="w-3 h-3 rounded-full border-2 border-current" />
+                            )}
+                          </div>
+                          <span className={cn(
+                            'text-[10px] font-bold leading-tight',
+                            status === 'completed' && 'text-emerald-700 dark:text-emerald-400',
+                            status === 'inprogress' && 'text-amber-700 dark:text-amber-400',
+                            status === 'empty' && 'text-slate-400'
+                          )}>Consuel</span>
+                          {stage?.statut && status !== 'empty' && (
+                            <span className="text-[8px] text-slate-500 truncate w-full px-0.5 leading-tight">{stage.statut}</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Raccordement / MES */}
+                  {(() => {
+                    const finalStage = client.stages['raccordement-mes'];
+                    const inProgressStage = client.stages['raccordement'];
+                    const isCompleted = isStageCompleted('raccordement-mes', finalStage);
+                    const isInProgress = isStageInProgress('raccordement', inProgressStage);
+                    const stage = finalStage || inProgressStage;
+                    const status = isCompleted ? 'completed' : isInProgress ? 'inprogress' : 'empty';
+                    
+                    return (
+                      <div
+                        className={cn(
+                          'relative rounded-lg p-2 border-2 transition-all',
+                          status === 'completed' && 'bg-emerald-50 border-emerald-500 dark:bg-emerald-900/20 dark:border-emerald-500',
+                          status === 'inprogress' && 'bg-amber-50 border-amber-500 dark:bg-amber-900/20 dark:border-amber-500',
+                          status === 'empty' && 'bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700'
+                        )}
+                      >
+                        <div className="flex flex-col items-center text-center gap-0.5">
+                          <div className={cn(
+                            'w-6 h-6 rounded-full flex items-center justify-center',
+                            status === 'completed' && 'bg-emerald-500 text-white',
+                            status === 'inprogress' && 'bg-amber-500 text-white',
+                            status === 'empty' && 'bg-slate-200 text-slate-400 dark:bg-slate-700'
+                          )}>
+                            {status === 'completed' ? (
+                              <CheckCircle className="h-3.5 w-3.5" />
+                            ) : status === 'inprogress' ? (
+                              <Clock className="h-3.5 w-3.5" />
+                            ) : (
+                              <div className="w-3 h-3 rounded-full border-2 border-current" />
+                            )}
+                          </div>
+                          <span className={cn(
+                            'text-[10px] font-bold leading-tight',
+                            status === 'completed' && 'text-emerald-700 dark:text-emerald-400',
+                            status === 'inprogress' && 'text-amber-700 dark:text-amber-400',
+                            status === 'empty' && 'text-slate-400'
+                          )}>{isCompleted ? 'MES' : 'Racc.'}</span>
+                          {stage?.statut && status !== 'empty' && (
+                            <span className="text-[8px] text-slate-500 truncate w-full px-0.5 leading-tight">{stage.statut}</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-              Aucun client trouvé
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Essayez de modifier votre recherche
-            </p>
-          </div>
-        )}
+          );
+        })}
       </div>
+
+      {/* Empty State - Compact */}
+      {filteredClients.length === 0 && (
+        <div className="py-12 text-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div className="inline-flex p-3 rounded-full bg-slate-100 dark:bg-slate-700 mb-3">
+            <User className="h-6 w-6 text-slate-400" />
+          </div>
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">
+            Aucun client trouvé
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Essayez de modifier votre recherche
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -40,7 +40,7 @@ interface DashboardProps {
 export default function Dashboard({
   initialSection = 'dp-en-cours',
 }: DashboardProps) {
-  const { activeSection, setActiveSection, sectionCounts } = useAppStore();
+  const { activeSection, setActiveSection, sectionCounts, setSectionCounts } = useAppStore();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -80,6 +80,32 @@ export default function Dashboard({
       window.removeEventListener('sectionLoading', handleSectionLoading);
   }, [activeSection]);
 
+  // Rafraîchir les données quand l'utilisateur revient sur l'onglet
+  useEffect(() => {
+    const fetchSectionCounts = async () => {
+      try {
+        const res = await fetch('/api/clients/counts');
+        const response = await res.json();
+        if (response.counts) {
+          setSectionCounts(response.counts);
+        }
+      } catch (error) {
+        console.error('Error fetching section counts:', error);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchSectionCounts();
+        // Forcer le rechargement de la section active
+        window.dispatchEvent(new CustomEvent('forceRefresh', { detail: { section: activeSection } }));
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [activeSection, setSectionCounts]);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -94,6 +120,7 @@ export default function Dashboard({
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
         onNavigateHome={() => window.location.href = '/'}
+        onShowClientsView={() => setActiveSection('clients')}
       />
       <main
         className={`flex-1 overflow-auto transition-all duration-200 relative ${
