@@ -36,6 +36,7 @@ export async function GET(request: Request) {
     // Return files with base64 data for download/viewing
     const formattedFiles = files.map((file) => ({
       id: file._id.toString(),
+      section: file.section,
       name: file.fileName,
       url: `data:${file.fileType};base64,${file.fileData}`,
       size: file.fileSize,

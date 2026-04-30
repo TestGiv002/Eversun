@@ -20,9 +20,11 @@ import {
   Copy,
   Link,
   Folder,
+  TrashSimple,
 } from '@phosphor-icons/react';
 import Badge from '@/components/ui/Badge';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import FileUpload, { UploadedFile } from '@/components/ui/FileUpload';
 import { ClientRecord } from '@/types/client';
 import { formatDateFR, getStatutBadgeColor } from '@/lib/clientTableUtils';
 import { toast } from '@/store/useToastStore';
@@ -47,7 +49,7 @@ export default function ClientModal({
   setShowPassword,
 }: ClientModalProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [clientFiles, setClientFiles] = useState<Array<{ id: string; name: string; url: string; size: number; type: string }>>([]);
+  const [clientFiles, setClientFiles] = useState<Array<{ id: string; section: string; name: string; url: string; size: number; type: string }>>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [previewFile, setPreviewFile] = useState<{ name: string; url: string; type: string } | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -56,14 +58,9 @@ export default function ClientModal({
   useEffect(() => {
     if (!selectedClient) return;
 
-    // Load client files from Google Drive
+    // Load client files from storage
     const loadClientFiles = async () => {
       if (!selectedClient.client) return;
-      
-      const isDp = section.startsWith('dp');
-      const isConsuel = section.startsWith('consuel');
-      
-      if (!isDp && !isConsuel) return;
 
       setLoadingFiles(true);
       try {
@@ -180,6 +177,26 @@ export default function ClientModal({
     toast.success(`${label} a été copié dans le presse-papier`);
   };
 
+  const sectionLabel = (fileSection: string) => {
+    if (fileSection.startsWith('dp')) return 'Déclaration Préalable';
+    if (fileSection.startsWith('consuel')) return 'Consuel Visé';
+    if (fileSection === 'daact') return 'DAACT';
+    return fileSection || 'Documents';
+  };
+
+  const getSectionUploadTarget = (group: 'dp' | 'consuel' | 'daact') => {
+    if (group === 'dp') return section.startsWith('dp') ? section : 'dp-en-cours';
+    if (group === 'consuel') return section.startsWith('consuel') ? section : 'consuel-en-cours';
+    return 'daact';
+  };
+
+  const appendUploadedFiles = (files: UploadedFile[], uploadSection: string) => {
+    setClientFiles((prev) => [
+      ...files.map((file) => ({ ...file, section: uploadSection })),
+      ...prev,
+    ]);
+  };
+
   const handleDelete = () => {
     setShowDeleteDialog(true);
   };
@@ -234,6 +251,16 @@ export default function ClientModal({
                 )}
               </div>
             </div>
+            {onDelete && (
+              <button
+                onClick={handleDelete}
+                className="ml-auto inline-flex items-center gap-2 rounded-md border border-white/30 bg-white/10 px-3 py-2 text-sm text-white transition hover:bg-white/20"
+                title="Supprimer le dossier"
+              >
+                <TrashSimple className="h-4 w-4" weight="bold" />
+                Supprimer
+              </button>
+            )}
           </div>
         </div>
 
@@ -456,54 +483,83 @@ export default function ClientModal({
                 </div>
               )}
 
-            {/* Documents - Affiché pour DP et Consuel */}
-            {(section.startsWith('dp') || section.startsWith('consuel')) && (
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                  <Folder className="h-4 w-4 text-cyan-500" weight="bold" />
-                  Documents
-                </h3>
-                {loadingFiles ? (
-                  <div className="text-center text-slate-500 dark:text-slate-400 py-3 text-sm">Chargement des fichiers...</div>
-                ) : clientFiles.length === 0 ? (
-                  <div className="text-center text-slate-500 dark:text-slate-400 py-3 text-sm">Aucun document disponible</div>
-                ) : (
-                  <div className="space-y-2">
-                    {clientFiles.map((file) => (
-                      <div
-                        key={file.id}
-                        className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
-                      >
-                        <FileText className="h-4 w-4 text-cyan-500" weight="bold" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{file.name}</p>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                            {(file.size / 1024).toFixed(2)} KB
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => setPreviewFile({ name: file.name, url: file.url, type: file.type })}
-                            className="p-1.5 text-gray-500 hover:text-cyan-500 transition-colors"
-                            title="Prévisualiser"
+            {/* Documents regroupés par section */}
+            <div className="space-y-4">
+              {loadingFiles && (
+                <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow text-center text-slate-500 dark:text-slate-400">
+                  Chargement des fichiers...
+                </div>
+              )}
+
+              {['dp', 'consuel', 'daact'].map((group) => {
+                const title = group === 'dp' ? 'Déclaration Préalable' : group === 'consuel' ? 'Consuel Visé' : 'DAACT';
+                const uploadSection = getSectionUploadTarget(group as 'dp' | 'consuel' | 'daact');
+                const filteredFiles = clientFiles.filter((file) => {
+                  if (group === 'dp') return file.section.startsWith('dp');
+                  if (group === 'consuel') return file.section.startsWith('consuel');
+                  return file.section === 'daact';
+                });
+
+                return (
+                  <div key={group} className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <Folder className="h-4 w-4 text-cyan-500" weight="bold" />
+                        {title}
+                      </h3>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        {filteredFiles.length} document{filteredFiles.length > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <FileUpload
+                      clientName={selectedClient.client}
+                      section={uploadSection}
+                      onUploadComplete={(files) => appendUploadedFiles(files, uploadSection)}
+                    />
+                    {filteredFiles.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        {filteredFiles.map((file) => (
+                          <div
+                            key={file.id}
+                            className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
                           >
-                            <Eye className="h-4 w-4" weight="bold" />
-                          </button>
-                          <a
-                            href={file.url}
-                            download={file.name}
-                            className="p-1.5 text-gray-500 hover:text-cyan-500 transition-colors"
-                            title="Télécharger"
-                          >
-                            <Link className="h-4 w-4" weight="bold" />
-                          </a>
-                        </div>
+                            <FileText className="h-4 w-4 text-cyan-500" weight="bold" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{file.name}</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                {(file.size / 1024).toFixed(2)} KB
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => setPreviewFile({ name: file.name, url: file.url, type: file.type })}
+                                className="p-1.5 text-gray-500 hover:text-cyan-500 transition-colors"
+                                title="Prévisualiser"
+                              >
+                                <Eye className="h-4 w-4" weight="bold" />
+                              </button>
+                              <a
+                                href={file.url}
+                                download={file.name}
+                                className="p-1.5 text-gray-500 hover:text-cyan-500 transition-colors"
+                                title="Télécharger"
+                              >
+                                <Link className="h-4 w-4" weight="bold" />
+                              </a>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
+                    {filteredFiles.length === 0 && !loadingFiles && (
+                      <div className="text-sm text-slate-500 dark:text-slate-400 mt-4">
+                        Aucun document disponible pour cette section.
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            )}
+                );
+              })}
+            </div>
 
             {/* Informations Consuel - Affiché uniquement pour Consuel */}
             {section.startsWith('consuel') && (
@@ -673,7 +729,7 @@ export default function ClientModal({
                       <Clock className="h-3.5 w-3.5 text-cyan-500" weight="bold" />
                       <div>
                         <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          {section === 'installation' ? 'Date de pose' : 'DatE Ed poess'}
+                          Date estimative
                         </p>
                         <p className="text-sm font-medium text-slate-900 dark:text-white">
                           {formatDateFR(selectedClient.dateEstimative)}
