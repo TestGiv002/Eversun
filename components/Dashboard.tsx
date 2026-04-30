@@ -32,6 +32,14 @@ const ClientAggregationView = dynamic(
   }
 );
 
+const ParametersView = dynamic(
+  () => import('@/components/ParametersView'),
+  {
+    loading: () => <div className="p-8 text-center">Chargement...</div>,
+    ssr: false,
+  }
+);
+
 interface DashboardProps {
   /** Section initiale (optionnel, défaut: 'dp-en-cours') */
   initialSection?: Section;
@@ -145,6 +153,8 @@ export default function Dashboard({
           >
             {activeSection === 'clients' ? (
               <ClientAggregationView />
+            ) : activeSection === 'parameters' ? (
+              <ParametersView />
             ) : (
               <ClientSection section={activeSection} />
             )}

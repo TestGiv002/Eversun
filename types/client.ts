@@ -12,7 +12,8 @@ export type Section =
   | 'consuel-en-cours'
   | 'consuel-finalise'
   | 'raccordement'
-  | 'raccordement-mes';
+  | 'raccordement-mes'
+  | 'parameters';
 
 /**
  * Enregistrement de client/dossier

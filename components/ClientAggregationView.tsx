@@ -38,7 +38,68 @@ export default function ClientAggregationView() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCompleted, setFilterCompleted] = useState(false);
+  const [downloadFormat, setDownloadFormat] = useState<'excel' | 'csv' | 'json' | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { setSectionCounts } = useAppStore();
+
+  // Check for download parameter in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const downloadParam = urlParams.get('download');
+    if (downloadParam === 'excel' || downloadParam === 'csv' || downloadParam === 'json') {
+      setDownloadFormat(downloadParam);
+    }
+  }, []);
+
+  const handleDownload = async (format: 'excel' | 'csv' | 'json') => {
+    setIsDownloading(true);
+
+    try {
+      const response = await fetch(`/api/export/${format}`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur lors du téléchargement ${format.toUpperCase()}`);
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      const timestamp = new Date().toISOString().split('T')[0];
+      const fileExtensions: Record<string, string> = {
+        excel: 'xlsx',
+        csv: 'csv',
+        json: 'json',
+      };
+
+      link.setAttribute('download', `clients_${timestamp}.${fileExtensions[format]}`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // Clear download format and update URL
+      setDownloadFormat(null);
+      const urlWithoutDownload = window.location.pathname + window.location.search.replace(/[?&]download=[^&]*/, '');
+      window.history.replaceState({}, '', urlWithoutDownload);
+
+    } catch (error) {
+      console.error(`Error downloading ${format}:`, error);
+      alert(`Erreur lors de l'export ${format.toUpperCase()}`);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const cancelDownload = () => {
+    setDownloadFormat(null);
+    const urlWithoutDownload = window.location.pathname + window.location.search.replace(/[?&]download=[^&]*/, '');
+    window.history.replaceState({}, '', urlWithoutDownload);
+  };
 
   const fetchSectionCounts = async () => {
     try {
@@ -227,7 +288,53 @@ export default function ClientAggregationView() {
   }
 
   return (
-    <div className="space-y-4 p-2">
+    <>
+      {/* Download Modal */}
+      {downloadFormat && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
+                <User className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                Télécharger les données clients
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+                Voulez-vous télécharger tous les clients au format {downloadFormat.toUpperCase()} ?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={cancelDownload}
+                  className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                  disabled={isDownloading}
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => handleDownload(downloadFormat)}
+                  disabled={isDownloading}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  {isDownloading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      Téléchargement...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle weight="bold" className="w-4 h-4" />
+                      Télécharger
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-4 p-2">
       {/* Compact Header */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -562,5 +669,6 @@ export default function ClientAggregationView() {
         </div>
       )}
     </div>
+    </>
   );
 }
