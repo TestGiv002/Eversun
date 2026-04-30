@@ -71,7 +71,9 @@ export async function POST(request: Request) {
       
       uploadedFiles.push({
         id: fileRecord._id.toString(),
+        section,
         name: file.name,
+        url: `data:${file.type};base64,${base64Data}`,
         size: file.size,
         type: file.type,
       });
