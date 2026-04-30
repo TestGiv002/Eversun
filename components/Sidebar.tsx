@@ -18,6 +18,8 @@ import {
   List,
   House,
   Users,
+  Download,
+  Upload,
 } from '@phosphor-icons/react';
 import { Section } from '@/types/client';
 import Input from '@/components/ui/Input';
@@ -108,6 +110,16 @@ const sectionGroups = [
       },
     ],
   },
+  {
+    title: 'Paramètre',
+    sections: [
+      {
+        id: 'parameters' as const,
+        label: 'Paramètre',
+        icon: Download,
+      },
+    ],
+  },
 ];
 
 function Sidebar({
@@ -181,6 +193,11 @@ function Sidebar({
       ),
     }))
     .filter((group) => group.sections.length > 0);
+
+  const handleSectionClick = (sectionId: string) => {
+    // All sections are treated as regular sections now
+    setActiveSection(sectionId as Section);
+  };
 
   return (
     <>
@@ -354,7 +371,7 @@ function Sidebar({
                       return (
                         <li key={section.id} role="listitem">
                           <button
-                            onClick={() => setActiveSection(section.id)}
+                            onClick={() => handleSectionClick(section.id)}
                             className={`w-full text-left rounded-lg text-xs font-medium transition-all duration-200 ease-out flex items-center group relative overflow-hidden
                             ${
                               isCollapsed
