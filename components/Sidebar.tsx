@@ -445,8 +445,13 @@ function Sidebar({
                               />
                             )}
                             {!isCollapsed && (
-                              <span className="flex-1 relative z-10">
-                                {section.label}
+                              <span className="flex-1 relative z-10 flex items-center justify-between gap-2">
+                                <span>{section.label}</span>
+                                {sectionCounts && sectionCounts[section.id] > 0 && (
+                                  <span className="px-1.5 py-0.5 bg-slate-200/70 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 rounded-md text-[10px] font-semibold min-w-[1.25rem] text-center">
+                                    {sectionCounts[section.id]}
+                                  </span>
+                                )}
                               </span>
                             )}
                           </button>
