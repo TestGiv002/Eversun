@@ -29,14 +29,14 @@ export default function SectionTransition({
         setCurrentSection(sectionKey);
         setIsExiting(false);
         setIsVisible(true);
-      }, 150);
+      }, 75);
 
       return () => clearTimeout(timer);
     } else {
       // Première apparition
       const timer = setTimeout(() => {
         setIsVisible(true);
-      }, 50);
+      }, 25);
 
       return () => clearTimeout(timer);
     }

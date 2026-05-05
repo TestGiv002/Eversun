@@ -13,7 +13,9 @@ export type Section =
   | 'consuel-finalise'
   | 'raccordement'
   | 'raccordement-mes'
-  | 'parameters';
+  | 'parameters'
+  | 'sunlib'
+  | 'otovo';
 
 /**
  * Enregistrement de client/dossier

@@ -75,7 +75,8 @@ export async function POST(request: Request) {
 
     await connectToDatabase();
 
-    const Client = mongoose.model('Client', ClientSchema, clientCollectionName);
+    // Use existing model or create new one (prevents "Cannot overwrite model" error)
+    const Client = mongoose.models.Client || mongoose.model('Client', ClientSchema, clientCollectionName);
 
     // Validate and import data
     let importedCount = 0;

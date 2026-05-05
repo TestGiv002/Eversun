@@ -110,8 +110,9 @@ export function decrypt(encryptedData: string): string {
     ]);
     return decrypted.toString('utf8');
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logger.warn(
-      { error },
+      { error: errorMessage },
       'Erreur lors du déchiffrement, retour des données telles quelles'
     );
     // En cas d'erreur, retourner les données telles quelles

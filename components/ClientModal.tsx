@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   User,
   X,
@@ -10,23 +11,20 @@ import {
   Buildings,
   FileText,
   Key,
-  WarningCircle,
   Lightning,
   CheckCircle,
   ChatCircle,
   Flag,
   House,
   Clock,
-  Copy,
-  Link,
-  Folder,
-  TrashSimple,
+  PencilSimple,
+  Trash,
+  MapPin,
+  ArrowRight,
+  Tag,
 } from '@phosphor-icons/react';
-import Badge from '@/components/ui/Badge';
-import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import FileUpload, { UploadedFile } from '@/components/ui/FileUpload';
 import { ClientRecord } from '@/types/client';
-import { formatDateFR, getStatutBadgeColor } from '@/lib/clientTableUtils';
+import { formatDateFR } from '@/lib/clientTableUtils';
 import { toast } from '@/store/useToastStore';
 
 interface ClientModalProps {
@@ -39,6 +37,37 @@ interface ClientModalProps {
   setShowPassword: (show: boolean) => void;
 }
 
+const sectionColors: Record<string, { bg: string; text: string; gradient: string }> = {
+  'dp-en-cours': { bg: 'bg-amber-500', text: 'text-amber-600', gradient: 'from-amber-500 to-orange-500' },
+  'dp-accordes': { bg: 'bg-emerald-500', text: 'text-emerald-600', gradient: 'from-emerald-500 to-teal-500' },
+  'dp-refuses': { bg: 'bg-rose-500', text: 'text-rose-600', gradient: 'from-rose-500 to-pink-500' },
+  'daact': { bg: 'bg-violet-500', text: 'text-violet-600', gradient: 'from-violet-500 to-purple-500' },
+  'installation': { bg: 'bg-cyan-500', text: 'text-cyan-600', gradient: 'from-cyan-500 to-blue-500' },
+  'consuel-en-cours': { bg: 'bg-amber-500', text: 'text-amber-600', gradient: 'from-amber-500 to-orange-500' },
+  'consuel-finalise': { bg: 'bg-emerald-500', text: 'text-emerald-600', gradient: 'from-emerald-500 to-teal-500' },
+  'raccordement': { bg: 'bg-blue-500', text: 'text-blue-600', gradient: 'from-blue-500 to-indigo-500' },
+  'raccordement-mes': { bg: 'bg-emerald-500', text: 'text-emerald-600', gradient: 'from-emerald-500 to-teal-500' },
+};
+
+const getSectionColor = (section: string) => {
+  return sectionColors[section] || { bg: 'bg-slate-500', text: 'text-slate-600', gradient: 'from-slate-500 to-gray-500' };
+};
+
+const getSectionLabel = (section: string) => {
+  const labels: Record<string, string> = {
+    'dp-en-cours': 'Déclaration Préalable - En cours',
+    'dp-accordes': 'Déclaration Préalable - Accordée',
+    'dp-refuses': 'Déclaration Préalable - Refusée',
+    'daact': 'DAACT',
+    'installation': 'Installation',
+    'consuel-en-cours': 'Consuel - En cours',
+    'consuel-finalise': 'Consuel - Finalisé',
+    'raccordement': 'Raccordement',
+    'raccordement-mes': 'Raccordement - MES',
+  };
+  return labels[section] || section;
+};
+
 export default function ClientModal({
   selectedClient,
   onClose,
@@ -48,84 +77,29 @@ export default function ClientModal({
   showPassword,
   setShowPassword,
 }: ClientModalProps) {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [clientFiles, setClientFiles] = useState<Array<{ id: string; section: string; name: string; url: string; size: number; type: string }>>([]);
-  const [loadingFiles, setLoadingFiles] = useState(false);
-  const [previewFile, setPreviewFile] = useState<{ name: string; url: string; type: string } | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElementRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!selectedClient) return;
 
-    // Load client files from storage
-    const loadClientFiles = async () => {
-      if (!selectedClient.client) return;
-
-      setLoadingFiles(true);
-      try {
-        const response = await fetch(`/api/files?clientName=${encodeURIComponent(selectedClient.client)}`);
-        const data = await response.json();
-        if (data.success) {
-          setClientFiles(data.files || []);
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement des fichiers:', error);
-      } finally {
-        setLoadingFiles(false);
-      }
-    };
-
-    loadClientFiles();
-
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
 
-    const handleTabKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab' || !modalRef.current) return;
-      const focusable = Array.from(
-        modalRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        )
-      ).filter((el) => !el.hasAttribute('disabled'));
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement as HTMLElement;
-
-      if (!e.shiftKey && active === last) {
-        e.preventDefault();
-        first.focus();
-      } else if (e.shiftKey && active === first) {
-        e.preventDefault();
-        last.focus();
-      }
-    };
-
     previousActiveElementRef.current = document.activeElement as HTMLElement;
     document.addEventListener('keydown', handleEscape);
-    document.addEventListener('keydown', handleTabKey);
     document.body.style.overflow = 'hidden';
-
-    requestAnimationFrame(() => {
-      const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      firstFocusable?.focus();
-    });
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.removeEventListener('keydown', handleTabKey);
       document.body.style.overflow = 'unset';
       previousActiveElementRef.current?.focus();
     };
   }, [onClose, selectedClient]);
 
   const getUrgencyInfo = () => {
-    if (!selectedClient) return null;
-    if (!selectedClient.dateEstimative) return null;
+    if (!selectedClient?.dateEstimative) return null;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -136,726 +110,485 @@ export default function ClientModal({
     );
 
     if (diffDays < 0) {
-      return {
-        color: 'from-red-500 to-rose-600',
-        label: 'En retard',
-        urgent: true,
-        diffDays,
-      };
+      return { label: 'En retard', color: 'text-rose-600 bg-rose-50 border-rose-200', urgent: true, diffDays };
     }
     if (diffDays === 0) {
-      return {
-        color: 'from-red-500 to-orange-500',
-        label: "Aujourd'hui",
-        urgent: true,
-        diffDays,
-      };
+      return { label: "Aujourd'hui", color: 'text-red-600 bg-red-50 border-red-200', urgent: true, diffDays };
     }
     if (diffDays <= 3) {
-      return {
-        color: 'from-orange-500 to-amber-500',
-        label: 'Urgent',
-        urgent: true,
-        diffDays,
-      };
+      return { label: 'Urgent', color: 'text-orange-600 bg-orange-50 border-orange-200', urgent: true, diffDays };
     }
     if (diffDays <= 7) {
-      return {
-        color: 'from-yellow-500 to-amber-500',
-        label: 'Proche',
-        urgent: false,
-        diffDays,
-      };
+      return { label: 'Proche', color: 'text-amber-600 bg-amber-50 border-amber-200', urgent: false, diffDays };
     }
-    return null;
+    return { label: 'À venir', color: 'text-emerald-600 bg-emerald-50 border-emerald-200', urgent: false, diffDays };
   };
 
   const urgency = getUrgencyInfo();
+  const colors = getSectionColor(section);
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${label} a été copié dans le presse-papier`);
-  };
-
-  const sectionLabel = (fileSection: string) => {
-    if (fileSection.startsWith('dp')) return 'Déclaration Préalable';
-    if (fileSection.startsWith('consuel')) return 'Consuel Visé';
-    if (fileSection === 'daact') return 'DAACT';
-    return fileSection || 'Documents';
-  };
-
-  const getSectionUploadTarget = (group: 'dp' | 'consuel' | 'daact') => {
-    if (group === 'dp') return section.startsWith('dp') ? section : 'dp-en-cours';
-    if (group === 'consuel') return section.startsWith('consuel') ? section : 'consuel-en-cours';
-    return 'daact';
-  };
-
-  const appendUploadedFiles = (files: UploadedFile[], uploadSection: string) => {
-    setClientFiles((prev) => [
-      ...files.map((file) => ({ ...file, section: uploadSection })),
-      ...prev,
-    ]);
+  const handleEdit = () => {
+    if (selectedClient) onEdit(selectedClient);
   };
 
   const handleDelete = () => {
-    setShowDeleteDialog(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedClient) return;
-    if (onDelete) {
-      onDelete(String(selectedClient._id || selectedClient.id || ''));
-      onClose();
+    if (selectedClient?._id && onDelete) {
+      if (confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
+        onDelete(selectedClient._id);
+        onClose();
+      }
     }
-    setShowDeleteDialog(false);
   };
 
-  if (!selectedClient) return null;
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copié dans le presse-papier`);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-md"
-        onClick={onClose}
-      />
-      <div
-        ref={modalRef}
-        className="relative bg-white dark:bg-slate-900 backdrop-blur-xl rounded-lg shadow-lg w-full max-w-4xl max-h-[95vh] overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col"
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Dossier ${selectedClient.client || 'client'}`}
-      >
-        {/* Header */}
-        <div className="relative bg-gradient-to-r from-cyan-500 via-blue-500 to-violet-500 p-4 overflow-hidden">
-          <div className="absolute inset-0 bg-black/10" />
-          <div className="relative z-10 flex items-center gap-3 flex-1">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-lg">
-              <User className="h-6 w-6 text-white" weight="bold" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-white">
-                {selectedClient.client}
-              </h2>
-              <div className="flex items-center gap-2 mt-0.5">
-                {!section.startsWith('consuel') && (
-                  <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs">
-                    {selectedClient.statut || 'Sans statut'}
-                  </Badge>
-                )}
-                {urgency && !section.startsWith('consuel') && (
-                  <Badge
-                    className="bg-white/30 text-white border-white/40 backdrop-blur-sm shadow-lg text-xs"
+    <AnimatePresence>
+      {selectedClient && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          {/* Backdrop with blur */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={onClose}
+          />
+
+          {/* Slide-in Panel */}
+          <motion.div
+            ref={modalRef}
+            initial={{ x: '100%', opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="relative w-full max-w-5xl h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Dossier ${selectedClient.client || 'client'}`}
+          >
+            {/* Modern Header with Gradient */}
+            <div className={`relative bg-gradient-to-r ${colors.gradient} p-5 text-white`}>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center shadow-lg">
+                    <User className="h-8 w-8 text-white" weight="bold" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-2xl font-bold text-white truncate">
+                      {selectedClient.client}
+                    </h2>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/20 backdrop-blur text-white">
+                        {getSectionLabel(section)}
+                      </span>
+                      {selectedClient.statut && !section.startsWith('consuel') && (
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          selectedClient.statut.includes('Accord') ? 'bg-emerald-400/30 text-white' :
+                          selectedClient.statut.includes('Refus') ? 'bg-rose-400/30 text-white' :
+                          'bg-white/20 text-white'
+                        }`}>
+                          {selectedClient.statut}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleEdit}
+                    className="p-2.5 rounded-xl bg-white/10 backdrop-blur hover:bg-white/20 transition-all duration-200"
+                    title="Modifier"
                   >
+                    <PencilSimple className="h-5 w-5 text-white" weight="bold" />
+                  </button>
+                  {onDelete && (
+                    <button
+                      onClick={handleDelete}
+                      className="p-2.5 rounded-xl bg-white/10 backdrop-blur hover:bg-rose-500/50 transition-all duration-200"
+                      title="Supprimer"
+                    >
+                      <Trash className="h-5 w-5 text-white" weight="bold" />
+                    </button>
+                  )}
+                  <button
+                    onClick={onClose}
+                    className="p-2.5 rounded-xl bg-white/10 backdrop-blur hover:bg-white/20 transition-all duration-200 ml-2"
+                    title="Fermer"
+                  >
+                    <X className="h-5 w-5 text-white" weight="bold" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Info Chips */}
+              <div className="flex flex-wrap items-center gap-3 mt-4">
+                {urgency && !section.startsWith('consuel') && section !== 'dp-refuses' && section !== 'dp-accordes' && (
+                  <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${urgency.color}`}>
+                    <Clock className="h-3.5 w-3.5" weight="bold" />
                     {urgency.label} ({urgency.diffDays}j)
-                  </Badge>
-                )}
-              </div>
-            </div>
-            {onDelete && (
-              <button
-                onClick={handleDelete}
-                className="ml-auto inline-flex items-center gap-2 rounded-md border border-white/30 bg-white/10 px-3 py-2 text-sm text-white transition hover:bg-white/20"
-                title="Supprimer le dossier"
-              >
-                <TrashSimple className="h-4 w-4" weight="bold" />
-                Supprimer
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
-          <div className="space-y-4">
-            {/* KPI Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {urgency && !section.startsWith('consuel') && section !== 'dp-refuses' && (
-                <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-lg p-3 border border-cyan-200 dark:border-cyan-800 shadow-md hover:shadow-lg transition-all duration-300">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Clock className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" weight="bold" />
-                    <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Jours restants</span>
-                  </div>
-                  <div className={`text-xl font-bold ${urgency.urgent ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}>
-                    {urgency.diffDays}
-                  </div>
-                  <div className={`text-[10px] mt-0.5 ${urgency.urgent ? 'text-red-500' : 'text-slate-500'}`}>
-                    {urgency.label}
-                  </div>
-                </div>
-              )}
-              <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-lg p-3 border border-violet-200 dark:border-violet-800 shadow-md hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-2 mb-1">
-                  <FileText className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" weight="bold" />
-                  <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Documents</span>
-                </div>
-                <div className="text-xl font-bold text-slate-900 dark:text-white">
-                  {clientFiles.length}
-                </div>
-                <div className="text-[10px] text-slate-500 mt-0.5">
-                  Fichiers
-                </div>
-              </div>
-              {selectedClient.dateEstimative && section !== 'consuel-finalise' && (
-                <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg p-3 border border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" weight="bold" />
-                    <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">{section === 'installation' ? 'Date de pose' : 'Date estimative'}</span>
-                  </div>
-                  <div className="text-sm font-bold text-slate-900 dark:text-white">
-                    {selectedClient.dateEstimative
-                      ? formatDateFR(selectedClient.dateEstimative)
-                      : 'N/A'}
-                  </div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">
-                    Estimation
-                  </div>
-                </div>
-              )}
-              <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg p-3 border border-amber-200 dark:border-amber-800 shadow-md hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-2 mb-1">
-                  <Lightning className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" weight="bold" />
-                  <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Financement</span>
-                </div>
-                <div className="text-lg font-bold text-slate-900 dark:text-white truncate">
-                  {selectedClient.financement || 'N/A'}
-                </div>
-                <div className="text-[10px] text-slate-500 mt-0.5">
-                  Type
-                </div>
-              </div>
-            </div>
-
-            {/* Informations générales */}
-            <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 backdrop-blur-sm rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow-md hover:shadow-lg transition-all duration-300">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                <User className="h-4 w-4 text-cyan-500" weight="bold" />
-                Informations générales
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {selectedClient.dateEnvoi && (
-                  <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <Calendar className="h-3.5 w-3.5 text-cyan-500" weight="bold" />
-                    <div>
-                      <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                        Date d'envoi
-                      </p>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">
-                        {formatDateFR(selectedClient.dateEnvoi)}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {selectedClient.dateEstimative && section !== 'consuel-finalise' && (
-                  <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <Clock className="h-3.5 w-3.5 text-cyan-500" weight="bold" />
-                    <div>
-                      <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                        {section === 'installation' ? 'Date de pose' : 'Date estimative'}
-                      </p>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">
-                        {formatDateFR(selectedClient.dateEstimative)}
-                      </p>
-                    </div>
                   </div>
                 )}
                 {selectedClient.financement && (
-                  <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <Lightning
-                      className="h-3.5 w-3.5 text-cyan-500"
-                      weight="bold"
-                    />
-                    <div>
-                      <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                        Financement
-                      </p>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">
-                        {selectedClient.financement}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {selectedClient.noDp && (
-                  <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <FileText className="h-3.5 w-3.5 text-cyan-500" weight="bold" />
-                    <div>
-                      <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                        Numéro DP
-                      </p>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">
-                        {selectedClient.noDp}
-                      </p>
-                    </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/20 backdrop-blur text-white border border-white/30">
+                    <Tag className="h-3.5 w-3.5" weight="bold" />
+                    {selectedClient.financement}
                   </div>
                 )}
                 {selectedClient.ville && (
-                  <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <Buildings
-                      className="h-3.5 w-3.5 text-cyan-500"
-                      weight="bold"
-                    />
-                    <div>
-                      <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                        Ville
-                      </p>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">
-                        {selectedClient.ville}
-                      </p>
-                    </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 backdrop-blur text-white/90 border border-white/20">
+                    <MapPin className="h-3.5 w-3.5" weight="bold" />
+                    {selectedClient.ville}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Identifiants Portail - Affiché uniquement pour DP en cours */}
-            {section.startsWith('dp') &&
-              section !== 'dp-accordes' &&
-              section !== 'dp-refuses' && (
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                    <Key className="h-4 w-4 text-cyan-500" weight="bold" />
-                    Identifiants Portail
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {selectedClient.portail && (
-                      <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                        <Buildings
-                          className="h-3.5 w-3.5 text-cyan-500"
-                          weight="bold"
-                        />
-                        <div className="flex-1">
-                          <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                            Portail
-                          </p>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">
-                            {selectedClient.portail}
-                          </p>
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
+              <div className="p-5 space-y-4">
+                {/* KPI Cards - Modern Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  {selectedClient.dateEstimative && section !== 'consuel-finalise' && (
+                    <motion.div
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                      className="bg-white dark:bg-slate-900 rounded-xl p-3 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={`p-2 rounded-xl ${colors.bg} bg-opacity-10`}>
+                          <Calendar className={`h-4 w-4 ${colors.text}`} weight="bold" />
                         </div>
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                          {section === 'installation' ? 'Date de pose' : 'Date estimative'}
+                        </span>
                       </div>
-                    )}
-                    {selectedClient.identifiant && (
-                      <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                        <User className="h-3.5 w-3.5 text-cyan-500" weight="bold" />
-                        <div className="flex-1">
-                          <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                            Identifiant
-                          </p>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">
-                            {selectedClient.identifiant}
-                          </p>
+                      <p className="text-lg font-bold text-slate-900 dark:text-white">
+                        {formatDateFR(selectedClient.dateEstimative)}
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {selectedClient.dateEnvoi && (
+                    <motion.div
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.15 }}
+                      className="bg-white dark:bg-slate-900 rounded-xl p-3 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20">
+                          <ArrowRight className="h-4 w-4 text-blue-600" weight="bold" />
                         </div>
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Date d&apos;envoi</span>
                       </div>
-                    )}
-                    {selectedClient.motDePasse && (
-                      <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                        <Key
-                          className="h-3.5 w-3.5 text-cyan-500"
-                          weight="bold"
-                        />
-                        <div className="flex-1">
-                          <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                            Mot de passe
-                          </p>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">
-                            {showPassword
-                              ? selectedClient.motDePasse
-                              : '••••••••'}
-                          </p>
+                      <p className="text-lg font-bold text-slate-900 dark:text-white">
+                        {formatDateFR(selectedClient.dateEnvoi)}
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {selectedClient.noDp && (
+                    <motion.div
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="bg-white dark:bg-slate-900 rounded-xl p-3 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-2 rounded-xl bg-violet-50 dark:bg-violet-900/20">
+                          <FileText className="h-4 w-4 text-violet-600" weight="bold" />
                         </div>
-                        <button
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                        >
-                          {showPassword ? (
-                            <EyeSlash
-                              className="h-3.5 w-3.5 text-slate-500"
-                              weight="bold"
-                            />
-                          ) : (
-                            <Eye
-                              className="h-3.5 w-3.5 text-slate-500"
-                              weight="bold"
-                            />
-                          )}
-                        </button>
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Numéro DP</span>
                       </div>
-                    )}
-                  </div>
+                      <p className="text-lg font-bold text-slate-900 dark:text-white truncate">
+                        {selectedClient.noDp}
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {section.startsWith('consuel') && selectedClient.typeConsuel && (
+                    <motion.div
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.25 }}
+                      className="bg-white dark:bg-slate-900 rounded-xl p-3 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20">
+                          <Lightning className="h-4 w-4 text-amber-600" weight="bold" />
+                        </div>
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Type Consuel</span>
+                      </div>
+                      <p className="text-lg font-bold text-slate-900 dark:text-white">
+                        {selectedClient.typeConsuel}
+                      </p>
+                    </motion.div>
+                  )}
                 </div>
-              )}
 
-            {/* Documents regroupés par section */}
-            <div className="space-y-4">
-              {loadingFiles && (
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow text-center text-slate-500 dark:text-slate-400">
-                  Chargement des fichiers...
-                </div>
-              )}
-
-              {['dp', 'consuel', 'daact'].map((group) => {
-                const title = group === 'dp' ? 'Déclaration Préalable' : group === 'consuel' ? 'Consuel Visé' : 'DAACT';
-                const uploadSection = getSectionUploadTarget(group as 'dp' | 'consuel' | 'daact');
-                const filteredFiles = clientFiles.filter((file) => {
-                  if (group === 'dp') return file.section.startsWith('dp');
-                  if (group === 'consuel') return file.section.startsWith('consuel');
-                  return file.section === 'daact';
-                });
-
-                return (
-                  <div key={group} className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow">
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <Folder className="h-4 w-4 text-cyan-500" weight="bold" />
-                        {title}
+                {/* Portal Credentials Section */}
+                {section.startsWith('dp') && section !== 'dp-accordes' && section !== 'dp-refuses' && (
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+                  >
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                        <Key className="h-4 w-4 text-slate-500" weight="bold" />
+                        Identifiants Portail
                       </h3>
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {filteredFiles.length} document{filteredFiles.length > 1 ? 's' : ''}
-                      </span>
                     </div>
-                    <FileUpload
-                      clientName={selectedClient.client}
-                      section={uploadSection}
-                      onUploadComplete={(files) => appendUploadedFiles(files, uploadSection)}
-                    />
-                    {filteredFiles.length > 0 && (
-                      <div className="mt-4 space-y-2">
-                        {filteredFiles.map((file) => (
-                          <div
-                            key={file.id}
-                            className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
-                          >
-                            <FileText className="h-4 w-4 text-cyan-500" weight="bold" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{file.name}</p>
-                              <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                                {(file.size / 1024).toFixed(2)} KB
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => setPreviewFile({ name: file.name, url: file.url, type: file.type })}
-                                className="p-1.5 text-gray-500 hover:text-cyan-500 transition-colors"
-                                title="Prévisualiser"
-                              >
-                                <Eye className="h-4 w-4" weight="bold" />
-                              </button>
-                              <a
-                                href={file.url}
-                                download={file.name}
-                                className="p-1.5 text-gray-500 hover:text-cyan-500 transition-colors"
-                                title="Télécharger"
-                              >
-                                <Link className="h-4 w-4" weight="bold" />
-                              </a>
+                    <div className="p-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                        {selectedClient.portail && (
+                          <div className="group">
+                            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Portail</label>
+                            <div className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                              <Buildings className="h-4 w-4 text-slate-400" weight="bold" />
+                              <span className="text-sm font-medium text-slate-900 dark:text-white">{selectedClient.portail}</span>
                             </div>
                           </div>
-                        ))}
+                        )}
+                        {selectedClient.identifiant && (
+                          <div className="group">
+                            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Identifiant</label>
+                            <button
+                              onClick={() => copyToClipboard(selectedClient.identifiant!, 'Identifiant')}
+                              className="w-full flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+                            >
+                              <User className="h-4 w-4 text-slate-400" weight="bold" />
+                              <span className="text-sm font-medium text-slate-900 dark:text-white truncate">{selectedClient.identifiant}</span>
+                            </button>
+                          </div>
+                        )}
+                        {selectedClient.motDePasse && (
+                          <div className="group">
+                            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Mot de passe</label>
+                            <div className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                              <Key className="h-4 w-4 text-slate-400" weight="bold" />
+                              <span className="text-sm font-medium text-slate-900 dark:text-white flex-1">
+                                {showPassword ? selectedClient.motDePasse : '••••••••'}
+                              </span>
+                              <button
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                              >
+                                {showPassword ? (
+                                  <EyeSlash className="h-4 w-4 text-slate-500" weight="bold" />
+                                ) : (
+                                  <Eye className="h-4 w-4 text-slate-500" weight="bold" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {filteredFiles.length === 0 && !loadingFiles && (
-                      <div className="text-sm text-slate-500 dark:text-slate-400 mt-4">
-                        Aucun document disponible pour cette section.
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                    </div>
+                  </motion.div>
+                )}
 
-            {/* Informations Consuel - Affiché uniquement pour Consuel */}
-            {section.startsWith('consuel') && (
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                  <Lightning className="h-4 w-4 text-cyan-500" weight="bold" />
-                  Informations Consuel
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {selectedClient.pvChantierDate && (
-                    <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <Calendar
-                        className="h-3.5 w-3.5 text-cyan-500"
-                        weight="bold"
-                      />
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          PV Chantier
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {formatDateFR(selectedClient.pvChantierDate)}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {selectedClient.statut && (
-                    <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <CheckCircle
-                        className="h-3.5 w-3.5 text-emerald-500"
-                        weight="bold"
-                      />
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          Statut
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {selectedClient.statut}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {selectedClient.typeConsuel && (
-                    <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <Lightning
-                        className="h-3.5 w-3.5 text-cyan-500"
-                        weight="bold"
-                      />
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          Type Consuel
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {selectedClient.typeConsuel}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {selectedClient.dateDerniereDemarche && (
-                    <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <Calendar
-                        className="h-3.5 w-3.5 text-cyan-500"
-                        weight="bold"
-                      />
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          Dernière démarche
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {formatDateFR(selectedClient.dateDerniereDemarche)}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {selectedClient.dateEstimative && (
-                    <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <Clock className="h-3.5 w-3.5 text-cyan-500" weight="bold" />
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          {section === 'installation' ? 'Date de pose' : 'DatE Ed poess'}
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {formatDateFR(selectedClient.dateEstimative)}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Commentaires - Affiché pour Consuel, Raccordement et Raccordement MES */}
-            {(section.startsWith('consuel') ||
-              section === 'raccordement' ||
-              section === 'raccordement-mes') &&
-              selectedClient.commentaires && (
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                    <ChatCircle
-                      className="h-4 w-4 text-cyan-500"
-                      weight="bold"
-                    />
-                    Commentaires
-                  </h3>
-                  <div className="p-3 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <p className="text-sm font-medium text-slate-900 dark:text-white whitespace-pre-wrap">
-                      {selectedClient.commentaires}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-            {/* Informations Raccordement - Affiché uniquement pour Raccordement */}
-            {section === 'raccordement' && (
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                  <Flag className="h-4 w-4 text-cyan-500" weight="bold" />
-                  Raccordement
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {selectedClient.typeConsuel && (
-                    <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <Lightning
-                        className="h-3.5 w-3.5 text-cyan-500"
-                        weight="bold"
-                      />
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          Type de consuel
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {selectedClient.typeConsuel}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {selectedClient.statut && (
-                    <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <Flag className="h-3.5 w-3.5 text-cyan-500" />
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          Statut
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {selectedClient.statut}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {selectedClient.dateDerniereDemarche && (
-                    <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <Calendar
-                        className="h-3.5 w-3.5 text-cyan-500"
-                        weight="bold"
-                      />
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          Date dernière démarche
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {formatDateFR(selectedClient.dateDerniereDemarche)}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {selectedClient.dateEstimative && (
-                    <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <Clock className="h-3.5 w-3.5 text-cyan-500" weight="bold" />
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          Date estimative
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {formatDateFR(selectedClient.dateEstimative)}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Informations Raccordement MES - Affiché uniquement pour Raccordement MES */}
-            {section === 'raccordement-mes' && (
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                  <House className="h-4 w-4 text-cyan-500" weight="bold" />
-                  Mise en service
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {selectedClient.numeroContrat && (
-                    <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <FileText
-                        className="h-3.5 w-3.5 text-cyan-500"
-                        weight="bold"
-                      />
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          Numéro de contrat
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {selectedClient.numeroContrat}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {selectedClient.dateMiseEnService && (
-                    <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <Calendar
-                        className="h-3.5 w-3.5 text-cyan-500"
-                        weight="bold"
-                      />
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                          Date de Mise en service
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                          {formatDateFR(selectedClient.dateMiseEnService)}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-between items-center p-4 border-t border-primary bg-secondary">
-          <div className="text-sm text-tertiary">
-            ID: {selectedClient.clientId || selectedClient._id || selectedClient.id}
-          </div>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-md border border-primary text-secondary hover:bg-secondary transition-colors duration-150 font-medium"
-          >
-            Fermer
-          </button>
-        </div>
-      </div>
-
-      {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={showDeleteDialog}
-        onClose={() => setShowDeleteDialog(false)}
-        onConfirm={confirmDelete}
-        title="Supprimer le client"
-        message={`Êtes-vous sûr de vouloir supprimer le dossier de ${selectedClient.client} ? Cette action est irréversible.`}
-        confirmText="Supprimer"
-        cancelText="Annuler"
-        variant="danger"
-      />
-
-      {/* File Preview Modal */}
-      {previewFile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
-          <div className="bg-primary rounded-lg max-w-4xl max-h-[90vh] w-full mx-4 overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-primary">
-              <h3 className="text-lg font-bold text-primary">{previewFile.name}</h3>
-              <button
-                onClick={() => setPreviewFile(null)}
-                className="p-2 text-gray-500 hover:text-white transition-colors"
-              >
-                <X className="h-6 w-6" weight="bold" />
-              </button>
-            </div>
-            <div className="p-4 overflow-auto" style={{ maxHeight: 'calc(90vh - 80px)' }}>
-              {previewFile.type?.startsWith('image/') ? (
-                <img
-                  src={previewFile.url}
-                  alt={previewFile.name}
-                  className="max-w-full h-auto mx-auto"
-                />
-              ) : previewFile.type === 'application/pdf' ? (
-                <iframe
-                  src={previewFile.url}
-                  className="w-full h-[70vh]"
-                  title={previewFile.name}
-                />
-              ) : (
-                <div className="text-center py-8">
-                  <FileText className="h-16 w-16 text-gray-500 mx-auto mb-4" weight="bold" />
-                  <p className="text-gray-400">Prévisualisation non disponible pour ce type de fichier</p>
-                  <a
-                    href={previewFile.url}
-                    download={previewFile.name}
-                    className="inline-block mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+                {/* Consuel Section */}
+                {section.startsWith('consuel') && (
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.35 }}
+                    className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
                   >
-                    Télécharger le fichier
-                  </a>
-                </div>
-              )}
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                        <Lightning className="h-4 w-4 text-amber-500" weight="bold" />
+                        Informations Consuel
+                      </h3>
+                    </div>
+                    <div className="p-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-3">
+                        {selectedClient.pvChantierDate && (
+                          <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                              <CheckCircle className="h-4 w-4 text-emerald-600" weight="bold" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">PV Chantier</p>
+                              <p className="text-sm font-semibold text-slate-900 dark:text-white">{formatDateFR(selectedClient.pvChantierDate)}</p>
+                            </div>
+                          </div>
+                        )}
+                        {selectedClient.statut && (
+                          <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                              <Flag className="h-4 w-4 text-blue-600" weight="bold" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Statut</p>
+                              <p className="text-sm font-semibold text-slate-900 dark:text-white">{selectedClient.statut}</p>
+                            </div>
+                          </div>
+                        )}
+                        {selectedClient.typeConsuel && (
+                          <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                              <Lightning className="h-4 w-4 text-amber-600" weight="bold" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Type</p>
+                              <p className="text-sm font-semibold text-slate-900 dark:text-white">{selectedClient.typeConsuel}</p>
+                            </div>
+                          </div>
+                        )}
+                        {selectedClient.dateDerniereDemarche && (
+                          <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
+                              <Calendar className="h-4 w-4 text-violet-600" weight="bold" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Dernière démarche</p>
+                              <p className="text-sm font-semibold text-slate-900 dark:text-white">{formatDateFR(selectedClient.dateDerniereDemarche)}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Raccordement Section */}
+                {section === 'raccordement' && (
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+                  >
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                        <Flag className="h-4 w-4 text-blue-500" weight="bold" />
+                        Raccordement
+                      </h3>
+                    </div>
+                    <div className="p-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-3">
+                        {selectedClient.typeConsuel && (
+                          <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                              <Lightning className="h-4 w-4 text-amber-600" weight="bold" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Type de consuel</p>
+                              <p className="text-sm font-semibold text-slate-900 dark:text-white">{selectedClient.typeConsuel}</p>
+                            </div>
+                          </div>
+                        )}
+                        {selectedClient.statut && (
+                          <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                              <Flag className="h-4 w-4 text-blue-600" weight="bold" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Statut</p>
+                              <p className="text-sm font-semibold text-slate-900 dark:text-white">{selectedClient.statut}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Raccordement MES Section */}
+                {section === 'raccordement-mes' && (
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+                  >
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                        <House className="h-4 w-4 text-emerald-500" weight="bold" />
+                        Mise en Service
+                      </h3>
+                    </div>
+                    <div className="p-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-3">
+                        {selectedClient.numeroContrat && (
+                          <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
+                              <FileText className="h-4 w-4 text-violet-600" weight="bold" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Numéro de contrat</p>
+                              <p className="text-sm font-semibold text-slate-900 dark:text-white">{selectedClient.numeroContrat}</p>
+                            </div>
+                          </div>
+                        )}
+                        {selectedClient.dateMiseEnService && (
+                          <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                              <Calendar className="h-4 w-4 text-emerald-600" weight="bold" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Date de MES</p>
+                              <p className="text-sm font-semibold text-slate-900 dark:text-white">{formatDateFR(selectedClient.dateMiseEnService)}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Comments Section */}
+                {(section.startsWith('consuel') || section === 'raccordement' || section === 'raccordement-mes') && selectedClient.commentaires && (
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.45 }}
+                    className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+                  >
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                        <ChatCircle className="h-4 w-4 text-slate-500" weight="bold" />
+                        Commentaires
+                      </h3>
+                    </div>
+                    <div className="p-4">
+                      <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                        <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                          {selectedClient.commentaires}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
             </div>
-          </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-slate-400 dark:text-slate-500">
+                  ID: {selectedClient.clientId || selectedClient._id || selectedClient.id}
+                </div>
+                <button
+                  onClick={onClose}
+                  className="px-6 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-200 font-medium text-sm"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </motion.div>
         </div>
       )}
-    </div>
+    </AnimatePresence>
   );
 }

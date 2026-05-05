@@ -20,6 +20,8 @@ import {
   Users,
   Download,
   Upload,
+  SunHorizon,
+  DropHalf,
 } from '@phosphor-icons/react';
 import { Section } from '@/types/client';
 import Input from '@/components/ui/Input';
@@ -45,6 +47,21 @@ interface SidebarProps {
 }
 
 const sectionGroups = [
+  {
+    title: 'Vue Clients',
+    sections: [
+      {
+        id: 'sunlib' as const,
+        label: 'Sunlib',
+        icon: SunHorizon,
+      },
+      {
+        id: 'otovo' as const,
+        label: 'Otovo',
+        icon: DropHalf,
+      },
+    ],
+  },
   {
     title: 'Déclarations Préalables',
     sections: [
@@ -111,11 +128,11 @@ const sectionGroups = [
     ],
   },
   {
-    title: 'Paramètre',
+    title: 'Centre de téléchargement',
     sections: [
       {
         id: 'parameters' as const,
-        label: 'Paramètre',
+        label: 'Centre de téléchargement',
         icon: Download,
       },
     ],
@@ -178,11 +195,23 @@ function Sidebar({
   }, []);
 
   // Save state
-  const handleCollapse = () => {
+  const handleCollapse = useCallback(() => {
     const newState = !isCollapsed;
     setIsCollapsed(newState);
     localStorage.setItem('sidebar-collapsed', String(newState));
-  };
+  }, [isCollapsed]);
+
+  // Keyboard shortcut Ctrl+B to toggle sidebar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        handleCollapse();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleCollapse]);
 
   // Filter sections based on search query
   const filteredSectionGroups = sectionGroups
@@ -215,14 +244,25 @@ function Sidebar({
         )}
       </AnimatePresence>
 
-      <aside
-        className={`bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-r border-slate-200 dark:border-slate-700 h-[calc(100vh-4rem)] z-40 flex flex-col shadow-lg shadow-slate-200/30 dark:shadow-black/30 transition-all duration-200 ease-out flex-shrink-0 ${
+      <motion.aside
+        initial={false}
+        animate={{
+          width: isMobile ? (isMobileOpen ? 208 : 0) : isCollapsed ? 56 : 224,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 300,
+          damping: 30,
+          mass: 0.8,
+        }}
+        className={`bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-r border-slate-200 dark:border-slate-700 h-[calc(100vh-4rem)] z-40 flex flex-col shadow-lg shadow-slate-200/30 dark:shadow-black/30 flex-shrink-0 ${
           isMobile
             ? isMobileOpen
-              ? 'translate-x-0 w-52 fixed left-0 top-16'
-              : '-translate-x-full w-52 fixed left-0 top-16'
-            : 'fixed left-0 top-16 ' + (isCollapsed ? 'w-14' : 'w-56')
+              ? 'translate-x-0 fixed left-0 top-16'
+              : '-translate-x-full fixed left-0 top-16'
+            : 'fixed left-0 top-16'
         }`}
+        style={{ overflow: 'hidden' }}
         role="navigation"
         aria-label="Navigation principale"
       >
@@ -405,23 +445,9 @@ function Sidebar({
                               />
                             )}
                             {!isCollapsed && (
-                              <>
-                                <span className="flex-1 relative z-10">
-                                  {section.label}
-                                </span>
-                                {sectionCounts &&
-                                  sectionCounts[section.id] !== undefined && (
-                                    <span
-                                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full transition-all duration-200 relative z-10 ${
-                                        activeSection === section.id
-                                          ? 'bg-white/20 text-white'
-                                          : 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 group-hover:bg-cyan-200 dark:group-hover:bg-cyan-800/50'
-                                      }`}
-                                    >
-                                      {sectionCounts[section.id]}
-                                    </span>
-                                  )}
-                              </>
+                              <span className="flex-1 relative z-10">
+                                {section.label}
+                              </span>
                             )}
                           </button>
                         </li>
@@ -436,28 +462,50 @@ function Sidebar({
 
         {/* Collapse Toggle - Desktop only */}
         {!isMobile && (
-          <div className="px-2 py-2 border-t border-primary">
-            <button
+          <motion.div
+            initial={false}
+            animate={{ opacity: 1 }}
+            className="px-2 py-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-center"
+          >
+            <motion.button
               onClick={handleCollapse}
-              className="w-full flex items-center justify-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-150"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`flex items-center justify-center gap-2 p-2 rounded-xl transition-all duration-200 ${
+                isCollapsed
+                  ? 'bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/30'
+                  : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400'
+              }`}
               aria-label={
                 isCollapsed ? 'Étendre la sidebar' : 'Réduire la sidebar'
               }
+              title={isCollapsed ? 'Étendre (Ctrl+B)' : 'Réduire (Ctrl+B)'}
             >
-              {isCollapsed ? (
-                <CaretRight className="h-3 w-3 text-secondary" />
-              ) : (
-                <>
-                  <CaretLeft className="h-3 w-3 text-secondary" />
-                  <span className="text-xs font-medium text-secondary">
+              <motion.div
+                initial={false}
+                animate={{ rotate: isCollapsed ? 180 : 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              >
+                <CaretLeft className="h-4 w-4" weight="bold" />
+              </motion.div>
+              <AnimatePresence mode="wait">
+                {!isCollapsed && (
+                  <motion.span
+                    key="label"
+                    initial={{ opacity: 0, x: -10, width: 0 }}
+                    animate={{ opacity: 1, x: 0, width: 'auto' }}
+                    exit={{ opacity: 0, x: -10, width: 0 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    className="text-xs font-semibold whitespace-nowrap overflow-hidden"
+                  >
                     Réduire
-                  </span>
-                </>
-              )}
-            </button>
-          </div>
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          </motion.div>
         )}
-      </aside>
+      </motion.aside>
     </>
   );
 }

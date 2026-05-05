@@ -145,13 +145,56 @@ export async function GET(request: Request) {
 
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 100); // Max 100
     const section = url.searchParams.get('section');
+    const search = url.searchParams.get('search') || '';
+    const sortKey = url.searchParams.get('sortKey') || 'client';
+    const sortDir = (url.searchParams.get('sortDir') || 'asc') as 'asc' | 'desc';
     const skip = (page - 1) * limit;
+    
+    // Build query
     const query: Record<string, unknown> = {};
 
     if (section) {
-      query.section = section;
+      // Pour sunlib et otovo, on filtre par financement plutôt que par section
+      // Et on utilise un GROUP BY pour éviter les doublons (un même client dans plusieurs sections)
+      if (section === 'sunlib') {
+        query.financement = { $regex: '^Sunlib$', $options: 'i' };
+      } else if (section === 'otovo') {
+        query.financement = { $regex: '^Otovo$', $options: 'i' };
+      } else {
+        query.section = section;
+      }
+    }
+
+    // Search query - text search on multiple fields
+    if (search) {
+      query.$or = [
+        { client: { $regex: search, $options: 'i' } },
+        { ville: { $regex: search, $options: 'i' } },
+        { statut: { $regex: search, $options: 'i' } },
+        { noDp: { $regex: search, $options: 'i' } },
+        { commentaires: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    // Additional filters
+    const filterStatus = url.searchParams.get('filter_status');
+    const filterVille = url.searchParams.get('filter_ville');
+    const filterFinancement = url.searchParams.get('filter_financement');
+    const filterDateFrom = url.searchParams.get('filter_dateFrom');
+    const filterDateTo = url.searchParams.get('filter_dateTo');
+
+    if (filterStatus) query.statut = { $regex: filterStatus, $options: 'i' };
+    if (filterVille) query.ville = { $regex: filterVille, $options: 'i' };
+    if (filterFinancement) query.financement = { $regex: filterFinancement, $options: 'i' };
+    
+    // Date range filter
+    if (filterDateFrom || filterDateTo) {
+      const dateQuery: Record<string, string> = {};
+      if (filterDateFrom) dateQuery.$gte = filterDateFrom;
+      if (filterDateTo) dateQuery.$lte = filterDateTo;
+      query.dateEstimative = dateQuery;
     }
 
     try {
@@ -163,49 +206,100 @@ export async function GET(request: Request) {
           clientCollectionName
         );
 
-      const totalCount = await Model.countDocuments(query);
+      let allClients: any[];
+      let totalCount: number;
 
-      // Inclure le mot de passe pour les sections DP sauf DP Accordés et DP Refus
-      let queryBuilder = Model.find(query).skip(skip).limit(limit);
-      if (
-        section &&
-        section.startsWith('dp') &&
-        section !== 'dp-accordes' &&
-        section !== 'dp-refuses'
-      ) {
-        queryBuilder = queryBuilder.select('+motDePasse');
+      // Pour sunlib et otovo, utiliser une agrégation pour éviter les doublons par clientId
+      if (section === 'sunlib' || section === 'otovo') {
+        const aggregation = await Model.aggregate([
+          { $match: query },
+          {
+            $group: {
+              _id: { client: '$client', financement: '$financement' },
+              doc: { $first: '$$ROOT' }
+            }
+          },
+          {
+            $replaceRoot: { newRoot: '$doc' }
+          },
+          { $sort: { [sortKey]: sortDir === 'asc' ? 1 : -1 } },
+          { $skip: skip },
+          { $limit: limit }
+        ]);
+
+        // Pour le total, on compte les clientId distincts
+        const countAggregation = await Model.aggregate([
+          { $match: query },
+          {
+            $group: {
+              _id: { client: '$client', financement: '$financement' }
+            }
+          },
+          { $count: 'total' }
+        ]);
+
+        totalCount = countAggregation[0]?.total || 0;
+        allClients = aggregation.map((doc) => mapImportedFields(doc as MappedClient));
+      } else {
+        totalCount = await Model.countDocuments(query);
+
+        // Build sort object
+        const sortObj: Record<string, 1 | -1> = {};
+        sortObj[sortKey] = sortDir === 'asc' ? 1 : -1;
+
+        // Inclure le mot de passe pour les sections DP sauf DP Accordés et DP Refus
+        let queryBuilder = Model.find(query)
+          .sort(sortObj)
+          .skip(skip)
+          .limit(limit);
+
+        if (
+          section &&
+          section.startsWith('dp') &&
+          section !== 'dp-accordes' &&
+          section !== 'dp-refuses'
+        ) {
+          queryBuilder = queryBuilder.select('+motDePasse');
+        }
+
+        const docs = await queryBuilder.lean();
+        allClients = docs.map((doc) => mapImportedFields(doc as MappedClient));
       }
 
-      const docs = await queryBuilder.lean();
-
-      const allClients = docs.map((doc) =>
-        mapImportedFields(doc as MappedClient)
-      );
-
       return NextResponse.json({
-        data: allClients,
-        pagination: {
-          page,
-          limit,
-          total: totalCount,
-          totalPages: Math.ceil(totalCount / limit),
-        },
+        clients: allClients,
+        total: totalCount,
+        page,
+        totalPages: Math.ceil(totalCount / limit),
       });
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Erreur inconnue';
+    } catch (err: any) {
+      console.error('MongoDB Error in GET /api/clients:', err);
+      console.error('Error stack:', err.stack);
       return NextResponse.json(
         {
           error: `Erreur MongoDB lors de la récupération des clients`,
-          details: errorMessage,
+          details: err.message,
+          stack: err.stack,
+          name: err.name,
+          mongodb_uri: process.env.MONGODB_URI ? 'defined' : 'undefined',
+          section: section || 'none',
+          query: JSON.stringify(query),
         },
         { status: 500 }
       );
     }
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Erreur serveur';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+  } catch (error: any) {
+    console.error('General Error in GET /api/clients:', error);
+    console.error('Error stack:', error.stack);
+    return NextResponse.json(
+      {
+        error: error.message || 'Erreur serveur',
+        stack: error.stack,
+        name: error.name,
+        mongodb_uri: process.env.MONGODB_URI ? 'defined' : 'undefined',
+      },
+      { status: 500 }
+    );
   }
 }
 

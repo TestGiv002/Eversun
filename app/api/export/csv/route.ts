@@ -29,13 +29,30 @@ function arrayToCsv(data: any[]): string {
   return csvRows.join('\n');
 }
 
-export async function GET() {
+// Mapping des sections aux patterns de filtrage
+const sectionFilters: Record<string, string[]> = {
+  'dp': ['dp-en-cours', 'dp-accordes', 'dp-refuses', 'daact'],
+  'installation': ['installation'],
+  'consuel': ['consuel-en-cours', 'consuel-finalise'],
+  'raccordement': ['raccordement', 'raccordement-mes'],
+};
+
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const section = searchParams.get('section');
+
     await connectToDatabase();
 
     const Client = mongoose.models.Client || mongoose.model('Client', ClientSchema, clientCollectionName);
 
-    const clients = await Client.find({}).lean();
+    // Construire le filtre de requête
+    let query = {};
+    if (section && section !== 'all' && sectionFilters[section]) {
+      query = { section: { $in: sectionFilters[section] } };
+    }
+
+    const clients = await Client.find(query).lean();
 
     const csv = arrayToCsv(clients);
 

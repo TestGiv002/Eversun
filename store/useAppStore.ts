@@ -49,8 +49,23 @@ export const useAppStore = create<AppStore>()(
       toggleTheme: () =>
         set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
       setTheme: (theme) => set({ theme }),
-      sectionCounts: {},
-      setSectionCounts: (counts) => set({ sectionCounts: counts }),
+      sectionCounts: {
+        'clients': 0,
+        'dp-en-cours': 0,
+        'dp-accordes': 0,
+        'dp-refuses': 0,
+        'daact': 0,
+        'installation': 0,
+        'consuel-en-cours': 0,
+        'consuel-finalise': 0,
+        'raccordement': 0,
+        'raccordement-mes': 0,
+        'parameters': 0,
+        'sunlib': 0,
+        'otovo': 0,
+      },
+      setSectionCounts: (counts) =>
+        set((state) => ({ sectionCounts: { ...state.sectionCounts, ...counts } })),
       notifications: [],
       addNotification: (message) =>
         set((state) => ({
